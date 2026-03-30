@@ -4,27 +4,29 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { clsx } from "clsx";
 import {
+  FileText,
   LayoutDashboard,
   Shield,
   Bot,
   Users,
-  FileText,
   ScrollText,
   ArrowLeftRight,
   Plug,
   HeartPulse,
   BarChart3,
   Power,
+  BookOpen,
   ChevronLeft,
   ChevronRight,
-  Eye,
+  Feather,
 } from "lucide-react";
 import { useState } from "react";
 
 const navSections = [
   {
-    title: "Overview",
+    title: "Library",
     items: [
+      { label: "Artifacts", href: "/artifacts", icon: FileText },
       { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     ],
   },
@@ -39,8 +41,7 @@ const navSections = [
   {
     title: "Data",
     items: [
-      { label: "Artifacts", href: "/artifacts", icon: FileText },
-      { label: "Audit", href: "/audit", icon: ScrollText },
+      { label: "Audit Trail", href: "/audit", icon: ScrollText },
       { label: "Migration", href: "/migration", icon: ArrowLeftRight },
       { label: "Connectors", href: "/connectors", icon: Plug },
     ],
@@ -58,6 +59,12 @@ const navSections = [
       { label: "Kill Switches", href: "/kill-switches", icon: Power },
     ],
   },
+  {
+    title: "Learn",
+    items: [
+      { label: "Tutorials", href: "/tutorials", icon: BookOpen },
+    ],
+  },
 ];
 
 export function Sidebar() {
@@ -67,21 +74,21 @@ export function Sidebar() {
   return (
     <aside
       className={clsx(
-        "fixed left-0 top-0 h-screen bg-surface-50 border-r border-gray-800/60 flex flex-col z-40 transition-all duration-200",
+        "fixed left-0 top-0 h-screen bg-white border-r border-ink-100 flex flex-col z-40 transition-all duration-300",
         collapsed ? "w-16" : "w-60"
       )}
     >
       {/* Logo */}
-      <div className="h-14 flex items-center gap-2.5 px-4 border-b border-gray-800/60 shrink-0">
-        <div className="w-8 h-8 rounded-lg bg-lurk-600 flex items-center justify-center shrink-0">
-          <Eye className="w-4 h-4 text-white" />
+      <div className="h-14 flex items-center gap-2.5 px-4 border-b border-ink-100 shrink-0">
+        <div className="w-8 h-8 rounded-lg bg-clay-500 flex items-center justify-center shrink-0">
+          <Feather className="w-4 h-4 text-white" />
         </div>
         {!collapsed && (
           <div className="flex flex-col">
-            <span className="text-sm font-bold text-gray-100 tracking-tight">
+            <span className="text-body-sm font-bold text-ink-800 tracking-tight font-serif">
               Lurk
             </span>
-            <span className="text-2xs text-gray-500">Admin Console</span>
+            <span className="text-2xs text-ink-300">Knowledge Platform</span>
           </div>
         )}
       </div>
@@ -92,7 +99,7 @@ export function Sidebar() {
           <div key={section.title} className="mb-4">
             {!collapsed && (
               <div className="px-3 py-1 mb-1">
-                <span className="text-2xs font-semibold text-gray-600 uppercase tracking-widest">
+                <span className="text-2xs font-semibold text-ink-300 uppercase tracking-widest">
                   {section.title}
                 </span>
               </div>
@@ -108,17 +115,17 @@ export function Sidebar() {
                   key={item.href}
                   href={item.href}
                   className={clsx(
-                    "flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-150 mb-0.5",
+                    "flex items-center gap-3 px-3 py-2 text-body-sm font-medium rounded-lg transition-all duration-200 mb-0.5",
                     isActive
-                      ? "text-lurk-400 bg-lurk-950/50"
-                      : "text-gray-400 hover:text-gray-200 hover:bg-surface-200"
+                      ? "text-clay-600 bg-clay-50"
+                      : "text-ink-400 hover:text-ink-700 hover:bg-ink-50"
                   )}
                   title={collapsed ? item.label : undefined}
                 >
                   <Icon
                     className={clsx(
                       "w-4 h-4 shrink-0",
-                      isActive ? "text-lurk-400" : "text-gray-500"
+                      isActive ? "text-clay-500" : "text-ink-300"
                     )}
                   />
                   {!collapsed && <span>{item.label}</span>}
@@ -130,10 +137,10 @@ export function Sidebar() {
       </nav>
 
       {/* Collapse Toggle */}
-      <div className="p-2.5 border-t border-gray-800/60 shrink-0">
+      <div className="p-2.5 border-t border-ink-100 shrink-0">
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="w-full flex items-center justify-center p-2 rounded-lg text-gray-500 hover:text-gray-300 hover:bg-surface-200 transition-colors"
+          className="w-full flex items-center justify-center p-2 rounded-lg text-ink-300 hover:text-ink-500 hover:bg-ink-50 transition-colors"
         >
           {collapsed ? (
             <ChevronRight className="w-4 h-4" />

@@ -160,11 +160,11 @@ const customerHealthSummary = [
   { label: "Healthy", count: 42, color: "bg-emerald-400" },
   { label: "At Risk", count: 8, color: "bg-yellow-400" },
   { label: "Critical", count: 3, color: "bg-red-400" },
-  { label: "Churned", count: 1, color: "bg-gray-500" },
+  { label: "Churned", count: 1, color: "bg-ink-300" },
 ];
 
 const statusIcons = {
-  success: <CheckCircle2 className="w-4 h-4 text-emerald-400" />,
+  success: <CheckCircle2 className="w-4 h-4 text-olive-600" />,
   warning: <AlertTriangle className="w-4 h-4 text-yellow-400" />,
   danger: <XCircle className="w-4 h-4 text-red-400" />,
 };
@@ -174,8 +174,8 @@ const statusIcons = {
 function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ name: string; value: number; color: string }>; label?: string }) {
   if (!active || !payload) return null;
   return (
-    <div className="bg-surface-100 border border-gray-700 rounded-lg px-3 py-2 shadow-xl text-xs">
-      <p className="text-gray-400 mb-1">{label}</p>
+    <div className="bg-white border border-ink-200 rounded-lg px-3 py-2 shadow-warm-lg text-xs">
+      <p className="text-ink-400 mb-1">{label}</p>
       {payload.map((entry, i) => (
         <p key={i} style={{ color: entry.color }} className="font-medium">
           {entry.name}: {entry.value}
@@ -192,11 +192,11 @@ export default function DashboardPage() {
     <div className="space-y-6">
       {/* Page Title */}
       <div>
-        <h1 className="text-xl font-bold text-gray-100 tracking-tight flex items-center gap-2">
-          <LayoutDashboard className="w-5 h-5 text-lurk-400" />
+        <h1 className="text-xl font-bold text-ink-800 tracking-tight flex items-center gap-2">
+          <LayoutDashboard className="w-5 h-5 text-clay-400" />
           Dashboard
         </h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-body-sm text-ink-300 mt-1">
           Overview of your knowledge management system
         </p>
       </div>
@@ -256,7 +256,7 @@ export default function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle>PR Acceptance Rate</CardTitle>
-            <span className="text-xs text-gray-500">Last 8 weeks</span>
+            <span className="text-xs text-ink-300">Last 8 weeks</span>
           </CardHeader>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -282,7 +282,7 @@ export default function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle>Artifact Volume</CardTitle>
-            <span className="text-xs text-gray-500">This week</span>
+            <span className="text-xs text-ink-300">This week</span>
           </CardHeader>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -304,14 +304,14 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Agent Activity */}
         <Card className="lg:col-span-2" padding="none">
-          <div className="p-5 border-b border-gray-800/60">
+          <div className="p-5 border-b border-ink-100">
             <CardTitle>Recent Agent Activity</CardTitle>
           </div>
-          <div className="divide-y divide-gray-800/40">
+          <div className="divide-y divide-ink-100">
             {recentActivity.map((item) => (
               <div
                 key={item.id}
-                className="flex items-center gap-4 px-5 py-3 hover:bg-surface-200/30 transition-colors"
+                className="flex items-center gap-4 px-5 py-3 hover:bg-ink-50/30 transition-colors"
               >
                 <div className="shrink-0">
                   {statusIcons[item.status]}
@@ -321,13 +321,13 @@ export default function DashboardPage() {
                     <Badge variant="purple" size="sm">
                       {item.agent}
                     </Badge>
-                    <span className="text-sm text-gray-300 truncate">
+                    <span className="text-sm text-ink-600 truncate">
                       {item.action}
                     </span>
                   </div>
-                  <span className="text-xs text-gray-500">{item.target}</span>
+                  <span className="text-xs text-ink-300">{item.target}</span>
                 </div>
-                <div className="flex items-center gap-1.5 text-xs text-gray-500 shrink-0">
+                <div className="flex items-center gap-1.5 text-xs text-ink-300 shrink-0">
                   <Clock className="w-3 h-3" />
                   {item.time}
                 </div>
@@ -346,15 +346,15 @@ export default function DashboardPage() {
               <div key={item.label} className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className={`w-2.5 h-2.5 rounded-full ${item.color}`} />
-                  <span className="text-sm text-gray-300">{item.label}</span>
+                  <span className="text-sm text-ink-600">{item.label}</span>
                 </div>
-                <span className="text-lg font-semibold text-gray-100">
+                <span className="text-heading-2 font-serif text-ink-800">
                   {item.count}
                 </span>
               </div>
             ))}
-            <div className="pt-3 border-t border-gray-800/60">
-              <div className="flex items-center gap-1 h-3 rounded-full overflow-hidden bg-surface-300">
+            <div className="pt-3 border-t border-ink-100">
+              <div className="flex items-center gap-1 h-3 rounded-full overflow-hidden bg-ink-100">
                 {customerHealthSummary.map((item) => {
                   const total = customerHealthSummary.reduce((a, b) => a + b.count, 0);
                   const pct = (item.count / total) * 100;
@@ -374,7 +374,7 @@ export default function DashboardPage() {
 
       {/* Agent Performance Table */}
       <Card padding="none">
-        <div className="p-5 border-b border-gray-800/60">
+        <div className="p-5 border-b border-ink-100">
           <CardTitle>Agent Performance</CardTitle>
         </div>
         <Table>
@@ -393,8 +393,8 @@ export default function DashboardPage() {
               <TableRow key={agent.name}>
                 <TableCell>
                   <div className="flex items-center gap-2">
-                    <Bot className="w-4 h-4 text-lurk-400" />
-                    <span className="font-medium text-gray-200">
+                    <Bot className="w-4 h-4 text-clay-400" />
+                    <span className="font-medium text-ink-700">
                       {agent.name}
                     </span>
                   </div>
@@ -409,7 +409,7 @@ export default function DashboardPage() {
                   <span
                     className={
                       agent.acceptRate >= 90
-                        ? "text-emerald-400"
+                        ? "text-olive-600"
                         : agent.acceptRate >= 80
                         ? "text-yellow-400"
                         : "text-red-400"

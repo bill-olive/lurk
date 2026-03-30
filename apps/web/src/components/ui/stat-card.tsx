@@ -18,26 +18,26 @@ interface StatCardProps {
 const trendConfig = {
   up: {
     icon: TrendingUp,
-    color: "text-emerald-400",
-    bg: "bg-emerald-400/10",
+    color: "text-olive-600",
+    bg: "bg-olive-50",
   },
   down: {
     icon: TrendingDown,
-    color: "text-red-400",
-    bg: "bg-red-400/10",
+    color: "text-accent-red",
+    bg: "bg-red-50",
   },
   flat: {
     icon: Minus,
-    color: "text-gray-400",
-    bg: "bg-gray-400/10",
+    color: "text-ink-400",
+    bg: "bg-ink-100",
   },
 };
 
 const iconVariants = {
-  default: "bg-lurk-500/15 text-lurk-400",
-  success: "bg-emerald-500/15 text-emerald-400",
-  warning: "bg-yellow-500/15 text-yellow-400",
-  danger: "bg-red-500/15 text-red-400",
+  default: "bg-clay-100 text-clay-500",
+  success: "bg-olive-100 text-olive-500",
+  warning: "bg-yellow-50 text-yellow-600",
+  danger: "bg-clay-50 text-accent-red",
 };
 
 export function StatCard({
@@ -54,12 +54,12 @@ export function StatCard({
   return (
     <div
       className={clsx(
-        "bg-surface-100 border border-gray-800/60 rounded-xl p-5 transition-all duration-150 hover:border-gray-700",
+        "bg-white border border-ink-100 rounded-editorial p-5 transition-all duration-150 hover:border-ink-200 hover:shadow-warm",
         className
       )}
     >
       <div className="flex items-start justify-between mb-3">
-        <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+        <span className="text-caption font-medium text-ink-400 uppercase tracking-wider">
           {label}
         </span>
         {icon && (
@@ -74,7 +74,7 @@ export function StatCard({
         )}
       </div>
       <div className="flex items-end gap-3">
-        <span className="text-2xl font-bold text-gray-100 tracking-tight">
+        <span className="text-2xl font-bold text-ink-800 tracking-tight">
           {value}
         </span>
         {trendInfo && trendValue && (

@@ -53,7 +53,7 @@ const marketplaceAgents: MarketplaceAgent[] = [
     longDescription:
       "The Sales Ops agent monitors your sales documentation ecosystem, identifies outdated competitive intelligence, refreshes pricing sheets when changes are detected, and ensures your team always has the latest battle cards and playbooks. It integrates with CRM data to surface relevant customer insights.",
     model: "claude-sonnet-4-20250514",
-    icon: <Briefcase className="w-6 h-6 text-blue-400" />,
+    icon: <Briefcase className="w-6 h-6 text-accent-blue" />,
     capabilities: [
       "Competitive intel refresh",
       "Pricing doc updates",
@@ -75,7 +75,7 @@ const marketplaceAgents: MarketplaceAgent[] = [
     longDescription:
       "The Compliance agent continuously monitors your documentation for regulatory adherence across GDPR, SOC2, HIPAA, and other frameworks. It flags outdated policies, suggests updates when regulations change, and maintains an audit trail of all compliance-related modifications.",
     model: "claude-sonnet-4-20250514",
-    icon: <Shield className="w-6 h-6 text-emerald-400" />,
+    icon: <Shield className="w-6 h-6 text-olive-600" />,
     capabilities: [
       "GDPR/SOC2/HIPAA monitoring",
       "Policy staleness detection",
@@ -97,7 +97,7 @@ const marketplaceAgents: MarketplaceAgent[] = [
     longDescription:
       "The Brand Consistency agent analyzes all customer-facing and internal content for adherence to your brand guidelines. It checks tone, voice, terminology, logo usage, color references, and messaging frameworks. Automatically flags deviations and suggests corrections.",
     model: "claude-haiku-4-20250514",
-    icon: <Palette className="w-6 h-6 text-purple-400" />,
+    icon: <Palette className="w-6 h-6 text-heather-600" />,
     capabilities: [
       "Tone & voice analysis",
       "Terminology standardization",
@@ -185,7 +185,7 @@ const marketplaceAgents: MarketplaceAgent[] = [
     longDescription:
       "The Security agent provides continuous security monitoring across your knowledge base. It scans for accidentally committed secrets, API keys, credentials, and PII. It also monitors security runbooks and incident response documentation for completeness and accuracy.",
     model: "claude-sonnet-4-20250514",
-    icon: <Lock className="w-6 h-6 text-red-400" />,
+    icon: <Lock className="w-6 h-6 text-accent-red" />,
     capabilities: [
       "Secret/key detection",
       "PII scanning",
@@ -236,16 +236,16 @@ export default function MarketplacePage() {
         <div>
           <Link
             href="/agents"
-            className="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-gray-300 transition-colors mb-2"
+            className="inline-flex items-center gap-1 text-xs text-ink-300 hover:text-ink-700 transition-colors mb-2"
           >
             <ArrowLeft className="w-3 h-3" />
             Back to Agents
           </Link>
-          <h1 className="text-xl font-bold text-gray-100 tracking-tight flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-lurk-400" />
+          <h1 className="text-xl font-bold text-ink-800 tracking-tight flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-clay-500" />
             Agent Marketplace
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-ink-300 mt-1">
             Pre-built agents ready for one-click deployment
           </p>
         </div>
@@ -254,7 +254,7 @@ export default function MarketplacePage() {
       {/* Search + Category Filter */}
       <div className="flex items-center gap-4">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-300" />
           <input
             type="text"
             placeholder="Search agents..."
@@ -270,8 +270,8 @@ export default function MarketplacePage() {
               onClick={() => setSelectedCategory(cat)}
               className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
                 selectedCategory === cat
-                  ? "bg-lurk-600/20 text-lurk-400 border border-lurk-500/30"
-                  : "text-gray-500 hover:text-gray-300 hover:bg-surface-200 border border-transparent"
+                  ? "bg-clay-100 text-clay-500 border border-clay-500/30"
+                  : "text-ink-300 hover:text-ink-700 hover:bg-ink-50 border border-transparent"
               }`}
             >
               {cat}
@@ -285,12 +285,12 @@ export default function MarketplacePage() {
         {filtered.map((agent) => (
           <Card key={agent.id} hover onClick={() => setSelectedAgent(agent)}>
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-xl bg-surface-200 flex items-center justify-center shrink-0">
+              <div className="w-12 h-12 rounded-xl bg-ink-50 flex items-center justify-center shrink-0">
                 {agent.icon}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-semibold text-gray-200">
+                  <h3 className="text-sm font-semibold text-ink-700">
                     {agent.displayName}
                   </h3>
                   {agent.deployed && (
@@ -306,20 +306,20 @@ export default function MarketplacePage() {
               </div>
             </div>
 
-            <p className="text-xs text-gray-500 mt-3 line-clamp-2">
+            <p className="text-xs text-ink-300 mt-3 line-clamp-2">
               {agent.description}
             </p>
 
-            <div className="flex items-center gap-4 mt-4 pt-3 border-t border-gray-800/60">
-              <div className="flex items-center gap-1 text-xs text-gray-500">
-                <Star className="w-3 h-3 text-yellow-400" />
+            <div className="flex items-center gap-4 mt-4 pt-3 border-t border-ink-100">
+              <div className="flex items-center gap-1 text-xs text-ink-300">
+                <Star className="w-3 h-3 text-accent-yellow" />
                 <span>{agent.rating}</span>
               </div>
-              <div className="flex items-center gap-1 text-xs text-gray-500">
+              <div className="flex items-center gap-1 text-xs text-ink-300">
                 <Download className="w-3 h-3" />
                 <span>{agent.popularity.toLocaleString()}</span>
               </div>
-              <span className="text-2xs text-gray-600 font-mono">
+              <span className="text-2xs text-ink-300 font-mono">
                 {agent.model.replace("claude-", "").split("-").slice(0, 2).join("-")}
               </span>
             </div>
@@ -359,21 +359,21 @@ export default function MarketplacePage() {
           <div className="space-y-6">
             {/* Icon + Info */}
             <div className="flex items-start gap-4">
-              <div className="w-14 h-14 rounded-xl bg-surface-200 flex items-center justify-center shrink-0">
+              <div className="w-14 h-14 rounded-xl bg-ink-50 flex items-center justify-center shrink-0">
                 {selectedAgent.icon}
               </div>
               <div>
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="flex items-center gap-1 text-xs text-gray-500">
-                    <Star className="w-3 h-3 text-yellow-400" />
+                  <div className="flex items-center gap-1 text-xs text-ink-300">
+                    <Star className="w-3 h-3 text-accent-yellow" />
                     {selectedAgent.rating}
                   </div>
-                  <div className="flex items-center gap-1 text-xs text-gray-500">
+                  <div className="flex items-center gap-1 text-xs text-ink-300">
                     <Download className="w-3 h-3" />
                     {selectedAgent.popularity.toLocaleString()} deployments
                   </div>
                 </div>
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-ink-400">
                   {selectedAgent.longDescription}
                 </p>
               </div>
@@ -381,31 +381,31 @@ export default function MarketplacePage() {
 
             {/* Capabilities */}
             <div>
-              <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+              <h4 className="text-xs font-semibold text-ink-300 uppercase tracking-wider mb-3">
                 Capabilities
               </h4>
               <div className="space-y-2">
                 {selectedAgent.capabilities.map((cap) => (
                   <div key={cap} className="flex items-center gap-2">
-                    <Check className="w-3.5 h-3.5 text-emerald-400" />
-                    <span className="text-sm text-gray-300">{cap}</span>
+                    <Check className="w-3.5 h-3.5 text-olive-600" />
+                    <span className="text-sm text-ink-600">{cap}</span>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Config */}
-            <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-800/60">
+            <div className="grid grid-cols-2 gap-4 pt-4 border-t border-ink-100">
               <div>
-                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                <h4 className="text-xs font-semibold text-ink-300 uppercase tracking-wider mb-2">
                   Model
                 </h4>
-                <p className="text-sm text-gray-300 font-mono">
+                <p className="text-sm text-ink-600 font-mono">
                   {selectedAgent.model}
                 </p>
               </div>
               <div>
-                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                <h4 className="text-xs font-semibold text-ink-300 uppercase tracking-wider mb-2">
                   Artifact Types
                 </h4>
                 <div className="flex flex-wrap gap-1.5">

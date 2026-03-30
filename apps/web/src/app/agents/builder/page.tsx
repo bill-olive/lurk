@@ -129,32 +129,32 @@ Ready for deployment.`
       <div>
         <Link
           href="/agents"
-          className="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-gray-300 transition-colors mb-2"
+          className="inline-flex items-center gap-1 text-xs text-ink-300 hover:text-ink-700 transition-colors mb-2"
         >
           <ArrowLeft className="w-3 h-3" />
           Back to Agents
         </Link>
-        <h1 className="text-xl font-bold text-gray-100 tracking-tight flex items-center gap-2">
-          <Bot className="w-5 h-5 text-lurk-400" />
+        <h1 className="text-xl font-bold text-ink-800 tracking-tight flex items-center gap-2">
+          <Bot className="w-5 h-5 text-clay-500" />
           Custom Agent Builder
         </h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-sm text-ink-300 mt-1">
           Build a custom knowledge agent tailored to your needs
         </p>
       </div>
 
       {/* Step Indicator */}
-      <div className="flex items-center gap-1 p-1 bg-surface-100 rounded-xl border border-gray-800/60">
+      <div className="flex items-center gap-1 p-1 bg-white rounded-xl border border-ink-100">
         {steps.map((step, idx) => (
           <button
             key={step.id}
             onClick={() => setCurrentStep(step.id)}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all flex-1 justify-center ${
               currentStep === step.id
-                ? "bg-lurk-600/20 text-lurk-400 border border-lurk-500/30"
+                ? "bg-clay-100 text-clay-500 border border-clay-500/30"
                 : idx < stepIdx
-                ? "text-emerald-400 hover:bg-surface-200"
-                : "text-gray-500 hover:bg-surface-200 hover:text-gray-300"
+                ? "text-olive-600 hover:bg-ink-50"
+                : "text-ink-300 hover:bg-ink-50 hover:text-ink-700"
             }`}
           >
             {idx < stepIdx ? (
@@ -182,7 +182,7 @@ Ready for deployment.`
             </CardHeader>
             <div className="space-y-4">
               <div>
-                <label className="text-xs font-medium text-gray-400 mb-1.5 block">
+                <label className="text-xs font-medium text-ink-400 mb-1.5 block">
                   Agent Name
                 </label>
                 <input
@@ -194,7 +194,7 @@ Ready for deployment.`
                 />
               </div>
               <div>
-                <label className="text-xs font-medium text-gray-400 mb-1.5 block">
+                <label className="text-xs font-medium text-ink-400 mb-1.5 block">
                   What should this agent do?
                 </label>
                 <textarea
@@ -206,13 +206,13 @@ Ready for deployment.`
                 />
               </div>
               {description.length > 20 && (
-                <div className="p-3 rounded-lg bg-lurk-950/30 border border-lurk-500/20">
+                <div className="p-3 rounded-lg bg-clay-50 border border-clay-500/20">
                   <div className="flex items-center gap-2 mb-2">
-                    <Sparkles className="w-4 h-4 text-lurk-400" />
-                    <span className="text-xs font-medium text-lurk-400">AI Suggestion</span>
+                    <Sparkles className="w-4 h-4 text-clay-500" />
+                    <span className="text-xs font-medium text-clay-500">AI Suggestion</span>
                   </div>
-                  <p className="text-xs text-gray-400">
-                    Based on your description, we recommend the <strong className="text-gray-300">Reviewer</strong> agent type with <strong className="text-gray-300">Documents</strong> and <strong className="text-gray-300">API Specs</strong> artifact scopes. You can customize these in the next steps.
+                  <p className="text-xs text-ink-400">
+                    Based on your description, we recommend the <strong className="text-ink-600">Reviewer</strong> agent type with <strong className="text-ink-600">Documents</strong> and <strong className="text-ink-600">API Specs</strong> artifact scopes. You can customize these in the next steps.
                   </p>
                 </div>
               )}
@@ -233,7 +233,7 @@ Ready for deployment.`
             </CardHeader>
             <div className="space-y-6">
               <div>
-                <label className="text-xs font-medium text-gray-400 mb-3 block">Agent Type</label>
+                <label className="text-xs font-medium text-ink-400 mb-3 block">Agent Type</label>
                 <div className="grid grid-cols-2 gap-3">
                   {agentTypes.map((type) => (
                     <button
@@ -241,19 +241,19 @@ Ready for deployment.`
                       onClick={() => setAgentType(type.id)}
                       className={`p-4 rounded-xl border text-left transition-all ${
                         agentType === type.id
-                          ? "border-lurk-500/40 bg-lurk-950/30"
-                          : "border-gray-800/60 hover:border-gray-700 hover:bg-surface-200/30"
+                          ? "border-clay-500/40 bg-clay-50"
+                          : "border-ink-100 hover:border-ink-200 hover:bg-ink-50/30"
                       }`}
                     >
-                      <div className="text-sm font-medium text-gray-200">{type.label}</div>
-                      <div className="text-xs text-gray-500 mt-1">{type.description}</div>
+                      <div className="text-sm font-medium text-ink-700">{type.label}</div>
+                      <div className="text-xs text-ink-300 mt-1">{type.description}</div>
                     </button>
                   ))}
                 </div>
               </div>
 
               <div>
-                <label className="text-xs font-medium text-gray-400 mb-1.5 block">Model</label>
+                <label className="text-xs font-medium text-ink-400 mb-1.5 block">Model</label>
                 <select
                   value={model}
                   onChange={(e) => setModel(e.target.value)}
@@ -281,7 +281,7 @@ Ready for deployment.`
             </CardHeader>
             <div className="space-y-6">
               <div>
-                <label className="text-xs font-medium text-gray-400 mb-3 block">Artifact Types</label>
+                <label className="text-xs font-medium text-ink-400 mb-3 block">Artifact Types</label>
                 <div className="flex flex-wrap gap-2">
                   {artifactTypeOptions.map((type) => (
                     <button
@@ -289,8 +289,8 @@ Ready for deployment.`
                       onClick={() => toggleArrayItem(selectedArtifactTypes, type, setSelectedArtifactTypes)}
                       className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all ${
                         selectedArtifactTypes.includes(type)
-                          ? "border-lurk-500/40 bg-lurk-950/30 text-lurk-400"
-                          : "border-gray-700 text-gray-500 hover:text-gray-300 hover:bg-surface-200"
+                          ? "border-clay-500/40 bg-clay-50 text-clay-500"
+                          : "border-ink-200 text-ink-300 hover:text-ink-700 hover:bg-ink-50"
                       }`}
                     >
                       {selectedArtifactTypes.includes(type) && <Check className="w-3 h-3 inline mr-1" />}
@@ -301,7 +301,7 @@ Ready for deployment.`
               </div>
 
               <div>
-                <label className="text-xs font-medium text-gray-400 mb-3 block">Team Scope</label>
+                <label className="text-xs font-medium text-ink-400 mb-3 block">Team Scope</label>
                 <div className="flex flex-wrap gap-2">
                   {teamOptions.map((team) => (
                     <button
@@ -309,8 +309,8 @@ Ready for deployment.`
                       onClick={() => toggleArrayItem(selectedTeams, team, setSelectedTeams)}
                       className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all ${
                         selectedTeams.includes(team)
-                          ? "border-lurk-500/40 bg-lurk-950/30 text-lurk-400"
-                          : "border-gray-700 text-gray-500 hover:text-gray-300 hover:bg-surface-200"
+                          ? "border-clay-500/40 bg-clay-50 text-clay-500"
+                          : "border-ink-200 text-ink-300 hover:text-ink-700 hover:bg-ink-50"
                       }`}
                     >
                       {selectedTeams.includes(team) && <Check className="w-3 h-3 inline mr-1" />}
@@ -319,12 +319,12 @@ Ready for deployment.`
                   ))}
                 </div>
                 {selectedTeams.length === 0 && (
-                  <p className="text-2xs text-gray-600 mt-2">No teams selected = all teams</p>
+                  <p className="text-2xs text-ink-300 mt-2">No teams selected = all teams</p>
                 )}
               </div>
 
               <div>
-                <label className="text-xs font-medium text-gray-400 mb-3 block">
+                <label className="text-xs font-medium text-ink-400 mb-3 block">
                   Maximum Sensitivity Level
                 </label>
                 <div className="grid grid-cols-4 gap-3">
@@ -334,12 +334,12 @@ Ready for deployment.`
                       onClick={() => setMaxSensitivity(opt.id)}
                       className={`p-3 rounded-xl border text-center transition-all ${
                         maxSensitivity === opt.id
-                          ? "border-lurk-500/40 bg-lurk-950/30"
-                          : "border-gray-800/60 hover:border-gray-700"
+                          ? "border-clay-500/40 bg-clay-50"
+                          : "border-ink-100 hover:border-ink-200"
                       }`}
                     >
-                      <div className="text-xs font-medium text-gray-200">{opt.label}</div>
-                      <div className="text-2xs text-gray-500 mt-0.5">{opt.description}</div>
+                      <div className="text-xs font-medium text-ink-700">{opt.label}</div>
+                      <div className="text-2xs text-ink-300 mt-0.5">{opt.description}</div>
                     </button>
                   ))}
                 </div>
@@ -366,19 +366,19 @@ Ready for deployment.`
                     key={trigger.id}
                     className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
                       selectedTriggers.includes(trigger.id)
-                        ? "border-lurk-500/40 bg-lurk-950/30"
-                        : "border-gray-800/60 hover:border-gray-700"
+                        ? "border-clay-500/40 bg-clay-50"
+                        : "border-ink-100 hover:border-ink-200"
                     }`}
                   >
                     <input
                       type="checkbox"
                       checked={selectedTriggers.includes(trigger.id)}
                       onChange={() => toggleArrayItem(selectedTriggers, trigger.id, setSelectedTriggers)}
-                      className="mt-0.5 accent-lurk-500"
+                      className="mt-0.5 accent-clay-500"
                     />
                     <div>
-                      <div className="text-sm font-medium text-gray-200">{trigger.label}</div>
-                      <div className="text-xs text-gray-500 mt-0.5">{trigger.description}</div>
+                      <div className="text-sm font-medium text-ink-700">{trigger.label}</div>
+                      <div className="text-xs text-ink-300 mt-0.5">{trigger.description}</div>
                     </div>
                   </label>
                 ))}
@@ -386,7 +386,7 @@ Ready for deployment.`
 
               {selectedTriggers.includes("scheduled") && (
                 <div>
-                  <label className="text-xs font-medium text-gray-400 mb-1.5 block">
+                  <label className="text-xs font-medium text-ink-400 mb-1.5 block">
                     Cron Schedule
                   </label>
                   <input
@@ -396,7 +396,7 @@ Ready for deployment.`
                     className="input-base w-full font-mono"
                     placeholder="0 9 * * 1"
                   />
-                  <p className="text-2xs text-gray-600 mt-1">
+                  <p className="text-2xs text-ink-300 mt-1">
                     Current: Every Monday at 9:00 AM
                   </p>
                 </div>
@@ -419,7 +419,7 @@ Ready for deployment.`
             <div className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-medium text-gray-400 mb-1.5 block">
+                  <label className="text-xs font-medium text-ink-400 mb-1.5 block">
                     Monthly Budget Limit ($)
                   </label>
                   <input
@@ -432,7 +432,7 @@ Ready for deployment.`
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-gray-400 mb-1.5 block">
+                  <label className="text-xs font-medium text-ink-400 mb-1.5 block">
                     Confidence Threshold
                   </label>
                   <input
@@ -444,14 +444,14 @@ Ready for deployment.`
                     max="1"
                     step="0.05"
                   />
-                  <p className="text-2xs text-gray-600 mt-1">
+                  <p className="text-2xs text-ink-300 mt-1">
                     Agent must be at least {(parseFloat(confidenceThreshold) * 100).toFixed(0)}% confident to act
                   </p>
                 </div>
               </div>
 
               <div>
-                <label className="text-xs font-medium text-gray-400 mb-1.5 block">
+                <label className="text-xs font-medium text-ink-400 mb-1.5 block">
                   Max PRs Per Day
                 </label>
                 <input
@@ -464,21 +464,21 @@ Ready for deployment.`
                 />
               </div>
 
-              <div className="p-4 rounded-xl border border-gray-800/60 space-y-4">
+              <div className="p-4 rounded-xl border border-ink-100 space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="text-sm font-medium text-gray-200 flex items-center gap-2">
-                      <Zap className="w-4 h-4 text-yellow-400" />
+                    <div className="text-sm font-medium text-ink-700 flex items-center gap-2">
+                      <Zap className="w-4 h-4 text-accent-yellow" />
                       YOLO Mode
                     </div>
-                    <div className="text-xs text-gray-500 mt-0.5">
+                    <div className="text-xs text-ink-300 mt-0.5">
                       Auto-merge PRs above the confidence threshold
                     </div>
                   </div>
                   <button
                     onClick={() => setYoloEnabled(!yoloEnabled)}
                     className={`relative w-10 h-5 rounded-full transition-colors duration-200 ${
-                      yoloEnabled ? "bg-yellow-500" : "bg-surface-400"
+                      yoloEnabled ? "bg-yellow-500" : "bg-ink-200"
                     }`}
                   >
                     <span
@@ -491,7 +491,7 @@ Ready for deployment.`
 
                 {yoloEnabled && (
                   <div>
-                    <label className="text-xs font-medium text-gray-400 mb-1.5 block">
+                    <label className="text-xs font-medium text-ink-400 mb-1.5 block">
                       YOLO Confidence Threshold
                     </label>
                     <input
@@ -503,9 +503,9 @@ Ready for deployment.`
                       max="1"
                       step="0.01"
                     />
-                    <div className="flex items-center gap-2 mt-2 p-2 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
-                      <AlertTriangle className="w-3.5 h-3.5 text-yellow-400 shrink-0" />
-                      <p className="text-2xs text-yellow-400">
+                    <div className="flex items-center gap-2 mt-2 p-2 rounded-lg bg-yellow-50 border border-yellow-200">
+                      <AlertTriangle className="w-3.5 h-3.5 text-accent-yellow shrink-0" />
+                      <p className="text-2xs text-accent-yellow">
                         YOLO mode will auto-merge without human review. Use with caution.
                       </p>
                     </div>
@@ -532,21 +532,21 @@ Ready for deployment.`
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-3">
                   <div>
-                    <label className="text-2xs text-gray-500">Name</label>
-                    <p className="text-sm text-gray-200 font-mono">{agentName || "custom_agent"}</p>
+                    <label className="text-2xs text-ink-300">Name</label>
+                    <p className="text-sm text-ink-700 font-mono">{agentName || "custom_agent"}</p>
                   </div>
                   <div>
-                    <label className="text-2xs text-gray-500">Type</label>
-                    <p className="text-sm text-gray-200 capitalize">{agentType}</p>
+                    <label className="text-2xs text-ink-300">Type</label>
+                    <p className="text-sm text-ink-700 capitalize">{agentType}</p>
                   </div>
                   <div>
-                    <label className="text-2xs text-gray-500">Model</label>
-                    <p className="text-sm text-gray-200 font-mono">{model}</p>
+                    <label className="text-2xs text-ink-300">Model</label>
+                    <p className="text-sm text-ink-700 font-mono">{model}</p>
                   </div>
                 </div>
                 <div className="space-y-3">
                   <div>
-                    <label className="text-2xs text-gray-500">Artifact Types</label>
+                    <label className="text-2xs text-ink-300">Artifact Types</label>
                     <div className="flex flex-wrap gap-1 mt-1">
                       {selectedArtifactTypes.map((t) => (
                         <Badge key={t} variant="outline" size="sm">{t}</Badge>
@@ -554,7 +554,7 @@ Ready for deployment.`
                     </div>
                   </div>
                   <div>
-                    <label className="text-2xs text-gray-500">Triggers</label>
+                    <label className="text-2xs text-ink-300">Triggers</label>
                     <div className="flex flex-wrap gap-1 mt-1">
                       {selectedTriggers.map((t) => (
                         <Badge key={t} variant="info" size="sm">{t}</Badge>
@@ -565,9 +565,9 @@ Ready for deployment.`
               </div>
 
               {/* Test Area */}
-              <div className="border-t border-gray-800/60 pt-4">
+              <div className="border-t border-ink-100 pt-4">
                 <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-sm font-medium text-gray-200">Sandbox Test</h4>
+                  <h4 className="text-sm font-medium text-ink-700">Sandbox Test</h4>
                   <Button
                     size="sm"
                     icon={<Play className="w-3.5 h-3.5" />}
@@ -578,12 +578,12 @@ Ready for deployment.`
                   </Button>
                 </div>
                 {testOutput ? (
-                  <pre className="p-4 rounded-lg bg-surface-200/50 border border-gray-800/60 text-xs text-gray-300 font-mono whitespace-pre-wrap overflow-x-auto">
+                  <pre className="p-4 rounded-lg bg-ink-50 border border-ink-100 text-xs text-ink-600 font-mono whitespace-pre-wrap overflow-x-auto">
                     {testOutput}
                   </pre>
                 ) : (
-                  <div className="p-8 rounded-lg bg-surface-200/30 border border-gray-800/60 text-center">
-                    <p className="text-sm text-gray-500">
+                  <div className="p-8 rounded-lg bg-ink-50 border border-ink-100 text-center">
+                    <p className="text-sm text-ink-300">
                       Click &quot;Run Test&quot; to preview your agent on sample data
                     </p>
                   </div>
@@ -591,7 +591,7 @@ Ready for deployment.`
               </div>
 
               {/* Deploy */}
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-800/60">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-ink-100">
                 <Button variant="secondary" icon={<Save className="w-3.5 h-3.5" />}>
                   Save Draft
                 </Button>

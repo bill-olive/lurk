@@ -69,9 +69,9 @@ const complianceReports = [
 ];
 
 const actorTypeIcons = {
-  user: <User className="w-3.5 h-3.5 text-blue-400" />,
-  agent: <Bot className="w-3.5 h-3.5 text-purple-400" />,
-  system: <Settings className="w-3.5 h-3.5 text-gray-400" />,
+  user: <User className="w-3.5 h-3.5 text-accent-blue" />,
+  agent: <Bot className="w-3.5 h-3.5 text-heather-600" />,
+  system: <Settings className="w-3.5 h-3.5 text-ink-400" />,
 };
 
 const severityColors = {
@@ -125,11 +125,11 @@ export default function AuditPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-gray-100 tracking-tight flex items-center gap-2">
-            <ScrollText className="w-5 h-5 text-lurk-400" />
+          <h1 className="text-xl font-bold text-ink-800 tracking-tight flex items-center gap-2">
+            <ScrollText className="w-5 h-5 text-clay-400" />
             Audit Log
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-ink-300 mt-1">
             Complete audit trail of all system activity
           </p>
         </div>
@@ -146,7 +146,7 @@ export default function AuditPage() {
           {/* Filters */}
           <div className="flex items-center gap-3 mb-4 flex-wrap">
             <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-300" />
               <input
                 type="text"
                 placeholder="Search audit log..."
@@ -183,22 +183,22 @@ export default function AuditPage() {
             {filtered.map((entry) => (
               <div
                 key={entry.id}
-                className="flex items-start gap-4 p-3 rounded-lg hover:bg-surface-100 transition-colors group"
+                className="flex items-start gap-4 p-3 rounded-lg hover:bg-white transition-colors group"
               >
                 <div className="shrink-0 mt-0.5">
                   {actorTypeIcons[entry.actorType]}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm font-medium text-gray-200">{entry.actor}</span>
-                    <ArrowRight className="w-3 h-3 text-gray-600" />
-                    <code className="text-xs text-gray-400 font-mono bg-surface-200 px-1.5 py-0.5 rounded">
+                    <span className="text-sm font-medium text-ink-700">{entry.actor}</span>
+                    <ArrowRight className="w-3 h-3 text-ink-300" />
+                    <code className="text-xs text-ink-400 font-mono bg-ink-50 px-1.5 py-0.5 rounded">
                       {entry.action}
                     </code>
-                    <ArrowRight className="w-3 h-3 text-gray-600" />
-                    <span className="text-sm text-gray-300">{entry.target}</span>
+                    <ArrowRight className="w-3 h-3 text-ink-300" />
+                    <span className="text-sm text-ink-600">{entry.target}</span>
                   </div>
-                  <p className="text-xs text-gray-500 mt-0.5">{entry.details}</p>
+                  <p className="text-xs text-ink-300 mt-0.5">{entry.details}</p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <Badge variant={categoryColors[entry.category]} size="sm">
@@ -207,7 +207,7 @@ export default function AuditPage() {
                   <Badge variant={severityColors[entry.severity]} size="sm">
                     {entry.severity}
                   </Badge>
-                  <span className="text-2xs text-gray-600 font-mono whitespace-nowrap">
+                  <span className="text-2xs text-ink-300 font-mono whitespace-nowrap">
                     {entry.timestamp.split(" ")[1]}
                   </span>
                 </div>
@@ -217,7 +217,7 @@ export default function AuditPage() {
 
           {filtered.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-sm text-gray-500">No entries match your filters</p>
+              <p className="text-sm text-ink-300">No entries match your filters</p>
             </div>
           )}
         </div>
@@ -230,15 +230,15 @@ export default function AuditPage() {
             <Card key={report.id} hover>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-surface-200 flex items-center justify-center">
-                    <Shield className="w-5 h-5 text-lurk-400" />
+                  <div className="w-10 h-10 rounded-lg bg-ink-50 flex items-center justify-center">
+                    <Shield className="w-5 h-5 text-clay-400" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-semibold text-gray-200">{report.name}</h3>
+                    <h3 className="text-sm font-semibold text-ink-700">{report.name}</h3>
                     <div className="flex items-center gap-3 mt-0.5">
-                      <span className="text-xs text-gray-500">{report.period}</span>
-                      <span className="text-xs text-gray-600">&middot;</span>
-                      <span className="text-xs text-gray-500">Generated {report.generatedAt}</span>
+                      <span className="text-xs text-ink-300">{report.period}</span>
+                      <span className="text-xs text-ink-300">&middot;</span>
+                      <span className="text-xs text-ink-300">Generated {report.generatedAt}</span>
                     </div>
                   </div>
                 </div>

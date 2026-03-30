@@ -81,12 +81,12 @@ function PolicySection({
   return (
     <Card className="mb-4">
       <div className="flex items-start gap-4">
-        <div className="w-10 h-10 rounded-lg bg-lurk-600/15 flex items-center justify-center shrink-0 mt-0.5">
+        <div className="w-10 h-10 rounded-lg bg-clay-100 flex items-center justify-center shrink-0 mt-0.5">
           {icon}
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-semibold text-gray-200">{title}</h3>
-          <p className="text-xs text-gray-500 mt-0.5 mb-4">{description}</p>
+          <h3 className="text-sm font-semibold text-ink-700">{title}</h3>
+          <p className="text-xs text-ink-300 mt-0.5 mb-4">{description}</p>
           {children}
         </div>
       </div>
@@ -113,8 +113,8 @@ function RadioOption({
     <label
       className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
         checked
-          ? "border-lurk-500/40 bg-lurk-950/30"
-          : "border-gray-800/60 hover:border-gray-700 hover:bg-surface-200/30"
+          ? "border-clay-500/40 bg-clay-50"
+          : "border-ink-100 hover:border-ink-200 hover:bg-ink-50"
       }`}
     >
       <input
@@ -123,11 +123,11 @@ function RadioOption({
         value={value}
         checked={checked}
         onChange={() => onChange(value)}
-        className="mt-1 accent-lurk-500"
+        className="mt-1 accent-clay-500"
       />
       <div>
-        <div className="text-sm font-medium text-gray-200">{label}</div>
-        <div className="text-xs text-gray-500 mt-0.5">{description}</div>
+        <div className="text-sm font-medium text-ink-700">{label}</div>
+        <div className="text-xs text-ink-300 mt-0.5">{description}</div>
       </div>
     </label>
   );
@@ -147,15 +147,15 @@ function ToggleSwitch({
   return (
     <div className="flex items-center justify-between py-2">
       <div>
-        <div className="text-sm text-gray-300">{label}</div>
+        <div className="text-sm text-ink-600">{label}</div>
         {description && (
-          <div className="text-xs text-gray-500 mt-0.5">{description}</div>
+          <div className="text-xs text-ink-300 mt-0.5">{description}</div>
         )}
       </div>
       <button
         onClick={onToggle}
         className={`relative w-10 h-5 rounded-full transition-colors duration-200 ${
-          enabled ? "bg-lurk-600" : "bg-surface-400"
+          enabled ? "bg-clay-500" : "bg-ink-200"
         }`}
       >
         <span
@@ -194,11 +194,11 @@ export default function PoliciesPage() {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-gray-100 tracking-tight flex items-center gap-2">
-            <Shield className="w-5 h-5 text-lurk-400" />
+          <h1 className="text-xl font-bold text-ink-800 tracking-tight flex items-center gap-2">
+            <Shield className="w-5 h-5 text-clay-500" />
             Privacy & Agent Policies
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-ink-300 mt-1">
             Configure data privacy, content access, and agent behavior policies
           </p>
         </div>
@@ -229,7 +229,7 @@ export default function PoliciesPage() {
         <div className="space-y-4 mt-6">
           {/* Redaction Level */}
           <PolicySection
-            icon={<EyeOff className="w-5 h-5 text-lurk-400" />}
+            icon={<EyeOff className="w-5 h-5 text-clay-500" />}
             title="Redaction Level"
             description="Control how sensitive information is handled across artifacts"
           >
@@ -263,7 +263,7 @@ export default function PoliciesPage() {
 
           {/* Content Access */}
           <PolicySection
-            icon={<Lock className="w-5 h-5 text-lurk-400" />}
+            icon={<Lock className="w-5 h-5 text-clay-500" />}
             title="Content Access Controls"
             description="Define how content is shared and accessed within the organization"
           >
@@ -297,7 +297,7 @@ export default function PoliciesPage() {
 
           {/* Customer Data */}
           <PolicySection
-            icon={<FileWarning className="w-5 h-5 text-lurk-400" />}
+            icon={<FileWarning className="w-5 h-5 text-clay-500" />}
             title="Customer Data Policy"
             description="How customer-related information is processed by agents"
           >
@@ -331,7 +331,7 @@ export default function PoliciesPage() {
 
           {/* Recording Policy */}
           <PolicySection
-            icon={<Video className="w-5 h-5 text-lurk-400" />}
+            icon={<Video className="w-5 h-5 text-clay-500" />}
             title="Recording Policy"
             description="Manage how meetings and conversations are captured"
           >
@@ -350,8 +350,8 @@ export default function PoliciesPage() {
               />
               <div className="flex items-center justify-between py-2">
                 <div>
-                  <div className="text-sm text-gray-300">Retention period</div>
-                  <div className="text-xs text-gray-500 mt-0.5">
+                  <div className="text-sm text-ink-600">Retention period</div>
+                  <div className="text-xs text-ink-300 mt-0.5">
                     How long recordings are kept before auto-deletion
                   </div>
                 </div>
@@ -373,7 +373,7 @@ export default function PoliciesPage() {
 
           {/* Migration Policy */}
           <PolicySection
-            icon={<ArrowLeftRight className="w-5 h-5 text-lurk-400" />}
+            icon={<ArrowLeftRight className="w-5 h-5 text-clay-500" />}
             title="Migration Policy"
             description="Controls for data migration and import processes"
           >
@@ -398,27 +398,27 @@ export default function PoliciesPage() {
       <TabPanel id="history" activeTab={activeTab}>
         <div className="mt-6 space-y-2">
           <div className="flex items-center gap-2 mb-4">
-            <Info className="w-4 h-4 text-gray-500" />
-            <span className="text-xs text-gray-500">
+            <Info className="w-4 h-4 text-ink-300" />
+            <span className="text-xs text-ink-300">
               All policy changes are logged and can be rolled back
             </span>
           </div>
           {policyHistory.map((entry, idx) => (
             <div
               key={entry.version}
-              className="flex items-start gap-4 p-4 rounded-xl bg-surface-100 border border-gray-800/60 hover:border-gray-700 transition-colors"
+              className="flex items-start gap-4 p-4 rounded-xl bg-white border border-ink-100 hover:border-ink-200 transition-colors"
             >
               <div className="flex flex-col items-center gap-1">
                 <Badge variant={idx === 0 ? "success" : "default"} size="sm">
                   {entry.version}
                 </Badge>
                 {idx === 0 && (
-                  <span className="text-2xs text-emerald-400">Current</span>
+                  <span className="text-2xs text-olive-600">Current</span>
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-gray-200">{entry.summary}</p>
-                <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-500">
+                <p className="text-sm text-ink-700">{entry.summary}</p>
+                <div className="flex items-center gap-3 mt-1.5 text-xs text-ink-300">
                   <span>{entry.changedBy}</span>
                   <span>&middot;</span>
                   <span>{entry.changedAt}</span>

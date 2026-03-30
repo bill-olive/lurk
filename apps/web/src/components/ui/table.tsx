@@ -16,7 +16,7 @@ export function Table({
   className?: string;
 }) {
   return (
-    <div className={clsx("overflow-x-auto rounded-xl border border-gray-800/60", className)}>
+    <div className={clsx("overflow-x-auto rounded-xl border border-ink-100", className)}>
       <table className="w-full text-left">{children}</table>
     </div>
   );
@@ -30,7 +30,7 @@ export function TableHead({
   className?: string;
 }) {
   return (
-    <thead className={clsx("bg-surface-200/50", className)}>{children}</thead>
+    <thead className={clsx("bg-ink-50", className)}>{children}</thead>
   );
 }
 
@@ -41,7 +41,7 @@ export function TableBody({
   children: ReactNode;
   className?: string;
 }) {
-  return <tbody className={clsx("divide-y divide-gray-800/40", className)}>{children}</tbody>;
+  return <tbody className={clsx("divide-y divide-ink-100", className)}>{children}</tbody>;
 }
 
 export function TableRow({
@@ -58,7 +58,7 @@ export function TableRow({
   return (
     <tr
       className={clsx(
-        hoverable && "hover:bg-surface-200/40 transition-colors duration-100",
+        hoverable && "hover:bg-ink-50 transition-colors duration-100",
         onClick && "cursor-pointer",
         className
       )}
@@ -85,8 +85,8 @@ export function TableHeaderCell({
   return (
     <th
       className={clsx(
-        "px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider",
-        sortable && "cursor-pointer select-none hover:text-gray-300 transition-colors",
+        "px-4 py-3 text-xs font-medium text-ink-400 uppercase tracking-wider",
+        sortable && "cursor-pointer select-none hover:text-ink-600 transition-colors",
         className
       )}
       onClick={sortable ? onSort : undefined}
@@ -98,13 +98,13 @@ export function TableHeaderCell({
             <ChevronUp
               className={clsx(
                 "w-3 h-3",
-                sortDirection === "asc" ? "text-lurk-400" : "text-gray-600"
+                sortDirection === "asc" ? "text-clay-500" : "text-ink-200"
               )}
             />
             <ChevronDown
               className={clsx(
                 "w-3 h-3",
-                sortDirection === "desc" ? "text-lurk-400" : "text-gray-600"
+                sortDirection === "desc" ? "text-clay-500" : "text-ink-200"
               )}
             />
           </span>
@@ -122,7 +122,7 @@ export function TableCell({
   className?: string;
 }) {
   return (
-    <td className={clsx("px-4 py-3 text-sm text-gray-300", className)}>
+    <td className={clsx("px-4 py-3 text-body-sm text-ink-600", className)}>
       {children}
     </td>
   );
@@ -151,41 +151,41 @@ export function Pagination({
   const end = Math.min(currentPage * pageSize, totalItems);
 
   return (
-    <div className="flex items-center justify-between px-4 py-3 border-t border-gray-800/60">
-      <span className="text-xs text-gray-500">
+    <div className="flex items-center justify-between px-4 py-3 border-t border-ink-100">
+      <span className="text-xs text-ink-400">
         Showing {start}-{end} of {totalItems}
       </span>
       <div className="flex items-center gap-1">
         <button
           onClick={() => onPageChange(1)}
           disabled={currentPage === 1}
-          className="p-1 rounded hover:bg-surface-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          className="p-1 rounded hover:bg-ink-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
         >
-          <ChevronsLeft className="w-4 h-4 text-gray-400" />
+          <ChevronsLeft className="w-4 h-4 text-ink-400" />
         </button>
         <button
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className="p-1 rounded hover:bg-surface-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          className="p-1 rounded hover:bg-ink-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
         >
-          <ChevronLeft className="w-4 h-4 text-gray-400" />
+          <ChevronLeft className="w-4 h-4 text-ink-400" />
         </button>
-        <span className="px-3 py-1 text-xs text-gray-400">
+        <span className="px-3 py-1 text-xs text-ink-400">
           {currentPage} / {totalPages}
         </span>
         <button
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className="p-1 rounded hover:bg-surface-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          className="p-1 rounded hover:bg-ink-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
         >
-          <ChevronRight className="w-4 h-4 text-gray-400" />
+          <ChevronRight className="w-4 h-4 text-ink-400" />
         </button>
         <button
           onClick={() => onPageChange(totalPages)}
           disabled={currentPage === totalPages}
-          className="p-1 rounded hover:bg-surface-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          className="p-1 rounded hover:bg-ink-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
         >
-          <ChevronsRight className="w-4 h-4 text-gray-400" />
+          <ChevronsRight className="w-4 h-4 text-ink-400" />
         </button>
       </div>
     </div>
@@ -255,8 +255,8 @@ export function DataTable<T extends Record<string, unknown>>({
 
   if (data.length === 0) {
     return (
-      <div className="rounded-xl border border-gray-800/60 p-12 text-center">
-        <p className="text-sm text-gray-500">{emptyMessage}</p>
+      <div className="rounded-xl border border-ink-100 p-12 text-center">
+        <p className="text-sm text-ink-400">{emptyMessage}</p>
       </div>
     );
   }

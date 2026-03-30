@@ -185,8 +185,8 @@ const priorityColors: Record<string, "danger" | "warning" | "info"> = {
 function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ name: string; value: number; color: string }>; label?: string }) {
   if (!active || !payload) return null;
   return (
-    <div className="bg-surface-100 border border-gray-700 rounded-lg px-3 py-2 shadow-xl text-xs">
-      <p className="text-gray-400 mb-1">{label}</p>
+    <div className="bg-white border border-ink-200 rounded-lg px-3 py-2 shadow-warm-lg text-xs">
+      <p className="text-ink-400 mb-1">{label}</p>
       {payload.map((entry, i) => (
         <p key={i} style={{ color: entry.color }} className="font-medium">
           {entry.name}: {entry.value}
@@ -217,11 +217,11 @@ export default function AnalyticsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-xl font-bold text-gray-100 tracking-tight flex items-center gap-2">
-          <BarChart3 className="w-5 h-5 text-lurk-400" />
+        <h1 className="text-xl font-bold text-ink-800 tracking-tight flex items-center gap-2">
+          <BarChart3 className="w-5 h-5 text-clay-400" />
           Analytics
         </h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-body-sm text-ink-300 mt-1">
           Artifact quality, coverage analysis, and team performance insights
         </p>
       </div>
@@ -335,9 +335,9 @@ export default function AnalyticsPage() {
               </ResponsiveContainer>
             </div>
             <div className="flex items-center justify-center gap-6 mt-2">
-              <div className="flex items-center gap-2"><div className="w-3 h-1.5 rounded bg-lurk-500" /><span className="text-xs text-gray-400">Engineering</span></div>
-              <div className="flex items-center gap-2"><div className="w-3 h-1.5 rounded bg-emerald-500" /><span className="text-xs text-gray-400">Sales</span></div>
-              <div className="flex items-center gap-2"><div className="w-3 h-1.5 rounded bg-purple-500" /><span className="text-xs text-gray-400">Marketing</span></div>
+              <div className="flex items-center gap-2"><div className="w-3 h-1.5 rounded bg-clay-500" /><span className="text-xs text-ink-400">Engineering</span></div>
+              <div className="flex items-center gap-2"><div className="w-3 h-1.5 rounded bg-emerald-500" /><span className="text-xs text-ink-400">Sales</span></div>
+              <div className="flex items-center gap-2"><div className="w-3 h-1.5 rounded bg-heather-500" /><span className="text-xs text-ink-400">Marketing</span></div>
             </div>
           </Card>
 
@@ -348,8 +348,8 @@ export default function AnalyticsPage() {
             <div className="space-y-4">
               {teamBreakdown.sort((a, b) => b.avgQuality - a.avgQuality).map((team) => (
                 <div key={team.team} className="flex items-center gap-3">
-                  <span className="text-xs text-gray-400 w-28 shrink-0">{team.team}</span>
-                  <div className="flex-1 h-3 rounded-full bg-surface-300 overflow-hidden">
+                  <span className="text-xs text-ink-400 w-28 shrink-0">{team.team}</span>
+                  <div className="flex-1 h-3 rounded-full bg-ink-100 overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all ${
                         team.avgQuality >= 85 ? "bg-emerald-400" : team.avgQuality >= 75 ? "bg-yellow-400" : "bg-red-400"
@@ -357,7 +357,7 @@ export default function AnalyticsPage() {
                       style={{ width: `${team.avgQuality}%` }}
                     />
                   </div>
-                  <span className="text-sm font-medium text-gray-300 w-10 text-right">{team.avgQuality}%</span>
+                  <span className="text-sm font-medium text-ink-600 w-10 text-right">{team.avgQuality}%</span>
                 </div>
               ))}
             </div>
@@ -375,8 +375,8 @@ export default function AnalyticsPage() {
             <div className="space-y-4">
               {coverageData.sort((a, b) => a.covered - b.covered).map((area) => (
                 <div key={area.area} className="flex items-center gap-4">
-                  <span className="text-sm text-gray-400 w-36 shrink-0">{area.area}</span>
-                  <div className="flex-1 h-4 rounded-full bg-surface-300 overflow-hidden relative">
+                  <span className="text-sm text-ink-400 w-36 shrink-0">{area.area}</span>
+                  <div className="flex-1 h-4 rounded-full bg-ink-100 overflow-hidden relative">
                     <div
                       className={`h-full rounded-full transition-all ${
                         area.covered >= 80
@@ -389,7 +389,7 @@ export default function AnalyticsPage() {
                     />
                   </div>
                   <span className={`text-sm font-medium w-12 text-right ${
-                    area.covered >= 80 ? "text-emerald-400" : area.covered >= 60 ? "text-yellow-400" : "text-red-400"
+                    area.covered >= 80 ? "text-olive-600" : area.covered >= 60 ? "text-yellow-400" : "text-red-400"
                   }`}>
                     {area.covered}%
                   </span>
@@ -409,36 +409,36 @@ export default function AnalyticsPage() {
           {teamBreakdown.map((team) => (
             <Card key={team.team}>
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-lg bg-lurk-600/15 flex items-center justify-center">
-                  <Users className="w-5 h-5 text-lurk-400" />
+                <div className="w-10 h-10 rounded-lg bg-clay-500/15 flex items-center justify-center">
+                  <Users className="w-5 h-5 text-clay-400" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-200">{team.team}</h3>
-                  <span className="text-xs text-gray-500">{team.artifacts.toLocaleString()} artifacts</span>
+                  <h3 className="text-sm font-serif text-ink-700">{team.team}</h3>
+                  <span className="text-xs text-ink-300">{team.artifacts.toLocaleString()} artifacts</span>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <div className="p-2.5 rounded-lg bg-surface-200/50">
-                  <div className="text-lg font-bold text-gray-100">{team.avgQuality}%</div>
-                  <div className="text-2xs text-gray-500">Avg Quality</div>
+                <div className="p-2.5 rounded-lg bg-ink-50/50">
+                  <div className="text-lg font-bold text-ink-800">{team.avgQuality}%</div>
+                  <div className="text-2xs text-ink-300">Avg Quality</div>
                 </div>
-                <div className="p-2.5 rounded-lg bg-surface-200/50">
-                  <div className={`text-lg font-bold ${team.stalePct > 15 ? "text-red-400" : team.stalePct > 10 ? "text-yellow-400" : "text-emerald-400"}`}>
+                <div className="p-2.5 rounded-lg bg-ink-50/50">
+                  <div className={`text-lg font-bold ${team.stalePct > 15 ? "text-red-400" : team.stalePct > 10 ? "text-yellow-400" : "text-olive-600"}`}>
                     {team.stalePct}%
                   </div>
-                  <div className="text-2xs text-gray-500">Stale Rate</div>
+                  <div className="text-2xs text-ink-300">Stale Rate</div>
                 </div>
-                <div className="p-2.5 rounded-lg bg-surface-200/50">
-                  <div className="text-lg font-bold text-gray-100">{team.coverage}%</div>
-                  <div className="text-2xs text-gray-500">Coverage</div>
+                <div className="p-2.5 rounded-lg bg-ink-50/50">
+                  <div className="text-lg font-bold text-ink-800">{team.coverage}%</div>
+                  <div className="text-2xs text-ink-300">Coverage</div>
                 </div>
-                <div className="p-2.5 rounded-lg bg-surface-200/50">
-                  <div className="text-lg font-bold text-lurk-400">{team.agentActivity}</div>
-                  <div className="text-2xs text-gray-500">Agent PRs</div>
+                <div className="p-2.5 rounded-lg bg-ink-50/50">
+                  <div className="text-lg font-bold text-clay-500">{team.agentActivity}</div>
+                  <div className="text-2xs text-ink-300">Agent PRs</div>
                 </div>
               </div>
-              <div className="mt-3 pt-3 border-t border-gray-800/60 flex items-center justify-between text-xs">
-                <span className="text-gray-500">Top type:</span>
+              <div className="mt-3 pt-3 border-t border-ink-100 flex items-center justify-between text-xs">
+                <span className="text-ink-300">Top type:</span>
                 <Badge variant="outline" size="sm">{team.topType}</Badge>
               </div>
             </Card>
@@ -462,11 +462,11 @@ export default function AnalyticsPage() {
                     </Badge>
                     <Badge variant="outline" size="sm">{rec.team}</Badge>
                   </div>
-                  <h3 className="text-sm font-semibold text-gray-200">{rec.title}</h3>
-                  <p className="text-xs text-gray-500 mt-1">{rec.description}</p>
-                  <div className="flex items-center gap-2 mt-2 p-2 rounded-lg bg-lurk-950/30 border border-lurk-500/20">
-                    <TrendingUp className="w-3.5 h-3.5 text-lurk-400 shrink-0" />
-                    <span className="text-xs text-lurk-300">{rec.impact}</span>
+                  <h3 className="text-sm font-serif text-ink-700">{rec.title}</h3>
+                  <p className="text-xs text-ink-300 mt-1">{rec.description}</p>
+                  <div className="flex items-center gap-2 mt-2 p-2 rounded-lg bg-clay-50/30 border border-clay-500/20">
+                    <TrendingUp className="w-3.5 h-3.5 text-clay-400 shrink-0" />
+                    <span className="text-xs text-clay-500">{rec.impact}</span>
                   </div>
                 </div>
                 <Button variant="secondary" size="sm">

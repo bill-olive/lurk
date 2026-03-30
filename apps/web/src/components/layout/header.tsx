@@ -35,26 +35,26 @@ export function Header() {
   }, []);
 
   return (
-    <header className="h-14 bg-surface-50/80 backdrop-blur-xl border-b border-gray-800/60 flex items-center justify-between px-6 sticky top-0 z-30">
+    <header className="h-14 bg-white/80 backdrop-blur-xl border-b border-ink-100 flex items-center justify-between px-6 sticky top-0 z-30">
       {/* Left: Org Switcher */}
       <div ref={orgRef} className="relative">
         <button
           onClick={() => setShowOrgMenu(!showOrgMenu)}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-surface-200 transition-colors"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-ink-50 transition-colors"
         >
-          <div className="w-6 h-6 rounded-md bg-lurk-600/20 flex items-center justify-center">
-            <Building2 className="w-3.5 h-3.5 text-lurk-400" />
+          <div className="w-6 h-6 rounded-md bg-clay-100 flex items-center justify-center">
+            <Building2 className="w-3.5 h-3.5 text-clay-500" />
           </div>
-          <span className="text-sm font-medium text-gray-200">
+          <span className="text-body-sm font-medium text-ink-700">
             {currentOrg?.name || "Select Organization"}
           </span>
-          <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
+          <ChevronDown className="w-3.5 h-3.5 text-ink-300" />
         </button>
 
         {showOrgMenu && (
-          <div className="absolute top-full left-0 mt-1 w-64 bg-surface-100 border border-gray-800/60 rounded-xl shadow-2xl py-1 animate-slide-in">
-            <div className="px-3 py-2 border-b border-gray-800/60">
-              <span className="text-2xs font-medium text-gray-500 uppercase tracking-wider">
+          <div className="absolute top-full left-0 mt-1 w-64 bg-white border border-ink-100 rounded-editorial shadow-warm-lg py-1 animate-slide-in">
+            <div className="px-3 py-2 border-b border-ink-100">
+              <span className="text-2xs font-medium text-ink-300 uppercase tracking-wider">
                 Organizations
               </span>
             </div>
@@ -65,19 +65,19 @@ export function Header() {
                   switchOrg(org.id);
                   setShowOrgMenu(false);
                 }}
-                className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-surface-200 transition-colors"
+                className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-ink-50 transition-colors"
               >
-                <div className="w-7 h-7 rounded-md bg-lurk-600/20 flex items-center justify-center">
-                  <Building2 className="w-3.5 h-3.5 text-lurk-400" />
+                <div className="w-7 h-7 rounded-md bg-clay-100 flex items-center justify-center">
+                  <Building2 className="w-3.5 h-3.5 text-clay-500" />
                 </div>
                 <div className="flex-1 text-left">
-                  <div className="text-sm text-gray-200">{org.name}</div>
-                  <div className="text-2xs text-gray-500">
-                    {org.memberCount} members &middot; {org.plan}
+                  <div className="text-body-sm text-ink-700">{org.name}</div>
+                  <div className="text-2xs text-ink-300">
+                    {org.memberCount} members · {org.plan}
                   </div>
                 </div>
                 {currentOrg?.id === org.id && (
-                  <Check className="w-4 h-4 text-lurk-400" />
+                  <Check className="w-4 h-4 text-clay-500" />
                 )}
               </button>
             ))}
@@ -87,58 +87,56 @@ export function Header() {
 
       {/* Right: Actions */}
       <div className="flex items-center gap-2">
-        {/* Notifications */}
-        <button className="relative p-2 rounded-lg hover:bg-surface-200 text-gray-400 hover:text-gray-200 transition-colors">
+        <button className="relative p-2 rounded-lg hover:bg-ink-50 text-ink-400 hover:text-ink-600 transition-colors">
           <Bell className="w-4 h-4" />
-          <span className="absolute top-1 right-1 w-2 h-2 bg-lurk-500 rounded-full" />
+          <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-clay-500 rounded-full" />
         </button>
 
-        {/* User Menu */}
         <div ref={userRef} className="relative">
           <button
             onClick={() => setShowUserMenu(!showUserMenu)}
-            className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-surface-200 transition-colors"
+            className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-ink-50 transition-colors"
           >
             {user?.photoURL ? (
               <img
                 src={user.photoURL}
                 alt=""
-                className="w-7 h-7 rounded-full border border-gray-700"
+                className="w-7 h-7 rounded-full border border-ink-100"
               />
             ) : (
-              <div className="w-7 h-7 rounded-full bg-surface-300 flex items-center justify-center">
-                <User className="w-3.5 h-3.5 text-gray-400" />
+              <div className="w-7 h-7 rounded-full bg-ink-100 flex items-center justify-center">
+                <User className="w-3.5 h-3.5 text-ink-400" />
               </div>
             )}
             <div className="hidden sm:block text-left">
-              <div className="text-sm font-medium text-gray-200">
+              <div className="text-body-sm font-medium text-ink-700">
                 {user?.displayName || "Admin User"}
               </div>
             </div>
-            <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
+            <ChevronDown className="w-3.5 h-3.5 text-ink-300" />
           </button>
 
           {showUserMenu && (
-            <div className="absolute top-full right-0 mt-1 w-56 bg-surface-100 border border-gray-800/60 rounded-xl shadow-2xl py-1 animate-slide-in">
-              <div className="px-3 py-2.5 border-b border-gray-800/60">
-                <div className="text-sm font-medium text-gray-200">
+            <div className="absolute top-full right-0 mt-1 w-56 bg-white border border-ink-100 rounded-editorial shadow-warm-lg py-1 animate-slide-in">
+              <div className="px-3 py-2.5 border-b border-ink-100">
+                <div className="text-body-sm font-medium text-ink-700">
                   {user?.displayName || "Admin User"}
                 </div>
-                <div className="text-2xs text-gray-500">
+                <div className="text-2xs text-ink-300">
                   {user?.email || "admin@lurk.dev"}
                 </div>
               </div>
-              <button className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-gray-400 hover:text-gray-200 hover:bg-surface-200 transition-colors">
+              <button className="w-full flex items-center gap-2.5 px-3 py-2 text-body-sm text-ink-400 hover:text-ink-700 hover:bg-ink-50 transition-colors">
                 <Settings className="w-4 h-4" />
                 Settings
               </button>
-              <div className="border-t border-gray-800/60 mt-1 pt-1">
+              <div className="border-t border-ink-100 mt-1 pt-1">
                 <button
                   onClick={() => {
                     signOut();
                     setShowUserMenu(false);
                   }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-body-sm text-accent-red hover:bg-red-50 transition-colors"
                 >
                   <LogOut className="w-4 h-4" />
                   Sign out

@@ -130,9 +130,9 @@ const recentActivity = [
 ];
 
 const severityColors = {
-  critical: "bg-red-500/20 text-red-400 border-red-500/30",
-  high: "bg-orange-500/20 text-orange-400 border-orange-500/30",
-  medium: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+  critical: "bg-red-500/20 text-accent-red border-red-500/30",
+  high: "bg-orange-500/20 text-orange-600 border-orange-500/30",
+  medium: "bg-yellow-500/20 text-accent-yellow border-yellow-500/30",
 };
 
 const severityBadge = {
@@ -192,18 +192,18 @@ export default function KillSwitchesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-gray-100 tracking-tight flex items-center gap-2">
-            <Power className="w-5 h-5 text-lurk-400" />
+          <h1 className="text-xl font-bold text-ink-800 tracking-tight flex items-center gap-2">
+            <Power className="w-5 h-5 text-clay-400" />
             Kill Switches
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-ink-300 mt-1">
             Emergency controls to disable Lurk features and operations
           </p>
         </div>
         {activeCount > 0 && (
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20">
-            <AlertTriangle className="w-4 h-4 text-red-400" />
-            <span className="text-sm font-medium text-red-400">
+            <AlertTriangle className="w-4 h-4 text-accent-red" />
+            <span className="text-sm font-medium text-accent-red">
               {activeCount} kill switch{activeCount > 1 ? "es" : ""} active
             </span>
           </div>
@@ -212,12 +212,12 @@ export default function KillSwitchesPage() {
 
       {/* Warning Banner */}
       <div className="p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/20 flex items-start gap-3">
-        <AlertTriangle className="w-5 h-5 text-yellow-400 shrink-0 mt-0.5" />
+        <AlertTriangle className="w-5 h-5 text-accent-yellow shrink-0 mt-0.5" />
         <div>
-          <p className="text-sm font-medium text-yellow-300">
+          <p className="text-sm font-medium text-yellow-700">
             Kill switches are emergency controls
           </p>
-          <p className="text-xs text-yellow-400/70 mt-0.5">
+          <p className="text-xs text-yellow-600/70 mt-0.5">
             Activating a kill switch immediately halts the affected systems. All changes are logged in the audit trail.
             Ensure you have a recovery plan before activating global or feature-level switches.
           </p>
@@ -226,8 +226,8 @@ export default function KillSwitchesPage() {
 
       {/* Main Kill Switches */}
       <div className="space-y-3">
-        <h2 className="text-sm font-semibold text-gray-300 flex items-center gap-2">
-          <Shield className="w-4 h-4 text-gray-500" />
+        <h2 className="text-sm font-semibold text-ink-600 flex items-center gap-2">
+          <Shield className="w-4 h-4 text-ink-300" />
           System Kill Switches
         </h2>
         {switches.map((ks) => (
@@ -239,15 +239,15 @@ export default function KillSwitchesPage() {
               <div
                 className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
                   ks.enabled
-                    ? "bg-red-500/20 text-red-400"
-                    : "bg-surface-200 text-gray-500"
+                    ? "bg-red-500/20 text-accent-red"
+                    : "bg-ink-50 text-ink-300"
                 }`}
               >
                 {ks.icon}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <h3 className="text-sm font-semibold text-gray-200">{ks.name}</h3>
+                  <h3 className="text-sm font-semibold text-ink-700">{ks.name}</h3>
                   <Badge variant={severityBadge[ks.severity]} size="sm">
                     {ks.severity}
                   </Badge>
@@ -255,8 +255,8 @@ export default function KillSwitchesPage() {
                     <Badge variant="danger" dot size="sm">ACTIVE</Badge>
                   )}
                 </div>
-                <p className="text-xs text-gray-500">{ks.description}</p>
-                <div className="flex items-center gap-4 mt-2 text-2xs text-gray-600">
+                <p className="text-xs text-ink-300">{ks.description}</p>
+                <div className="flex items-center gap-4 mt-2 text-2xs text-ink-300">
                   <span>Last: {ks.lastToggled}</span>
                   <span>By: {ks.toggledBy}</span>
                 </div>
@@ -272,7 +272,7 @@ export default function KillSwitchesPage() {
                   className={`relative w-14 h-7 rounded-full transition-colors duration-300 ${
                     ks.enabled
                       ? "bg-red-500"
-                      : "bg-surface-400 hover:bg-surface-300"
+                      : "bg-ink-200 hover:bg-ink-100"
                   }`}
                 >
                   <span
@@ -289,25 +289,25 @@ export default function KillSwitchesPage() {
 
       {/* Per-Team Switches */}
       <div className="space-y-3">
-        <h2 className="text-sm font-semibold text-gray-300 flex items-center gap-2">
-          <Users className="w-4 h-4 text-gray-500" />
+        <h2 className="text-sm font-semibold text-ink-600 flex items-center gap-2">
+          <Users className="w-4 h-4 text-ink-300" />
           Per-Team Controls
         </h2>
         <Card padding="none">
-          <div className="divide-y divide-gray-800/40">
-            <div className="grid grid-cols-3 gap-4 px-5 py-3 bg-surface-200/30">
-              <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Team</span>
-              <span className="text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Agents Paused</span>
-              <span className="text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Capture Paused</span>
+          <div className="divide-y divide-ink-100">
+            <div className="grid grid-cols-3 gap-4 px-5 py-3 bg-ink-50/30">
+              <span className="text-xs font-medium text-ink-300 uppercase tracking-wider">Team</span>
+              <span className="text-xs font-medium text-ink-300 uppercase tracking-wider text-center">Agents Paused</span>
+              <span className="text-xs font-medium text-ink-300 uppercase tracking-wider text-center">Capture Paused</span>
             </div>
             {teamSwitches.map((ts) => (
-              <div key={ts.id} className="grid grid-cols-3 gap-4 px-5 py-3 items-center hover:bg-surface-200/20 transition-colors">
-                <span className="text-sm text-gray-300 font-medium">{ts.team}</span>
+              <div key={ts.id} className="grid grid-cols-3 gap-4 px-5 py-3 items-center hover:bg-ink-50/20 transition-colors">
+                <span className="text-sm text-ink-600 font-medium">{ts.team}</span>
                 <div className="flex justify-center">
                   <button
                     onClick={() => toggleTeamSwitch(ts.id, "agentsPaused")}
                     className={`relative w-10 h-5 rounded-full transition-colors duration-200 ${
-                      ts.agentsPaused ? "bg-red-500" : "bg-surface-400"
+                      ts.agentsPaused ? "bg-red-500" : "bg-ink-200"
                     }`}
                   >
                     <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200 ${
@@ -319,7 +319,7 @@ export default function KillSwitchesPage() {
                   <button
                     onClick={() => toggleTeamSwitch(ts.id, "capturePaused")}
                     className={`relative w-10 h-5 rounded-full transition-colors duration-200 ${
-                      ts.capturePaused ? "bg-red-500" : "bg-surface-400"
+                      ts.capturePaused ? "bg-red-500" : "bg-ink-200"
                     }`}
                   >
                     <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200 ${
@@ -335,8 +335,8 @@ export default function KillSwitchesPage() {
 
       {/* Per-Agent Switches */}
       <div className="space-y-3">
-        <h2 className="text-sm font-semibold text-gray-300 flex items-center gap-2">
-          <Bot className="w-4 h-4 text-gray-500" />
+        <h2 className="text-sm font-semibold text-ink-600 flex items-center gap-2">
+          <Bot className="w-4 h-4 text-ink-300" />
           Per-Agent Controls
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
@@ -346,22 +346,22 @@ export default function KillSwitchesPage() {
               className={`flex items-center justify-between p-4 rounded-xl border transition-colors ${
                 as.paused
                   ? "border-red-500/30 bg-red-500/5"
-                  : "border-gray-800/60 bg-surface-100"
+                  : "border-ink-100 bg-white"
               }`}
             >
               <div className="flex items-center gap-3">
-                <Bot className={`w-4 h-4 ${as.paused ? "text-red-400" : "text-lurk-400"}`} />
+                <Bot className={`w-4 h-4 ${as.paused ? "text-accent-red" : "text-clay-400"}`} />
                 <div>
-                  <span className="text-sm font-medium text-gray-200">{as.agent}</span>
+                  <span className="text-sm font-medium text-ink-700">{as.agent}</span>
                   {as.paused && (
-                    <div className="text-2xs text-red-400 mt-0.5">Paused</div>
+                    <div className="text-2xs text-accent-red mt-0.5">Paused</div>
                   )}
                 </div>
               </div>
               <button
                 onClick={() => toggleAgentSwitch(as.id)}
                 className={`relative w-10 h-5 rounded-full transition-colors duration-200 ${
-                  as.paused ? "bg-red-500" : "bg-surface-400"
+                  as.paused ? "bg-red-500" : "bg-ink-200"
                 }`}
               >
                 <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200 ${
@@ -375,26 +375,26 @@ export default function KillSwitchesPage() {
 
       {/* Recent Activity */}
       <div className="space-y-3">
-        <h2 className="text-sm font-semibold text-gray-300 flex items-center gap-2">
-          <History className="w-4 h-4 text-gray-500" />
+        <h2 className="text-sm font-semibold text-ink-600 flex items-center gap-2">
+          <History className="w-4 h-4 text-ink-300" />
           Recent Kill Switch Activity
         </h2>
         <Card padding="none">
-          <div className="divide-y divide-gray-800/40">
+          <div className="divide-y divide-ink-100">
             {recentActivity.map((entry, idx) => (
-              <div key={idx} className="flex items-center gap-4 px-5 py-3 hover:bg-surface-200/20 transition-colors">
+              <div key={idx} className="flex items-center gap-4 px-5 py-3 hover:bg-ink-50/20 transition-colors">
                 <div className="shrink-0">
                   {entry.type === "activate" ? (
-                    <XCircle className="w-4 h-4 text-red-400" />
+                    <XCircle className="w-4 h-4 text-accent-red" />
                   ) : (
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    <CheckCircle2 className="w-4 h-4 text-olive-600" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <span className="text-sm text-gray-300">{entry.action}</span>
+                  <span className="text-sm text-ink-600">{entry.action}</span>
                 </div>
-                <span className="text-xs text-gray-500">{entry.by}</span>
-                <span className="text-2xs text-gray-600 font-mono">{entry.time}</span>
+                <span className="text-xs text-ink-300">{entry.by}</span>
+                <span className="text-2xs text-ink-300 font-mono">{entry.time}</span>
               </div>
             ))}
           </div>
@@ -430,26 +430,26 @@ export default function KillSwitchesPage() {
             {confirmModal.enabling ? (
               <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20">
                 <div className="flex items-start gap-3">
-                  <AlertTriangle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+                  <AlertTriangle className="w-5 h-5 text-accent-red shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-sm font-medium text-red-300">
+                    <p className="text-sm font-medium text-red-700">
                       This will immediately halt affected systems
                     </p>
-                    <p className="text-xs text-red-400/70 mt-1">
+                    <p className="text-xs text-red-600/70 mt-1">
                       All in-progress operations will be interrupted. This action is logged in the audit trail.
                     </p>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+              <div className="p-4 rounded-xl bg-olive-50 border border-olive-200">
                 <div className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-5 h-5 text-olive-600 shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-sm font-medium text-emerald-300">
+                    <p className="text-sm font-medium text-olive-700">
                       This will resume affected systems
                     </p>
-                    <p className="text-xs text-emerald-400/70 mt-1">
+                    <p className="text-xs text-olive-600/70 mt-1">
                       Operations will resume normally. Previously interrupted jobs may need to be restarted.
                     </p>
                   </div>
@@ -458,7 +458,7 @@ export default function KillSwitchesPage() {
             )}
 
             <div>
-              <label className="text-xs font-medium text-gray-400 mb-1.5 block">
+              <label className="text-xs font-medium text-ink-400 mb-1.5 block">
                 Type &quot;CONFIRM&quot; to proceed
               </label>
               <input

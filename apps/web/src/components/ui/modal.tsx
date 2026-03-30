@@ -61,26 +61,26 @@ export function Modal({
       {/* Dialog */}
       <div
         className={clsx(
-          "relative w-full bg-surface-100 border border-gray-800/60 rounded-xl shadow-2xl animate-slide-in",
+          "relative w-full bg-white border border-ink-100 rounded-xl shadow-warm-lg animate-slide-in",
           sizeStyles[size]
         )}
       >
         {/* Header */}
         {(title || description) && (
-          <div className="flex items-start justify-between p-5 border-b border-gray-800/60">
+          <div className="flex items-start justify-between p-5 border-b border-ink-100">
             <div>
               {title && (
-                <h2 className="text-base font-semibold text-gray-100">
+                <h2 className="text-base font-semibold text-ink-800">
                   {title}
                 </h2>
               )}
               {description && (
-                <p className="text-sm text-gray-500 mt-1">{description}</p>
+                <p className="text-sm text-ink-300 mt-1">{description}</p>
               )}
             </div>
             <button
               onClick={onClose}
-              className="p-1 rounded-lg hover:bg-surface-300 text-gray-500 hover:text-gray-300 transition-colors"
+              className="p-1 rounded-lg hover:bg-ink-100 text-ink-300 hover:text-ink-600 transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -92,7 +92,7 @@ export function Modal({
 
         {/* Footer */}
         {footer && (
-          <div className="flex items-center justify-end gap-3 p-5 border-t border-gray-800/60">
+          <div className="flex items-center justify-end gap-3 p-5 border-t border-ink-100">
             {footer}
           </div>
         )}

@@ -12,23 +12,23 @@ interface BadgeProps {
 }
 
 const variantStyles = {
-  default: "bg-gray-700/60 text-gray-300 border-gray-600/40",
-  success: "bg-emerald-500/15 text-emerald-400 border-emerald-500/20",
-  warning: "bg-yellow-500/15 text-yellow-400 border-yellow-500/20",
-  danger: "bg-red-500/15 text-red-400 border-red-500/20",
-  info: "bg-blue-500/15 text-blue-400 border-blue-500/20",
-  purple: "bg-purple-500/15 text-purple-400 border-purple-500/20",
-  outline: "bg-transparent text-gray-400 border-gray-600",
+  default: "bg-ink-100 text-ink-600 border-ink-200",
+  success: "bg-olive-50 text-olive-700 border-olive-200",
+  warning: "bg-yellow-50 text-yellow-700 border-yellow-200",
+  danger: "bg-clay-50 text-clay-700 border-clay-200",
+  info: "bg-blue-50 text-blue-700 border-blue-200",
+  purple: "bg-heather-50 text-heather-700 border-heather-200",
+  outline: "bg-transparent text-ink-500 border-ink-200",
 };
 
 const dotStyles = {
-  default: "bg-gray-400",
-  success: "bg-emerald-400",
-  warning: "bg-yellow-400",
-  danger: "bg-red-400",
-  info: "bg-blue-400",
-  purple: "bg-purple-400",
-  outline: "bg-gray-400",
+  default: "bg-ink-400",
+  success: "bg-olive-500",
+  warning: "bg-yellow-500",
+  danger: "bg-clay-500",
+  info: "bg-blue-500",
+  purple: "bg-heather-500",
+  outline: "bg-ink-400",
 };
 
 const sizeStyles = {

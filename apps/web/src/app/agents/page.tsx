@@ -204,11 +204,11 @@ export default function AgentsPage() {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-gray-100 tracking-tight flex items-center gap-2">
-            <Bot className="w-5 h-5 text-lurk-400" />
+          <h1 className="text-xl font-bold text-ink-800 tracking-tight flex items-center gap-2">
+            <Bot className="w-5 h-5 text-clay-500" />
             Agent Management
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-ink-300 mt-1">
             Deploy, configure, and monitor knowledge agents
           </p>
         </div>
@@ -232,7 +232,7 @@ export default function AgentsPage() {
         {/* Filters */}
         <div className="flex items-center gap-3 mt-6 mb-4">
           <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-300" />
             <input
               type="text"
               placeholder="Search agents..."
@@ -267,11 +267,11 @@ export default function AgentsPage() {
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-lurk-600/15 flex items-center justify-center">
-                    <Bot className="w-5 h-5 text-lurk-400" />
+                  <div className="w-10 h-10 rounded-lg bg-clay-100 flex items-center justify-center">
+                    <Bot className="w-5 h-5 text-clay-500" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-semibold text-gray-200">
+                    <h3 className="text-sm font-semibold text-ink-700">
                       {agent.displayName}
                     </h3>
                     <div className="flex items-center gap-2 mt-0.5">
@@ -292,39 +292,39 @@ export default function AgentsPage() {
                   </div>
                 </div>
                 {agent.yoloEnabled && (
-                  <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-yellow-500/15 border border-yellow-500/20">
-                    <Zap className="w-3 h-3 text-yellow-400" />
-                    <span className="text-2xs font-medium text-yellow-400">YOLO</span>
+                  <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-yellow-50 border border-yellow-200">
+                    <Zap className="w-3 h-3 text-accent-yellow" />
+                    <span className="text-2xs font-medium text-accent-yellow">YOLO</span>
                   </div>
                 )}
               </div>
 
-              <p className="text-xs text-gray-500 mb-4 line-clamp-2">
+              <p className="text-xs text-ink-300 mb-4 line-clamp-2">
                 {agent.description}
               </p>
 
-              <div className="grid grid-cols-3 gap-3 pt-3 border-t border-gray-800/60">
+              <div className="grid grid-cols-3 gap-3 pt-3 border-t border-ink-100">
                 <div>
-                  <div className="text-lg font-bold text-gray-100">
+                  <div className="text-lg font-bold text-ink-800">
                     {agent.acceptRate}%
                   </div>
-                  <div className="text-2xs text-gray-500">Accept Rate</div>
+                  <div className="text-2xs text-ink-300">Accept Rate</div>
                 </div>
                 <div>
-                  <div className="text-lg font-bold text-gray-100">
+                  <div className="text-lg font-bold text-ink-800">
                     {agent.prsOpened}
                   </div>
-                  <div className="text-2xs text-gray-500">Total PRs</div>
+                  <div className="text-2xs text-ink-300">Total PRs</div>
                 </div>
                 <div>
-                  <div className="text-lg font-bold text-gray-100">
+                  <div className="text-lg font-bold text-ink-800">
                     {agent.prsThisWeek}
                   </div>
-                  <div className="text-2xs text-gray-500">This Week</div>
+                  <div className="text-2xs text-ink-300">This Week</div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-1.5 mt-3 text-xs text-gray-500">
+              <div className="flex items-center gap-1.5 mt-3 text-xs text-ink-300">
                 <Clock className="w-3 h-3" />
                 Last active {agent.lastActive}
               </div>
@@ -338,22 +338,22 @@ export default function AgentsPage() {
           {activityLog.map((entry, idx) => (
             <div
               key={idx}
-              className="flex items-center gap-4 p-3 rounded-lg hover:bg-surface-100 transition-colors"
+              className="flex items-center gap-4 p-3 rounded-lg hover:bg-ink-50 transition-colors"
             >
-              <div className="w-8 h-8 rounded-lg bg-surface-200 flex items-center justify-center shrink-0">
-                {entry.type === "pr_opened" && <GitPullRequest className="w-4 h-4 text-blue-400" />}
-                {entry.type === "pr_merged" && <GitPullRequest className="w-4 h-4 text-emerald-400" />}
-                {entry.type === "alert" && <Activity className="w-4 h-4 text-yellow-400" />}
-                {entry.type === "block" && <XCircle className="w-4 h-4 text-red-400" />}
-                {entry.type === "report" && <Activity className="w-4 h-4 text-lurk-400" />}
+              <div className="w-8 h-8 rounded-lg bg-ink-50 flex items-center justify-center shrink-0">
+                {entry.type === "pr_opened" && <GitPullRequest className="w-4 h-4 text-accent-blue" />}
+                {entry.type === "pr_merged" && <GitPullRequest className="w-4 h-4 text-olive-600" />}
+                {entry.type === "alert" && <Activity className="w-4 h-4 text-accent-yellow" />}
+                {entry.type === "block" && <XCircle className="w-4 h-4 text-accent-red" />}
+                {entry.type === "report" && <Activity className="w-4 h-4 text-clay-500" />}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <Badge variant="purple" size="sm">{entry.agent}</Badge>
-                  <span className="text-sm text-gray-300">{entry.action}</span>
+                  <span className="text-sm text-ink-600">{entry.action}</span>
                 </div>
               </div>
-              <span className="text-xs text-gray-500 shrink-0">{entry.time}</span>
+              <span className="text-xs text-ink-300 shrink-0">{entry.time}</span>
             </div>
           ))}
         </div>
@@ -392,7 +392,7 @@ export default function AgentsPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-3">
                 <div>
-                  <label className="text-xs text-gray-500">Status</label>
+                  <label className="text-xs text-ink-300">Status</label>
                   <div className="mt-1">
                     <Badge variant={statusColors[selectedAgent.status]} dot>
                       {selectedAgent.status}
@@ -400,21 +400,21 @@ export default function AgentsPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs text-gray-500">Model</label>
-                  <p className="text-sm text-gray-200 font-mono mt-1">
+                  <label className="text-xs text-ink-300">Model</label>
+                  <p className="text-sm text-ink-700 font-mono mt-1">
                     {selectedAgent.model}
                   </p>
                 </div>
                 <div>
-                  <label className="text-xs text-gray-500">Type</label>
-                  <p className="text-sm text-gray-200 mt-1 capitalize">
+                  <label className="text-xs text-ink-300">Type</label>
+                  <p className="text-sm text-ink-700 mt-1 capitalize">
                     {selectedAgent.type}
                   </p>
                 </div>
               </div>
               <div className="space-y-3">
                 <div>
-                  <label className="text-xs text-gray-500">Scopes</label>
+                  <label className="text-xs text-ink-300">Scopes</label>
                   <div className="flex flex-wrap gap-1.5 mt-1">
                     {selectedAgent.scopes.map((s) => (
                       <Badge key={s} variant="outline" size="sm">{s}</Badge>
@@ -422,12 +422,12 @@ export default function AgentsPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs text-gray-500">YOLO Mode</label>
+                  <label className="text-xs text-ink-300">YOLO Mode</label>
                   <div className="mt-1">
                     {selectedAgent.yoloEnabled ? (
                       <div className="flex items-center gap-2">
                         <Badge variant="warning" dot size="sm">Enabled</Badge>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-ink-300">
                           Threshold: {selectedAgent.yoloThreshold}
                         </span>
                       </div>
@@ -440,32 +440,32 @@ export default function AgentsPage() {
             </div>
 
             {/* Performance */}
-            <div className="border-t border-gray-800/60 pt-4">
-              <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+            <div className="border-t border-ink-100 pt-4">
+              <h4 className="text-xs font-semibold text-ink-300 uppercase tracking-wider mb-3">
                 Performance Metrics
               </h4>
               <div className="grid grid-cols-4 gap-4">
-                <div className="text-center p-3 rounded-lg bg-surface-200/50">
-                  <div className="text-xl font-bold text-gray-100">
+                <div className="text-center p-3 rounded-lg bg-ink-50/50">
+                  <div className="text-xl font-bold text-ink-800">
                     {selectedAgent.prsOpened}
                   </div>
-                  <div className="text-2xs text-gray-500">Total PRs</div>
+                  <div className="text-2xs text-ink-300">Total PRs</div>
                 </div>
-                <div className="text-center p-3 rounded-lg bg-surface-200/50">
-                  <div className="text-xl font-bold text-emerald-400">
+                <div className="text-center p-3 rounded-lg bg-ink-50/50">
+                  <div className="text-xl font-bold text-olive-600">
                     {selectedAgent.acceptRate}%
                   </div>
-                  <div className="text-2xs text-gray-500">Accept Rate</div>
+                  <div className="text-2xs text-ink-300">Accept Rate</div>
                 </div>
-                <div className="text-center p-3 rounded-lg bg-surface-200/50">
-                  <div className="text-xl font-bold text-gray-100">
+                <div className="text-center p-3 rounded-lg bg-ink-50/50">
+                  <div className="text-xl font-bold text-ink-800">
                     {selectedAgent.prsThisWeek}
                   </div>
-                  <div className="text-2xs text-gray-500">This Week</div>
+                  <div className="text-2xs text-ink-300">This Week</div>
                 </div>
-                <div className="text-center p-3 rounded-lg bg-surface-200/50">
-                  <div className="text-xl font-bold text-gray-100">2.1h</div>
-                  <div className="text-2xs text-gray-500">Avg Review</div>
+                <div className="text-center p-3 rounded-lg bg-ink-50/50">
+                  <div className="text-xl font-bold text-ink-800">2.1h</div>
+                  <div className="text-2xs text-ink-300">Avg Review</div>
                 </div>
               </div>
             </div>

@@ -52,10 +52,21 @@ const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({
   prompt: "select_account",
 });
+// Request read access to Google Docs and Gmail so every doc change
+// can be captured as an artifact "revision" in Lurk's git structure.
+googleProvider.addScope("https://www.googleapis.com/auth/documents.readonly");
+googleProvider.addScope("https://www.googleapis.com/auth/drive.readonly");
+googleProvider.addScope("https://www.googleapis.com/auth/gmail.readonly");
 
 export async function signInWithGoogle() {
   const auth = getFirebaseAuth();
   const result = await signInWithPopup(auth, googleProvider);
+  // Store the Google OAuth credential so the backend can access
+  // Google Docs and Gmail on behalf of the user.
+  const credential = GoogleAuthProvider.credentialFromResult(result);
+  if (credential?.accessToken) {
+    sessionStorage.setItem("google_access_token", credential.accessToken);
+  }
   return result.user;
 }
 

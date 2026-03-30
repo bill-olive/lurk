@@ -189,11 +189,11 @@ export default function MigrationPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-gray-100 tracking-tight flex items-center gap-2">
-            <ArrowLeftRight className="w-5 h-5 text-lurk-400" />
+          <h1 className="text-xl font-bold text-ink-800 tracking-tight flex items-center gap-2">
+            <ArrowLeftRight className="w-5 h-5 text-clay-400" />
             Migration
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-ink-300 mt-1">
             Import data from external platforms into Lurk
           </p>
         </div>
@@ -208,21 +208,21 @@ export default function MigrationPage() {
 
       {/* Summary Stats */}
       <div className="grid grid-cols-4 gap-4">
-        <div className="bg-surface-100 border border-gray-800/60 rounded-xl p-4">
-          <div className="text-2xs text-gray-500 uppercase tracking-wider mb-1">Running</div>
-          <div className="text-xl font-bold text-blue-400">{runningJobs}</div>
+        <div className="bg-white border border-ink-100 rounded-xl p-4">
+          <div className="text-2xs text-ink-300 uppercase tracking-wider mb-1">Running</div>
+          <div className="text-xl font-bold text-accent-blue">{runningJobs}</div>
         </div>
-        <div className="bg-surface-100 border border-gray-800/60 rounded-xl p-4">
-          <div className="text-2xs text-gray-500 uppercase tracking-wider mb-1">Completed</div>
-          <div className="text-xl font-bold text-emerald-400">{completedJobs}</div>
+        <div className="bg-white border border-ink-100 rounded-xl p-4">
+          <div className="text-2xs text-ink-300 uppercase tracking-wider mb-1">Completed</div>
+          <div className="text-xl font-bold text-olive-600">{completedJobs}</div>
         </div>
-        <div className="bg-surface-100 border border-gray-800/60 rounded-xl p-4">
-          <div className="text-2xs text-gray-500 uppercase tracking-wider mb-1">Total Imported</div>
-          <div className="text-xl font-bold text-gray-100">{totalImported.toLocaleString()}</div>
+        <div className="bg-white border border-ink-100 rounded-xl p-4">
+          <div className="text-2xs text-ink-300 uppercase tracking-wider mb-1">Total Imported</div>
+          <div className="text-xl font-bold text-ink-800">{totalImported.toLocaleString()}</div>
         </div>
-        <div className="bg-surface-100 border border-gray-800/60 rounded-xl p-4">
-          <div className="text-2xs text-gray-500 uppercase tracking-wider mb-1">Platforms</div>
-          <div className="text-xl font-bold text-gray-100">
+        <div className="bg-white border border-ink-100 rounded-xl p-4">
+          <div className="text-2xs text-ink-300 uppercase tracking-wider mb-1">Platforms</div>
+          <div className="text-xl font-bold text-ink-800">
             {platforms.filter((p) => p.connected).length}/{platforms.length}
           </div>
         </div>
@@ -237,12 +237,12 @@ export default function MigrationPage() {
             <Card key={job.id}>
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-surface-200 flex items-center justify-center text-sm font-bold text-gray-400">
+                  <div className="w-10 h-10 rounded-lg bg-ink-50 flex items-center justify-center text-sm font-bold text-ink-400">
                     {platforms.find((p) => p.name === job.platform)?.icon || "?"}
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="text-sm font-semibold text-gray-200">
+                      <h3 className="text-sm font-semibold text-ink-700">
                         {job.platform}
                       </h3>
                       <Badge variant={statusConfig[job.status].color} dot size="sm">
@@ -251,7 +251,7 @@ export default function MigrationPage() {
                     </div>
                     <div className="flex items-center gap-2 mt-0.5">
                       <Badge variant="outline" size="sm">{modeLabels[job.mode]}</Badge>
-                      <span className="text-xs text-gray-500">{job.scope}</span>
+                      <span className="text-xs text-ink-300">{job.scope}</span>
                     </div>
                   </div>
                 </div>
@@ -277,30 +277,30 @@ export default function MigrationPage() {
               {/* Progress */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-gray-500">
+                  <span className="text-ink-300">
                     {job.artifactsImported.toLocaleString()} / {job.artifactsTotal > 0 ? job.artifactsTotal.toLocaleString() : "..."} artifacts
                   </span>
-                  <span className="text-gray-400 font-medium">{job.progress}%</span>
+                  <span className="text-ink-400 font-medium">{job.progress}%</span>
                 </div>
-                <div className="w-full h-1.5 rounded-full bg-surface-300 overflow-hidden">
+                <div className="w-full h-1.5 rounded-full bg-ink-100 overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all duration-500 ${
                       job.status === "failed"
-                        ? "bg-red-400"
+                        ? "bg-accent-red"
                         : job.status === "completed"
-                        ? "bg-emerald-400"
+                        ? "bg-olive-500"
                         : job.status === "paused"
-                        ? "bg-yellow-400"
-                        : "bg-lurk-500"
+                        ? "bg-accent-yellow"
+                        : "bg-clay-500"
                     }`}
                     style={{ width: `${job.progress}%` }}
                   />
                 </div>
-                <div className="flex items-center justify-between text-2xs text-gray-600">
+                <div className="flex items-center justify-between text-2xs text-ink-300">
                   <span>Started {job.startedAt}</span>
                   <div className="flex items-center gap-3">
                     {job.errors > 0 && (
-                      <span className="flex items-center gap-1 text-red-400">
+                      <span className="flex items-center gap-1 text-accent-red">
                         <AlertTriangle className="w-3 h-3" />
                         {job.errors} errors
                       </span>
@@ -322,17 +322,17 @@ export default function MigrationPage() {
           {platforms.map((platform) => (
             <Card key={platform.id} hover>
               <div className="flex items-start gap-3 mb-3">
-                <div className="w-10 h-10 rounded-lg bg-surface-200 flex items-center justify-center text-sm font-bold text-gray-400">
+                <div className="w-10 h-10 rounded-lg bg-ink-50 flex items-center justify-center text-sm font-bold text-ink-400">
                   {platform.icon}
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-semibold text-gray-200">{platform.name}</h3>
+                    <h3 className="text-sm font-semibold text-ink-700">{platform.name}</h3>
                     {platform.connected && (
                       <Badge variant="success" size="sm" dot>Connected</Badge>
                     )}
                   </div>
-                  <p className="text-xs text-gray-500 mt-0.5">{platform.description}</p>
+                  <p className="text-xs text-ink-300 mt-0.5">{platform.description}</p>
                 </div>
               </div>
               {platform.connected ? (
@@ -358,49 +358,49 @@ export default function MigrationPage() {
             </CardHeader>
             <div className="grid grid-cols-3 gap-6">
               <div>
-                <div className="text-2xs text-gray-500 uppercase tracking-wider mb-2">By Platform</div>
+                <div className="text-2xs text-ink-300 uppercase tracking-wider mb-2">By Platform</div>
                 <div className="space-y-2">
                   {["Slack", "Google Drive", "GitHub", "Gmail"].map((p) => {
                     const count = migrationJobs.filter((j) => j.platform === p).reduce((s, j) => s + j.artifactsImported, 0);
                     const total = totalImported || 1;
                     return (
                       <div key={p} className="flex items-center gap-3">
-                        <span className="text-xs text-gray-400 w-24">{p}</span>
-                        <div className="flex-1 h-2 rounded-full bg-surface-300 overflow-hidden">
+                        <span className="text-xs text-ink-400 w-24">{p}</span>
+                        <div className="flex-1 h-2 rounded-full bg-ink-100 overflow-hidden">
                           <div
-                            className="h-full bg-lurk-500 rounded-full"
+                            className="h-full bg-clay-500 rounded-full"
                             style={{ width: `${(count / total) * 100}%` }}
                           />
                         </div>
-                        <span className="text-xs text-gray-500 w-12 text-right">{count.toLocaleString()}</span>
+                        <span className="text-xs text-ink-300 w-12 text-right">{count.toLocaleString()}</span>
                       </div>
                     );
                   })}
                 </div>
               </div>
               <div>
-                <div className="text-2xs text-gray-500 uppercase tracking-wider mb-2">By Status</div>
+                <div className="text-2xs text-ink-300 uppercase tracking-wider mb-2">By Status</div>
                 <div className="space-y-2">
                   {(["completed", "running", "paused", "failed", "queued"] as const).map((status) => {
                     const count = migrationJobs.filter((j) => j.status === status).length;
                     return (
                       <div key={status} className="flex items-center justify-between">
                         <Badge variant={statusConfig[status].color} dot size="sm">{status}</Badge>
-                        <span className="text-sm font-medium text-gray-300">{count}</span>
+                        <span className="text-sm font-medium text-ink-600">{count}</span>
                       </div>
                     );
                   })}
                 </div>
               </div>
               <div>
-                <div className="text-2xs text-gray-500 uppercase tracking-wider mb-2">By Mode</div>
+                <div className="text-2xs text-ink-300 uppercase tracking-wider mb-2">By Mode</div>
                 <div className="space-y-2">
                   {(["api_import", "agentic_crawl", "file_upload"] as const).map((mode) => {
                     const count = migrationJobs.filter((j) => j.mode === mode).length;
                     return (
                       <div key={mode} className="flex items-center justify-between">
-                        <span className="text-xs text-gray-400">{modeLabels[mode]}</span>
-                        <span className="text-sm font-medium text-gray-300">{count}</span>
+                        <span className="text-xs text-ink-400">{modeLabels[mode]}</span>
+                        <span className="text-sm font-medium text-ink-600">{count}</span>
                       </div>
                     );
                   })}
@@ -433,7 +433,7 @@ export default function MigrationPage() {
         <div className="space-y-6">
           {/* Platform Selection */}
           <div>
-            <label className="text-xs font-medium text-gray-400 mb-3 block">Select Platform</label>
+            <label className="text-xs font-medium text-ink-400 mb-3 block">Select Platform</label>
             <div className="grid grid-cols-4 gap-2">
               {platforms.map((p) => (
                 <button
@@ -441,12 +441,12 @@ export default function MigrationPage() {
                   onClick={() => setSelectedPlatform(p.id)}
                   className={`p-3 rounded-xl border text-center transition-all ${
                     selectedPlatform === p.id
-                      ? "border-lurk-500/40 bg-lurk-950/30"
-                      : "border-gray-800/60 hover:border-gray-700"
+                      ? "border-clay-500/40 bg-clay-50"
+                      : "border-ink-100 hover:border-ink-200"
                   }`}
                 >
-                  <div className="text-lg font-bold text-gray-400 mb-1">{p.icon}</div>
-                  <div className="text-xs text-gray-300">{p.name}</div>
+                  <div className="text-lg font-bold text-ink-400 mb-1">{p.icon}</div>
+                  <div className="text-xs text-ink-600">{p.name}</div>
                 </button>
               ))}
             </div>
@@ -456,7 +456,7 @@ export default function MigrationPage() {
           {selectedPlatform && (
             <>
               <div>
-                <label className="text-xs font-medium text-gray-400 mb-3 block">Migration Mode</label>
+                <label className="text-xs font-medium text-ink-400 mb-3 block">Migration Mode</label>
                 <div className="grid grid-cols-3 gap-3">
                   {[
                     { id: "api_import", label: "API Import", icon: <Globe className="w-5 h-5" />, desc: "Direct API connection" },
@@ -468,13 +468,13 @@ export default function MigrationPage() {
                       onClick={() => setSelectedMode(mode.id)}
                       className={`p-4 rounded-xl border text-left transition-all ${
                         selectedMode === mode.id
-                          ? "border-lurk-500/40 bg-lurk-950/30"
-                          : "border-gray-800/60 hover:border-gray-700"
+                          ? "border-clay-500/40 bg-clay-50"
+                          : "border-ink-100 hover:border-ink-200"
                       }`}
                     >
-                      <div className="text-lurk-400 mb-2">{mode.icon}</div>
-                      <div className="text-sm font-medium text-gray-200">{mode.label}</div>
-                      <div className="text-xs text-gray-500 mt-0.5">{mode.desc}</div>
+                      <div className="text-clay-400 mb-2">{mode.icon}</div>
+                      <div className="text-sm font-medium text-ink-700">{mode.label}</div>
+                      <div className="text-xs text-ink-300 mt-0.5">{mode.desc}</div>
                     </button>
                   ))}
                 </div>
@@ -482,7 +482,7 @@ export default function MigrationPage() {
 
               {/* Scope */}
               <div>
-                <label className="text-xs font-medium text-gray-400 mb-1.5 block">Scope</label>
+                <label className="text-xs font-medium text-ink-400 mb-1.5 block">Scope</label>
                 <textarea
                   value={scopeInput}
                   onChange={(e) => setScopeInput(e.target.value)}

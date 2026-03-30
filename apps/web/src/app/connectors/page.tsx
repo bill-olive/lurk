@@ -100,23 +100,23 @@ const connectors: Connector[] = [
 
 const connectorTypeConfig = {
   email: {
-    icon: <Mail className="w-5 h-5 text-blue-400" />,
-    bg: "bg-blue-500/15",
+    icon: <Mail className="w-5 h-5 text-accent-blue" />,
+    bg: "bg-blue-50",
     label: "Email",
   },
   slack: {
-    icon: <MessageSquare className="w-5 h-5 text-purple-400" />,
-    bg: "bg-purple-500/15",
+    icon: <MessageSquare className="w-5 h-5 text-heather-600" />,
+    bg: "bg-heather-50",
     label: "Slack Webhook",
   },
   webhook: {
-    icon: <Webhook className="w-5 h-5 text-orange-400" />,
-    bg: "bg-orange-500/15",
+    icon: <Webhook className="w-5 h-5 text-orange-600" />,
+    bg: "bg-orange-50",
     label: "Custom Webhook",
   },
   apns: {
-    icon: <Smartphone className="w-5 h-5 text-green-400" />,
-    bg: "bg-green-500/15",
+    icon: <Smartphone className="w-5 h-5 text-olive-600" />,
+    bg: "bg-olive-50",
     label: "APNs (Push)",
   },
 };
@@ -172,11 +172,11 @@ export default function ConnectorsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-gray-100 tracking-tight flex items-center gap-2">
-            <Plug className="w-5 h-5 text-lurk-400" />
+          <h1 className="text-xl font-bold text-ink-800 tracking-tight flex items-center gap-2">
+            <Plug className="w-5 h-5 text-clay-400" />
             Notification Connectors
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-ink-300 mt-1">
             Configure how Lurk sends notifications and alerts
           </p>
         </div>
@@ -198,14 +198,14 @@ export default function ConnectorsPage() {
           return (
             <div
               key={type}
-              className="bg-surface-100 border border-gray-800/60 rounded-xl p-4 flex items-center gap-3"
+              className="bg-white border border-ink-100 rounded-xl p-4 flex items-center gap-3"
             >
               <div className={`w-10 h-10 rounded-lg ${config.bg} flex items-center justify-center`}>
                 {config.icon}
               </div>
               <div>
-                <div className="text-sm font-medium text-gray-200">{config.label}</div>
-                <div className="text-xs text-gray-500">
+                <div className="text-sm font-medium text-ink-700">{config.label}</div>
+                <div className="text-xs text-ink-300">
                   {count} configured, {active} active
                 </div>
               </div>
@@ -227,12 +227,12 @@ export default function ConnectorsPage() {
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="text-sm font-semibold text-gray-200">{connector.name}</h3>
+                      <h3 className="text-sm font-semibold text-ink-700">{connector.name}</h3>
                       <Badge variant={statusColors[connector.status]} dot size="sm">
                         {connector.status}
                       </Badge>
                     </div>
-                    <p className="text-xs text-gray-500 mt-0.5">{connector.description}</p>
+                    <p className="text-xs text-ink-300 mt-0.5">{connector.description}</p>
                     <div className="flex flex-wrap gap-1.5 mt-2">
                       {connector.events.map((event) => (
                         <Badge key={event} variant="outline" size="sm">
@@ -240,7 +240,7 @@ export default function ConnectorsPage() {
                         </Badge>
                       ))}
                     </div>
-                    <div className="text-2xs text-gray-600 mt-2">
+                    <div className="text-2xs text-ink-300 mt-2">
                       Last used: {connector.lastUsed}
                     </div>
                   </div>
@@ -268,8 +268,8 @@ export default function ConnectorsPage() {
               {/* Error state */}
               {connector.status === "error" && (
                 <div className="mt-3 p-2.5 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center gap-2">
-                  <AlertCircle className="w-3.5 h-3.5 text-red-400 shrink-0" />
-                  <span className="text-xs text-red-400">
+                  <AlertCircle className="w-3.5 h-3.5 text-accent-red shrink-0" />
+                  <span className="text-xs text-accent-red">
                     Connection failed. Check endpoint URL and credentials.
                   </span>
                 </div>
@@ -281,12 +281,12 @@ export default function ConnectorsPage() {
 
       {/* Test Result Toast */}
       {testResult && (
-        <div className="fixed bottom-6 right-6 bg-surface-100 border border-emerald-500/30 rounded-xl p-4 shadow-2xl flex items-center gap-3 animate-slide-in z-50">
-          <Check className="w-4 h-4 text-emerald-400" />
-          <span className="text-sm text-gray-200">{testResult}</span>
+        <div className="fixed bottom-6 right-6 bg-white border border-olive-200 rounded-xl p-4 shadow-warm-lg flex items-center gap-3 animate-slide-in z-50">
+          <Check className="w-4 h-4 text-olive-600" />
+          <span className="text-sm text-ink-700">{testResult}</span>
           <button
             onClick={() => setTestResult(null)}
-            className="text-gray-500 hover:text-gray-300 ml-2"
+            className="text-ink-300 hover:text-ink-600 ml-2"
           >
             &times;
           </button>
@@ -310,7 +310,7 @@ export default function ConnectorsPage() {
         <div className="space-y-6">
           {/* Type */}
           <div>
-            <label className="text-xs font-medium text-gray-400 mb-3 block">Connector Type</label>
+            <label className="text-xs font-medium text-ink-400 mb-3 block">Connector Type</label>
             <div className="grid grid-cols-4 gap-3">
               {(["email", "slack", "webhook", "apns"] as const).map((type) => {
                 const config = connectorTypeConfig[type];
@@ -320,12 +320,12 @@ export default function ConnectorsPage() {
                     onClick={() => setNewType(type)}
                     className={`p-4 rounded-xl border text-center transition-all ${
                       newType === type
-                        ? "border-lurk-500/40 bg-lurk-950/30"
-                        : "border-gray-800/60 hover:border-gray-700"
+                        ? "border-clay-500/40 bg-clay-50"
+                        : "border-ink-100 hover:border-ink-200"
                     }`}
                   >
                     <div className="flex justify-center mb-2">{config.icon}</div>
-                    <div className="text-xs font-medium text-gray-200">{config.label}</div>
+                    <div className="text-xs font-medium text-ink-700">{config.label}</div>
                   </button>
                 );
               })}
@@ -334,7 +334,7 @@ export default function ConnectorsPage() {
 
           {/* Name */}
           <div>
-            <label className="text-xs font-medium text-gray-400 mb-1.5 block">Name</label>
+            <label className="text-xs font-medium text-ink-400 mb-1.5 block">Name</label>
             <input
               type="text"
               value={newName}
@@ -347,7 +347,7 @@ export default function ConnectorsPage() {
           {/* URL */}
           {(newType === "slack" || newType === "webhook") && (
             <div>
-              <label className="text-xs font-medium text-gray-400 mb-1.5 block">
+              <label className="text-xs font-medium text-ink-400 mb-1.5 block">
                 {newType === "slack" ? "Webhook URL" : "Endpoint URL"}
               </label>
               <input
@@ -362,24 +362,24 @@ export default function ConnectorsPage() {
 
           {/* Events */}
           <div>
-            <label className="text-xs font-medium text-gray-400 mb-3 block">Subscribe to Events</label>
+            <label className="text-xs font-medium text-ink-400 mb-3 block">Subscribe to Events</label>
             <div className="grid grid-cols-2 gap-2">
               {availableEvents.map((event) => (
                 <label
                   key={event}
                   className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer transition-all ${
                     selectedEvents.includes(event)
-                      ? "border-lurk-500/40 bg-lurk-950/30"
-                      : "border-gray-800/60 hover:border-gray-700"
+                      ? "border-clay-500/40 bg-clay-50"
+                      : "border-ink-100 hover:border-ink-200"
                   }`}
                 >
                   <input
                     type="checkbox"
                     checked={selectedEvents.includes(event)}
                     onChange={() => toggleEvent(event)}
-                    className="accent-lurk-500"
+                    className="accent-clay-500"
                   />
-                  <code className="text-xs text-gray-400">{event}</code>
+                  <code className="text-xs text-ink-400">{event}</code>
                 </label>
               ))}
             </div>
@@ -407,13 +407,13 @@ export default function ConnectorsPage() {
         >
           <div className="space-y-4">
             <div>
-              <label className="text-xs font-medium text-gray-400 mb-1.5 block">Configuration</label>
-              <pre className="p-3 rounded-lg bg-surface-200/50 border border-gray-800/60 text-xs text-gray-400 font-mono">
+              <label className="text-xs font-medium text-ink-400 mb-1.5 block">Configuration</label>
+              <pre className="p-3 rounded-lg bg-ink-50/50 border border-ink-100 text-xs text-ink-400 font-mono">
                 {JSON.stringify(showConfig.config, null, 2)}
               </pre>
             </div>
             <div>
-              <label className="text-xs font-medium text-gray-400 mb-2 block">Subscribed Events</label>
+              <label className="text-xs font-medium text-ink-400 mb-2 block">Subscribed Events</label>
               <div className="flex flex-wrap gap-1.5">
                 {showConfig.events.map((e) => (
                   <Badge key={e} variant="outline" size="sm">{e}</Badge>

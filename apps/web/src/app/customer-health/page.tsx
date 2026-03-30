@@ -147,17 +147,17 @@ const alertLevelColors = {
 };
 
 const trendIcons = {
-  up: <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />,
-  down: <TrendingDown className="w-3.5 h-3.5 text-red-400" />,
-  flat: <Minus className="w-3.5 h-3.5 text-gray-400" />,
+  up: <TrendingUp className="w-3.5 h-3.5 text-olive-600" />,
+  down: <TrendingDown className="w-3.5 h-3.5 text-accent-red" />,
+  flat: <Minus className="w-3.5 h-3.5 text-ink-400" />,
 };
 
 const alertTypeIcons = {
-  churn_risk: <XCircle className="w-4 h-4 text-red-400" />,
-  engagement_drop: <TrendingDown className="w-4 h-4 text-yellow-400" />,
-  support_spike: <AlertTriangle className="w-4 h-4 text-orange-400" />,
-  expansion_signal: <ArrowUpRight className="w-4 h-4 text-emerald-400" />,
-  renewal_upcoming: <Calendar className="w-4 h-4 text-blue-400" />,
+  churn_risk: <XCircle className="w-4 h-4 text-accent-red" />,
+  engagement_drop: <TrendingDown className="w-4 h-4 text-accent-yellow" />,
+  support_spike: <AlertTriangle className="w-4 h-4 text-orange-600" />,
+  expansion_signal: <ArrowUpRight className="w-4 h-4 text-olive-600" />,
+  renewal_upcoming: <Calendar className="w-4 h-4 text-accent-blue" />,
 };
 
 const healthHistory = [
@@ -172,9 +172,9 @@ const healthHistory = [
 function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) {
   if (!active || !payload) return null;
   return (
-    <div className="bg-surface-100 border border-gray-700 rounded-lg px-3 py-2 shadow-xl text-xs">
-      <p className="text-gray-400">{label}</p>
-      <p className="text-gray-200 font-medium">Score: {payload[0].value}</p>
+    <div className="bg-white border border-ink-200 rounded-lg px-3 py-2 shadow-warm text-xs">
+      <p className="text-ink-400">{label}</p>
+      <p className="text-ink-700 font-medium">Score: {payload[0].value}</p>
     </div>
   );
 }
@@ -203,11 +203,11 @@ export default function CustomerHealthPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-gray-100 tracking-tight flex items-center gap-2">
-            <HeartPulse className="w-5 h-5 text-lurk-400" />
+          <h1 className="text-xl font-bold text-ink-800 tracking-tight flex items-center gap-2">
+            <HeartPulse className="w-5 h-5 text-clay-400" />
             Customer Health
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-ink-300 mt-1">
             Monitor customer health scores, trends, and risk signals
           </p>
         </div>
@@ -266,7 +266,7 @@ export default function CustomerHealthPage() {
       <Card>
         <CardHeader>
           <CardTitle>Portfolio Health Trend</CardTitle>
-          <span className="text-xs text-gray-500">Last 6 months</span>
+          <span className="text-xs text-ink-300">Last 6 months</span>
         </CardHeader>
         <div className="h-48">
           <ResponsiveContainer width="100%" height="100%">
@@ -285,7 +285,7 @@ export default function CustomerHealthPage() {
       <div>
         <div className="flex items-center gap-3 mb-4">
           <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-300" />
             <input
               type="text"
               placeholder="Search customers..."
@@ -313,32 +313,32 @@ export default function CustomerHealthPage() {
             >
               <div className="flex items-center gap-4 p-2">
                 {/* Health Score */}
-                <div className="w-14 h-14 rounded-xl bg-surface-200 flex flex-col items-center justify-center shrink-0">
+                <div className="w-14 h-14 rounded-xl bg-ink-50 flex flex-col items-center justify-center shrink-0">
                   <span
                     className={`text-lg font-bold ${
                       customer.healthScore >= 80
-                        ? "text-emerald-400"
+                        ? "text-olive-600"
                         : customer.healthScore >= 60
-                        ? "text-yellow-400"
+                        ? "text-accent-yellow"
                         : customer.healthScore >= 30
-                        ? "text-red-400"
-                        : "text-gray-500"
+                        ? "text-accent-red"
+                        : "text-ink-300"
                     }`}
                   >
                     {customer.healthScore}
                   </span>
-                  <span className="text-2xs text-gray-600">score</span>
+                  <span className="text-2xs text-ink-300">score</span>
                 </div>
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-semibold text-gray-200">{customer.name}</h3>
+                    <h3 className="text-sm font-semibold text-ink-700">{customer.name}</h3>
                     <Badge variant={alertLevelColors[customer.alertLevel]} dot size="sm">
                       {customer.alertLevel.replace("_", " ")}
                     </Badge>
                   </div>
-                  <div className="flex items-center gap-4 mt-1 text-xs text-gray-500">
+                  <div className="flex items-center gap-4 mt-1 text-xs text-ink-300">
                     <span>ARR: {customer.arr}</span>
                     <span>{customer.contacts} contacts</span>
                     <span>Last engaged: {customer.lastEngagement}</span>
@@ -352,15 +352,15 @@ export default function CustomerHealthPage() {
                   <span
                     className={`text-xs font-medium ${
                       customer.trendDelta > 0
-                        ? "text-emerald-400"
+                        ? "text-olive-600"
                         : customer.trendDelta < 0
-                        ? "text-red-400"
-                        : "text-gray-400"
+                        ? "text-accent-red"
+                        : "text-ink-400"
                     }`}
                   >
                     {customer.trendDelta > 0 ? "+" : ""}{customer.trendDelta}
                   </span>
-                  <ChevronRight className="w-4 h-4 text-gray-600" />
+                  <ChevronRight className="w-4 h-4 text-ink-300" />
                 </div>
               </div>
             </Card>
@@ -383,58 +383,58 @@ export default function CustomerHealthPage() {
           <div className="space-y-6">
             {/* Signal Breakdown */}
             <div>
-              <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+              <h4 className="text-xs font-semibold text-ink-300 uppercase tracking-wider mb-3">
                 Signal Breakdown
               </h4>
               <div className="space-y-3">
                 {Object.entries(selectedCustomer.signals).map(([key, value]) => (
                   <div key={key} className="flex items-center gap-3">
-                    <span className="text-xs text-gray-400 w-24 capitalize">{key}</span>
-                    <div className="flex-1 h-2 rounded-full bg-surface-300 overflow-hidden">
+                    <span className="text-xs text-ink-400 w-24 capitalize">{key}</span>
+                    <div className="flex-1 h-2 rounded-full bg-ink-100 overflow-hidden">
                       <div
                         className={`h-full rounded-full transition-all ${
-                          value >= 80 ? "bg-emerald-400" : value >= 60 ? "bg-yellow-400" : "bg-red-400"
+                          value >= 80 ? "bg-olive-500" : value >= 60 ? "bg-accent-yellow" : "bg-accent-red"
                         }`}
                         style={{ width: `${value}%` }}
                       />
                     </div>
-                    <span className="text-xs font-medium text-gray-300 w-8 text-right">{value}</span>
+                    <span className="text-xs font-medium text-ink-600 w-8 text-right">{value}</span>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Key Metrics */}
-            <div className="grid grid-cols-4 gap-4 pt-4 border-t border-gray-800/60">
-              <div className="text-center p-3 rounded-lg bg-surface-200/50">
-                <div className="text-lg font-bold text-gray-100">{selectedCustomer.arr}</div>
-                <div className="text-2xs text-gray-500">ARR</div>
+            <div className="grid grid-cols-4 gap-4 pt-4 border-t border-ink-100">
+              <div className="text-center p-3 rounded-lg bg-ink-50/50">
+                <div className="text-lg font-bold text-ink-800">{selectedCustomer.arr}</div>
+                <div className="text-2xs text-ink-300">ARR</div>
               </div>
-              <div className="text-center p-3 rounded-lg bg-surface-200/50">
-                <div className="text-lg font-bold text-gray-100">{selectedCustomer.contacts}</div>
-                <div className="text-2xs text-gray-500">Contacts</div>
+              <div className="text-center p-3 rounded-lg bg-ink-50/50">
+                <div className="text-lg font-bold text-ink-800">{selectedCustomer.contacts}</div>
+                <div className="text-2xs text-ink-300">Contacts</div>
               </div>
-              <div className="text-center p-3 rounded-lg bg-surface-200/50">
-                <div className="text-lg font-bold text-gray-100">{selectedCustomer.lastEngagement}</div>
-                <div className="text-2xs text-gray-500">Last Engaged</div>
+              <div className="text-center p-3 rounded-lg bg-ink-50/50">
+                <div className="text-lg font-bold text-ink-800">{selectedCustomer.lastEngagement}</div>
+                <div className="text-2xs text-ink-300">Last Engaged</div>
               </div>
-              <div className="text-center p-3 rounded-lg bg-surface-200/50">
-                <div className="text-lg font-bold text-gray-100">{selectedCustomer.renewalDate}</div>
-                <div className="text-2xs text-gray-500">Renewal</div>
+              <div className="text-center p-3 rounded-lg bg-ink-50/50">
+                <div className="text-lg font-bold text-ink-800">{selectedCustomer.renewalDate}</div>
+                <div className="text-2xs text-ink-300">Renewal</div>
               </div>
             </div>
 
             {/* Recommendations */}
-            <div className="pt-4 border-t border-gray-800/60">
-              <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-                <Lightbulb className="w-3.5 h-3.5 text-yellow-400" />
+            <div className="pt-4 border-t border-ink-100">
+              <h4 className="text-xs font-semibold text-ink-300 uppercase tracking-wider mb-3 flex items-center gap-2">
+                <Lightbulb className="w-3.5 h-3.5 text-accent-yellow" />
                 Recommendations
               </h4>
               <div className="space-y-2">
                 {selectedCustomer.recommendations.map((rec, idx) => (
-                  <div key={idx} className="flex items-start gap-2 p-2 rounded-lg bg-surface-200/30">
-                    <span className="text-xs text-lurk-400 font-mono shrink-0">{idx + 1}.</span>
-                    <span className="text-sm text-gray-300">{rec}</span>
+                  <div key={idx} className="flex items-start gap-2 p-2 rounded-lg bg-ink-50/30">
+                    <span className="text-xs text-clay-400 font-mono shrink-0">{idx + 1}.</span>
+                    <span className="text-sm text-ink-600">{rec}</span>
                   </div>
                 ))}
               </div>
@@ -460,8 +460,8 @@ export default function CustomerHealthPage() {
               key={alert.id}
               className={`flex items-start gap-3 p-3 rounded-lg border transition-colors ${
                 alert.acknowledged
-                  ? "border-gray-800/40 opacity-60"
-                  : "border-gray-800/60 hover:bg-surface-200/30"
+                  ? "border-ink-100/40 opacity-60"
+                  : "border-ink-100 hover:bg-ink-50/30"
               }`}
             >
               <div className="shrink-0 mt-0.5">
@@ -469,7 +469,7 @@ export default function CustomerHealthPage() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-gray-200">{alert.customer}</span>
+                  <span className="text-sm font-medium text-ink-700">{alert.customer}</span>
                   <Badge
                     variant={alert.severity === "high" ? "danger" : alert.severity === "medium" ? "warning" : "default"}
                     size="sm"
@@ -480,8 +480,8 @@ export default function CustomerHealthPage() {
                     <Badge variant="default" size="sm">Acknowledged</Badge>
                   )}
                 </div>
-                <p className="text-xs text-gray-500 mt-0.5">{alert.message}</p>
-                <span className="text-2xs text-gray-600 mt-1 block">{alert.createdAt}</span>
+                <p className="text-xs text-ink-300 mt-0.5">{alert.message}</p>
+                <span className="text-2xs text-ink-300 mt-1 block">{alert.createdAt}</span>
               </div>
               {!alert.acknowledged && (
                 <Button variant="ghost" size="xs">Acknowledge</Button>

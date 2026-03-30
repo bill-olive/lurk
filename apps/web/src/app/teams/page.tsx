@@ -157,11 +157,11 @@ export default function TeamsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-gray-100 tracking-tight flex items-center gap-2">
-            <Users className="w-5 h-5 text-lurk-400" />
+          <h1 className="text-xl font-bold text-ink-800 tracking-tight flex items-center gap-2">
+            <Users className="w-5 h-5 text-clay-500" />
             Teams & Access
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-ink-300 mt-1">
             Manage teams, members, and access policies
           </p>
         </div>
@@ -193,32 +193,32 @@ export default function TeamsPage() {
             <Card key={team.id} hover>
               <div className="flex items-start justify-between mb-3">
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-200">
+                  <h3 className="text-sm font-semibold text-ink-700">
                     {team.name}
                   </h3>
-                  <p className="text-xs text-gray-500 mt-0.5">
+                  <p className="text-xs text-ink-300 mt-0.5">
                     {team.description}
                   </p>
                 </div>
-                <button className="p-1 rounded hover:bg-surface-300 text-gray-500 transition-colors">
+                <button className="p-1 rounded hover:bg-ink-50 text-ink-300 transition-colors">
                   <MoreVertical className="w-4 h-4" />
                 </button>
               </div>
 
               <div className="space-y-3 mb-4">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-gray-500">Members</span>
-                  <span className="text-gray-300 font-medium">{team.memberCount}</span>
+                  <span className="text-ink-300">Members</span>
+                  <span className="text-ink-600 font-medium">{team.memberCount}</span>
                 </div>
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-gray-500">Policy</span>
-                  <span className="text-gray-300">{team.policy}</span>
+                  <span className="text-ink-300">Policy</span>
+                  <span className="text-ink-600">{team.policy}</span>
                 </div>
               </div>
 
               {team.agents.length > 0 && (
-                <div className="pt-3 border-t border-gray-800/60">
-                  <span className="text-2xs text-gray-500 uppercase tracking-wider">
+                <div className="pt-3 border-t border-ink-100">
+                  <span className="text-2xs text-ink-300 uppercase tracking-wider">
                     Active Agents
                   </span>
                   <div className="flex flex-wrap gap-1.5 mt-1.5">
@@ -239,7 +239,7 @@ export default function TeamsPage() {
       <TabPanel id="members" activeTab={activeTab}>
         <div className="mt-6">
           <div className="relative max-w-sm mb-4">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-300" />
             <input
               type="text"
               placeholder="Search members..."
@@ -264,14 +264,14 @@ export default function TeamsPage() {
                 <TableRow key={member.id}>
                   <TableCell>
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-lurk-600/20 flex items-center justify-center text-xs font-medium text-lurk-400">
+                      <div className="w-8 h-8 rounded-full bg-clay-100 flex items-center justify-center text-xs font-medium text-clay-500">
                         {member.name.split(" ").map((n) => n[0]).join("")}
                       </div>
                       <div>
-                        <div className="text-sm font-medium text-gray-200">
+                        <div className="text-sm font-medium text-ink-700">
                           {member.name}
                         </div>
-                        <div className="text-xs text-gray-500">{member.email}</div>
+                        <div className="text-xs text-ink-300">{member.email}</div>
                       </div>
                     </div>
                   </TableCell>
@@ -291,10 +291,10 @@ export default function TeamsPage() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <span className="text-xs text-gray-500">{member.lastActive}</span>
+                    <span className="text-xs text-ink-300">{member.lastActive}</span>
                   </TableCell>
                   <TableCell>
-                    <button className="p-1 rounded hover:bg-surface-300 text-gray-500 transition-colors">
+                    <button className="p-1 rounded hover:bg-ink-50 text-ink-300 transition-colors">
                       <MoreVertical className="w-4 h-4" />
                     </button>
                   </TableCell>
@@ -312,14 +312,14 @@ export default function TeamsPage() {
             <Card key={team.id}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-surface-200 flex items-center justify-center">
-                    <Shield className="w-5 h-5 text-lurk-400" />
+                  <div className="w-10 h-10 rounded-lg bg-ink-50 flex items-center justify-center">
+                    <Shield className="w-5 h-5 text-clay-500" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-semibold text-gray-200">
+                    <h3 className="text-sm font-semibold text-ink-700">
                       {team.name}
                     </h3>
-                    <p className="text-xs text-gray-500">{team.policy}</p>
+                    <p className="text-xs text-ink-300">{team.policy}</p>
                   </div>
                 </div>
                 <Button variant="ghost" size="sm" icon={<Settings className="w-3.5 h-3.5" />}>
@@ -327,17 +327,17 @@ export default function TeamsPage() {
                 </Button>
               </div>
               <div className="mt-4 grid grid-cols-3 gap-4">
-                <div className="p-3 rounded-lg bg-surface-200/50">
-                  <div className="text-2xs text-gray-500 mb-1">Content Access</div>
-                  <div className="text-sm text-gray-300">Team-scoped</div>
+                <div className="p-3 rounded-lg bg-ink-50">
+                  <div className="text-2xs text-ink-300 mb-1">Content Access</div>
+                  <div className="text-sm text-ink-600">Team-scoped</div>
                 </div>
-                <div className="p-3 rounded-lg bg-surface-200/50">
-                  <div className="text-2xs text-gray-500 mb-1">Redaction Level</div>
-                  <div className="text-sm text-gray-300">Standard</div>
+                <div className="p-3 rounded-lg bg-ink-50">
+                  <div className="text-2xs text-ink-300 mb-1">Redaction Level</div>
+                  <div className="text-sm text-ink-600">Standard</div>
                 </div>
-                <div className="p-3 rounded-lg bg-surface-200/50">
-                  <div className="text-2xs text-gray-500 mb-1">Agent Permissions</div>
-                  <div className="text-sm text-gray-300">
+                <div className="p-3 rounded-lg bg-ink-50">
+                  <div className="text-2xs text-ink-300 mb-1">Agent Permissions</div>
+                  <div className="text-sm text-ink-600">
                     {team.agents.length > 0 ? `${team.agents.length} active` : "None assigned"}
                   </div>
                 </div>
@@ -362,7 +362,7 @@ export default function TeamsPage() {
       >
         <div className="space-y-4">
           <div>
-            <label className="text-xs font-medium text-gray-400 mb-1.5 block">Team Name</label>
+            <label className="text-xs font-medium text-ink-400 mb-1.5 block">Team Name</label>
             <input
               type="text"
               value={newTeamName}
@@ -372,7 +372,7 @@ export default function TeamsPage() {
             />
           </div>
           <div>
-            <label className="text-xs font-medium text-gray-400 mb-1.5 block">Description</label>
+            <label className="text-xs font-medium text-ink-400 mb-1.5 block">Description</label>
             <textarea
               value={newTeamDesc}
               onChange={(e) => setNewTeamDesc(e.target.value)}
@@ -401,7 +401,7 @@ export default function TeamsPage() {
       >
         <div className="space-y-4">
           <div>
-            <label className="text-xs font-medium text-gray-400 mb-1.5 block">Email Address</label>
+            <label className="text-xs font-medium text-ink-400 mb-1.5 block">Email Address</label>
             <input
               type="email"
               value={inviteEmail}
@@ -411,7 +411,7 @@ export default function TeamsPage() {
             />
           </div>
           <div>
-            <label className="text-xs font-medium text-gray-400 mb-1.5 block">Role</label>
+            <label className="text-xs font-medium text-ink-400 mb-1.5 block">Role</label>
             <select
               value={inviteRole}
               onChange={(e) => setInviteRole(e.target.value)}
@@ -423,7 +423,7 @@ export default function TeamsPage() {
             </select>
           </div>
           <div>
-            <label className="text-xs font-medium text-gray-400 mb-1.5 block">Assign to Team</label>
+            <label className="text-xs font-medium text-ink-400 mb-1.5 block">Assign to Team</label>
             <select
               value={inviteTeam}
               onChange={(e) => setInviteTeam(e.target.value)}

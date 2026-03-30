@@ -34,7 +34,7 @@ export function Tabs({
 
   if (variant === "pills") {
     return (
-      <div className="flex items-center gap-2 p-1 bg-surface-200/50 rounded-lg">
+      <div className="flex items-center gap-2 p-1 bg-ink-50 rounded-lg">
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -42,8 +42,8 @@ export function Tabs({
             className={clsx(
               "flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-all duration-150",
               activeTab === tab.id
-                ? "bg-surface-100 text-gray-100 shadow-sm"
-                : "text-gray-500 hover:text-gray-300"
+                ? "bg-white text-ink-800 shadow-warm-sm"
+                : "text-ink-400 hover:text-ink-600"
             )}
           >
             {tab.icon}
@@ -53,8 +53,8 @@ export function Tabs({
                 className={clsx(
                   "text-2xs px-1.5 py-0.5 rounded-full",
                   activeTab === tab.id
-                    ? "bg-lurk-600/30 text-lurk-300"
-                    : "bg-surface-300 text-gray-500"
+                    ? "bg-clay-100 text-clay-600"
+                    : "bg-ink-100 text-ink-400"
                 )}
               >
                 {tab.count}
@@ -67,7 +67,7 @@ export function Tabs({
   }
 
   return (
-    <div className="border-b border-gray-800/60">
+    <div className="border-b border-ink-100">
       <div className="flex items-center gap-0 -mb-px">
         {tabs.map((tab) => (
           <button
@@ -76,8 +76,8 @@ export function Tabs({
             className={clsx(
               "flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-all duration-150",
               activeTab === tab.id
-                ? "border-lurk-500 text-lurk-400"
-                : "border-transparent text-gray-500 hover:text-gray-300 hover:border-gray-700"
+                ? "border-clay-500 text-clay-600"
+                : "border-transparent text-ink-400 hover:text-ink-600 hover:border-ink-200"
             )}
           >
             {tab.icon}
@@ -87,8 +87,8 @@ export function Tabs({
                 className={clsx(
                   "text-2xs px-1.5 py-0.5 rounded-full",
                   activeTab === tab.id
-                    ? "bg-lurk-600/20 text-lurk-300"
-                    : "bg-surface-300 text-gray-500"
+                    ? "bg-clay-100 text-clay-600"
+                    : "bg-ink-100 text-ink-400"
                 )}
               >
                 {tab.count}

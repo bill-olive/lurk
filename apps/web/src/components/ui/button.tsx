@@ -14,15 +14,15 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantStyles = {
   primary:
-    "bg-lurk-600 hover:bg-lurk-500 text-white shadow-sm shadow-lurk-900/30 active:bg-lurk-700",
+    "bg-clay-500 hover:bg-clay-600 text-white shadow-warm-sm active:bg-clay-700",
   secondary:
-    "bg-surface-200 hover:bg-surface-300 text-gray-200 border border-gray-700 active:bg-surface-400",
+    "bg-ink-50 hover:bg-ink-100 text-ink-700 border border-ink-200 active:bg-ink-200",
   danger:
-    "bg-red-600/90 hover:bg-red-500 text-white shadow-sm shadow-red-900/30 active:bg-red-700",
+    "bg-accent-red hover:bg-red-600 text-white shadow-warm-sm active:bg-red-700",
   ghost:
-    "bg-transparent hover:bg-surface-200 text-gray-400 hover:text-gray-200 active:bg-surface-300",
+    "bg-transparent hover:bg-ink-50 text-ink-400 hover:text-ink-700 active:bg-ink-100",
   outline:
-    "bg-transparent border border-gray-600 hover:border-gray-500 text-gray-300 hover:text-gray-100 hover:bg-surface-100",
+    "bg-transparent border border-ink-200 hover:border-ink-300 text-ink-600 hover:text-ink-800 hover:bg-ink-50",
 };
 
 const sizeStyles = {
@@ -53,7 +53,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         className={clsx(
           "inline-flex items-center justify-center font-medium rounded-lg",
-          "transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-lurk-500/40 focus:ring-offset-1 focus:ring-offset-surface",
+          "transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-clay-300/40 focus:ring-offset-1 focus:ring-offset-ivory",
           "disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none",
           variantStyles[variant],
           sizeStyles[size],

@@ -22,7 +22,7 @@ function AppShell({ children }: { children: ReactNode }) {
       <Sidebar />
       <div className="ml-60">
         <Header />
-        <main className="p-6 min-h-[calc(100vh-3.5rem)]">{children}</main>
+        <main className="px-8 py-6 min-h-[calc(100vh-3.5rem)]">{children}</main>
       </div>
     </OrgContext.Provider>
   );
@@ -30,12 +30,12 @@ function AppShell({ children }: { children: ReactNode }) {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <head>
-        <title>Lurk Admin Console</title>
-        <meta name="description" content="Lurk - Knowledge Management Admin Console" />
+        <title>Lurk — Knowledge Platform</title>
+        <meta name="description" content="Lurk - Artifact-centric knowledge collaboration" />
       </head>
-      <body className="bg-surface text-gray-100 font-sans antialiased">
+      <body className="bg-ivory text-ink font-sans antialiased">
         <AppShell>{children}</AppShell>
       </body>
     </html>
