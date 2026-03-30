@@ -2,7 +2,8 @@ import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
 import {
   getAuth,
   GoogleAuthProvider,
-  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signOut as firebaseSignOut,
   onAuthStateChanged,
   type Auth,
@@ -60,14 +61,26 @@ googleProvider.addScope("https://www.googleapis.com/auth/gmail.readonly");
 
 export async function signInWithGoogle() {
   const auth = getFirebaseAuth();
-  const result = await signInWithPopup(auth, googleProvider);
-  // Store the Google OAuth credential so the backend can access
-  // Google Docs and Gmail on behalf of the user.
-  const credential = GoogleAuthProvider.credentialFromResult(result);
-  if (credential?.accessToken) {
-    sessionStorage.setItem("google_access_token", credential.accessToken);
+  // Use redirect to avoid COOP issues on Vercel
+  await signInWithRedirect(auth, googleProvider);
+}
+
+// Call on app init to capture the Google OAuth token after redirect returns
+export async function handleRedirectResult() {
+  const auth = getFirebaseAuth();
+  try {
+    const result = await getRedirectResult(auth);
+    if (result) {
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+      if (credential?.accessToken) {
+        sessionStorage.setItem("google_access_token", credential.accessToken);
+      }
+      return result.user;
+    }
+  } catch (err) {
+    console.error("Redirect result error:", err);
   }
-  return result.user;
+  return null;
 }
 
 export async function signOut() {
