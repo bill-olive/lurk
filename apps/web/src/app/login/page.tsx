@@ -1,26 +1,39 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, Shield, Lock, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { signInWithGoogle } from "@/lib/firebase";
+import { signInWithGoogle, handleRedirectResult, setSessionCookie } from "@/lib/firebase";
 
 export default function LoginPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Handle return from Google redirect
+  useEffect(() => {
+    handleRedirectResult()
+      .then(async (user) => {
+        if (user) {
+          await setSessionCookie(user);
+          router.push("/dashboard");
+        }
+      })
+      .catch((err) => {
+        setError(err instanceof Error ? err.message : "Sign-in failed.");
+      });
+  }, [router]);
+
   const handleGoogleSignIn = async () => {
     setLoading(true);
     setError(null);
     try {
       await signInWithGoogle();
-      router.push("/dashboard");
+      // signInWithRedirect navigates away — no code runs after this
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Sign-in failed. Please try again.";
       setError(message);
-    } finally {
       setLoading(false);
     }
   };

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, createContext, useContext } from "react";
 import useSWR, { type SWRConfiguration } from "swr";
-import { onAuthChange, signInWithGoogle, signOut, type User } from "./firebase";
+import { onAuthChange, signInWithGoogle, signOut, setSessionCookie, clearSessionCookie, handleRedirectResult, type User } from "./firebase";
 import { fetcher, api } from "./api";
 
 // ──────────────────────────────────────────────
@@ -23,8 +23,16 @@ export function useAuth(): AuthState {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthChange((user) => {
+    // Handle redirect result from Google sign-in
+    handleRedirectResult().catch(() => {});
+
+    const unsubscribe = onAuthChange(async (user) => {
       setUser(user);
+      if (user) {
+        await setSessionCookie(user);
+      } else {
+        clearSessionCookie();
+      }
       setLoading(false);
     });
     return unsubscribe;
@@ -41,6 +49,7 @@ export function useAuth(): AuthState {
 
   const handleSignOut = useCallback(async () => {
     try {
+      clearSessionCookie();
       await signOut();
     } catch (err) {
       setError(err as Error);

@@ -2,7 +2,8 @@ import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
 import {
   getAuth,
   GoogleAuthProvider,
-  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signOut as firebaseSignOut,
   onAuthStateChanged,
   type Auth,
@@ -55,11 +56,16 @@ googleProvider.setCustomParameters({
 
 export async function signInWithGoogle() {
   const auth = getFirebaseAuth();
+  await signInWithRedirect(auth, googleProvider);
+}
+
+export async function handleRedirectResult(): Promise<User | null> {
+  const auth = getFirebaseAuth();
   try {
-    const result = await signInWithPopup(auth, googleProvider);
-    return result.user;
+    const result = await getRedirectResult(auth);
+    return result?.user ?? null;
   } catch (error) {
-    console.error("Google sign-in error:", error);
+    console.error("Google redirect sign-in error:", error);
     throw error;
   }
 }
@@ -79,6 +85,15 @@ export async function getIdToken(): Promise<string | null> {
   const user = auth.currentUser;
   if (!user) return null;
   return user.getIdToken();
+}
+
+export async function setSessionCookie(user: User) {
+  const token = await user.getIdToken();
+  document.cookie = `__session=${token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax; Secure`;
+}
+
+export function clearSessionCookie() {
+  document.cookie = "__session=; path=/; max-age=0";
 }
 
 export type { User };
