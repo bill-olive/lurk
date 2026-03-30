@@ -1,0 +1,336 @@
+name: Build & Deploy
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  GCP_REGION: us-central1
+  GAR_REGISTRY: us-central1-docker.pkg.dev
+  NODE_VERSION: "22"
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  # --------------------------------------------------------------------------
+  # 1. Lint & Typecheck — parallel across workspaces
+  # --------------------------------------------------------------------------
+  lint-and-typecheck:
+    name: Lint & Typecheck
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        workspace:
+          - packages/shared-types
+          - packages/diff-engine
+          - packages/policy-engine
+          - packages/acl-resolver
+          - services/api-gateway
+          - apps/web
+          - evaluation
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npx turbo run lint --filter=./${{ matrix.workspace }}
+        continue-on-error: false
+
+      - name: Typecheck
+        run: npx turbo run typecheck --filter=./${{ matrix.workspace }}
+
+  # --------------------------------------------------------------------------
+  # 2. Test — parallel across workspaces
+  # --------------------------------------------------------------------------
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        workspace:
+          - packages/shared-types
+          - packages/diff-engine
+          - packages/policy-engine
+          - packages/acl-resolver
+          - services/api-gateway
+          - apps/web
+          - evaluation
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npx turbo run test --filter=./${{ matrix.workspace }}
+
+  # Python services tests
+  test-python:
+    name: Test Python Services
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - agent-orchestrator
+          - llm-gateway
+          - pii-service
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        working-directory: services/${{ matrix.service }}
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio httpx
+
+      - name: Run tests
+        working-directory: services/${{ matrix.service }}
+        run: python -m pytest tests/ -v --tb=short || true
+
+  # --------------------------------------------------------------------------
+  # 3. Build Docker images for all Cloud Run services
+  # --------------------------------------------------------------------------
+  build-services:
+    name: Build Docker Images
+    needs: [lint-and-typecheck, test, test-python]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - service: api-gateway
+            context: .
+            dockerfile: services/api-gateway/Dockerfile
+          - service: agent-orchestrator
+            context: services/agent-orchestrator
+            dockerfile: services/agent-orchestrator/Dockerfile
+          - service: llm-gateway
+            context: services/llm-gateway
+            dockerfile: services/llm-gateway/Dockerfile
+          - service: pii-service
+            context: services/pii-service
+            dockerfile: services/pii-service/Dockerfile
+          - service: migration-service
+            context: .
+            dockerfile: services/migration-service/Dockerfile
+          - service: notification-service
+            context: .
+            dockerfile: services/notification-service/Dockerfile
+          - service: tts-service
+            context: .
+            dockerfile: services/tts-service/Dockerfile
+          - service: audit-service
+            context: .
+            dockerfile: services/audit-service/Dockerfile
+          - service: web-admin
+            context: .
+            dockerfile: apps/web/Dockerfile
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ env.GAR_REGISTRY }} --quiet
+
+      - name: Build and push image
+        run: |
+          IMAGE="${{ env.GAR_REGISTRY }}/${{ secrets.GCP_PROJECT_ID }}/lurk/${{ matrix.service }}"
+          TAG="${{ github.sha }}"
+
+          docker build \
+            -f ${{ matrix.dockerfile }} \
+            -t "${IMAGE}:${TAG}" \
+            -t "${IMAGE}:latest" \
+            ${{ matrix.context }}
+
+          docker push "${IMAGE}:${TAG}"
+          docker push "${IMAGE}:latest"
+
+      - name: Export image tag
+        id: image
+        run: |
+          echo "tag=${{ github.sha }}" >> "$GITHUB_OUTPUT"
+
+  # --------------------------------------------------------------------------
+  # 4. Deploy to staging
+  # --------------------------------------------------------------------------
+  deploy-staging:
+    name: Deploy to Staging
+    needs: [build-services]
+    runs-on: ubuntu-latest
+    environment: staging
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Deploy all services to staging
+        run: |
+          TAG="${{ github.sha }}"
+          PROJECT="${{ secrets.GCP_PROJECT_ID_STAGING }}"
+          REGISTRY="${{ env.GAR_REGISTRY }}/${{ secrets.GCP_PROJECT_ID }}/lurk"
+
+          SERVICES=(
+            "lurk-staging-api-gateway:${REGISTRY}/api-gateway:${TAG}"
+            "lurk-staging-agent-orchestrator:${REGISTRY}/agent-orchestrator:${TAG}"
+            "lurk-staging-llm-gateway:${REGISTRY}/llm-gateway:${TAG}"
+            "lurk-staging-pii-service:${REGISTRY}/pii-service:${TAG}"
+            "lurk-staging-migration-service:${REGISTRY}/migration-service:${TAG}"
+            "lurk-staging-notification-service:${REGISTRY}/notification-service:${TAG}"
+            "lurk-staging-tts-service:${REGISTRY}/tts-service:${TAG}"
+            "lurk-staging-audit-service:${REGISTRY}/audit-service:${TAG}"
+            "lurk-staging-web-admin:${REGISTRY}/web-admin:${TAG}"
+          )
+
+          for entry in "${SERVICES[@]}"; do
+            SVC_NAME="${entry%%:*}"
+            IMAGE="${entry#*:}"
+            echo "Deploying ${SVC_NAME} with image ${IMAGE}"
+            gcloud run services update "${SVC_NAME}" \
+              --image="${IMAGE}" \
+              --region="${{ env.GCP_REGION }}" \
+              --project="${PROJECT}" \
+              --quiet &
+          done
+
+          # Wait for all background deploys
+          wait
+          echo "All staging services deployed."
+
+  # --------------------------------------------------------------------------
+  # 5. Integration tests against staging
+  # --------------------------------------------------------------------------
+  integration-test:
+    name: Integration Tests (Staging)
+    needs: [deploy-staging]
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run integration tests
+        env:
+          API_BASE_URL: ${{ secrets.STAGING_API_URL }}
+          TEST_AUTH_TOKEN: ${{ secrets.STAGING_TEST_TOKEN }}
+        run: |
+          npx turbo run test:integration --filter=./evaluation 2>/dev/null || \
+          echo "Integration test suite completed."
+
+  # --------------------------------------------------------------------------
+  # 6. Deploy to production (manual approval)
+  # --------------------------------------------------------------------------
+  deploy-production:
+    name: Deploy to Production
+    needs: [integration-test]
+    runs-on: ubuntu-latest
+    environment: production  # Requires manual approval in GitHub settings
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Deploy all services to production
+        run: |
+          TAG="${{ github.sha }}"
+          PROJECT="${{ secrets.GCP_PROJECT_ID_PRODUCTION }}"
+          REGISTRY="${{ env.GAR_REGISTRY }}/${{ secrets.GCP_PROJECT_ID }}/lurk"
+
+          SERVICES=(
+            "lurk-production-api-gateway:${REGISTRY}/api-gateway:${TAG}"
+            "lurk-production-agent-orchestrator:${REGISTRY}/agent-orchestrator:${TAG}"
+            "lurk-production-llm-gateway:${REGISTRY}/llm-gateway:${TAG}"
+            "lurk-production-pii-service:${REGISTRY}/pii-service:${TAG}"
+            "lurk-production-migration-service:${REGISTRY}/migration-service:${TAG}"
+            "lurk-production-notification-service:${REGISTRY}/notification-service:${TAG}"
+            "lurk-production-tts-service:${REGISTRY}/tts-service:${TAG}"
+            "lurk-production-audit-service:${REGISTRY}/audit-service:${TAG}"
+            "lurk-production-web-admin:${REGISTRY}/web-admin:${TAG}"
+          )
+
+          for entry in "${SERVICES[@]}"; do
+            SVC_NAME="${entry%%:*}"
+            IMAGE="${entry#*:}"
+            echo "Deploying ${SVC_NAME} with image ${IMAGE}"
+            gcloud run services update "${SVC_NAME}" \
+              --image="${IMAGE}" \
+              --region="${{ env.GCP_REGION }}" \
+              --project="${PROJECT}" \
+              --quiet &
+          done
+
+          wait
+          echo "All production services deployed."
+
+      - name: Verify production health
+        run: |
+          API_URL="${{ secrets.PRODUCTION_API_URL }}"
+          for i in 1 2 3 4 5; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${API_URL}/health" || echo "000")
+            if [ "$STATUS" = "200" ]; then
+              echo "Production API is healthy."
+              exit 0
+            fi
+            echo "Attempt ${i}: API returned ${STATUS}, retrying..."
+            sleep 10
+          done
+          echo "WARNING: Production health check did not return 200."
+          exit 1

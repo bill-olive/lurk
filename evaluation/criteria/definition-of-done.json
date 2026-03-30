@@ -1,0 +1,412 @@
+{
+  "version": "3.0.0",
+  "prd_section": "22",
+  "description": "Lurk Definition of Done — 20 criteria required for closed beta readiness",
+  "criteria": [
+    {
+      "id": "dod-01",
+      "name": "Mac Menu Bar Audio Capture",
+      "description": "Mac menu bar app installs, captures system audio from Zoom/Google Meet, and transcribes locally.",
+      "category": "platform",
+      "weight": 9,
+      "testable": true,
+      "acceptance_criteria": [
+        "Mac app project exists with Swift/SwiftUI configuration",
+        "CoreAudio capture module is implemented for system audio tapping",
+        "Aggregate audio device creation for mirroring system output",
+        "Meeting app detection targets Zoom, Google Meet, Teams, FaceTime, Webex",
+        "Audio recording triggers on meeting detection",
+        "Whisper.cpp integration for local transcription",
+        "Raw audio never leaves the device (localOnly enforcement)",
+        "Opus audio format encoding is configured",
+        "System Preferences consent flow for audio privacy",
+        "Transcription output feeds into artifact pipeline"
+      ]
+    },
+    {
+      "id": "dod-02",
+      "name": "Chrome Extension Capture",
+      "description": "Chrome extension captures artifacts from Google Docs and Gmail, delegates to Mac app via Native Messaging.",
+      "category": "platform",
+      "weight": 8,
+      "testable": true,
+      "acceptance_criteria": [
+        "Manifest V3 extension with correct permissions",
+        "DOM observer for docs.google.com capturing document:gdoc artifacts",
+        "DOM observer for mail.google.com capturing comm:email_sent and comm:email_received",
+        "Native Messaging host configuration (com.lurk.native_host)",
+        "chrome.runtime.connectNative integration for Mac app communication",
+        "Fallback to extension-local processing when Mac app is unavailable",
+        "React-based sidebar UI with Shadow DOM isolation",
+        "Sidebar tabs: Inbox, Activity, Ledger, Agents, Privacy",
+        "Content scripts properly scoped to target domains",
+        "Standalone mode with WASM PII detection for non-Mac users"
+      ]
+    },
+    {
+      "id": "dod-03",
+      "name": "iOS PR Review App",
+      "description": "iOS app displays PRs, supports swipe-to-approve, and delivers push notifications.",
+      "category": "platform",
+      "weight": 8,
+      "testable": true,
+      "acceptance_criteria": [
+        "SwiftUI iOS app project exists",
+        "PR list view with diff display and justification",
+        "Swipe-to-approve gesture implementation",
+        "Swipe-to-reject gesture implementation",
+        "Push notification integration via APNs",
+        "Deep linking from push notification to specific PR",
+        "Agent management view (pause/resume, YOLO toggle)",
+        "Voice memo capture pipeline (record, transcribe, commit)",
+        "Offline support with action queueing",
+        "Shared Swift packages with macOS app via SPM"
+      ]
+    },
+    {
+      "id": "dod-04",
+      "name": "PII Scrubbing and Ledger Sync",
+      "description": "Captured artifacts are PII-scrubbed on-device, committed to ledger, and synced to cloud.",
+      "category": "privacy",
+      "weight": 10,
+      "testable": true,
+      "acceptance_criteria": [
+        "PII detection runs on-device before any network transit",
+        "Regex detectors for EMAIL, PHONE, SSN, CREDIT_CARD, API_KEY, TOKEN, PASSWORD, IP_ADDRESS",
+        "NER detectors for PERSON, ORGANIZATION, ADDRESS, DATE_OF_BIRTH",
+        "PII entities replaced with typed tokens (e.g., [PERSON_1], [EMAIL_2])",
+        "Content hash (SHA-256) computed from raw content",
+        "Redacted content stored separately from raw content",
+        "Feature bundle extraction for privacy-preserving metadata",
+        "Commit to local ledger (SQLite on Mac/iOS)",
+        "Sync to cloud Firestore with only redacted content",
+        "Three-layer privacy model enforced: on-device, redacted transit, stored"
+      ]
+    },
+    {
+      "id": "dod-05",
+      "name": "Personal Agent with Sonnet 4.6",
+      "description": "Personal agent reads ledger, detects stale references, forks, and opens PRs using Claude Sonnet 4.6.",
+      "category": "agent",
+      "weight": 9,
+      "testable": true,
+      "acceptance_criteria": [
+        "Agent orchestrator service exists and is deployable",
+        "Personal agent type registered in agent configuration",
+        "Ledger reading capability with proper ACL scoping",
+        "Staleness detection algorithm comparing artifact timestamps and related artifact changes",
+        "Fork creation from source artifact to agent branch",
+        "PR opening with title, description, diff, and justification",
+        "Claude Sonnet 4.6 model configured for personal agent tasks",
+        "Action budget enforcement (max actions per time window)",
+        "Agent trigger configuration (schedule, event-based, or both)",
+        "Confidence scoring on proposed changes"
+      ]
+    },
+    {
+      "id": "dod-06",
+      "name": "Org Agent with Opus 4.6",
+      "description": "Org agent performs deep analysis using Claude Opus 4.6.",
+      "category": "agent",
+      "weight": 8,
+      "testable": true,
+      "acceptance_criteria": [
+        "Org-level agent type registered with org-wide read scope",
+        "Claude Opus 4.6 model configured for deep analysis tasks",
+        "Cross-team artifact analysis capability",
+        "Conflict detection across organizational boundaries",
+        "Synthesis artifact generation (meta:synthesis type)",
+        "Higher action budget than personal agents",
+        "Org admin approval gates for sensitive operations",
+        "LLM gateway routes org agent requests to Opus model",
+        "Deep analysis prompts versioned in /prompts directory",
+        "Results stored as org-level artifacts in appropriate ledgers"
+      ]
+    },
+    {
+      "id": "dod-07",
+      "name": "Voice Agent for Meetings",
+      "description": "Voice agent transcribes meetings, generates summaries, and opens PRs on affected artifacts.",
+      "category": "agent",
+      "weight": 8,
+      "testable": true,
+      "acceptance_criteria": [
+        "Voice agent type registered in agent configuration",
+        "Meeting audio intake from Mac app transcription pipeline",
+        "Summary generation using Claude Sonnet 4.6",
+        "Action item extraction from meeting transcripts",
+        "Affected artifact identification by cross-referencing transcript with ledger",
+        "PR creation on affected artifacts with meeting-derived changes",
+        "comm:call_summary artifact type generation",
+        "Meeting summary prompt templates in /prompts/meeting_summary",
+        "Integration with notification service for summary delivery",
+        "Speaker attribution in transcription output"
+      ]
+    },
+    {
+      "id": "dod-08",
+      "name": "Calendar Agent",
+      "description": "Calendar agent reviews upcoming meetings and suggests cancellations.",
+      "category": "agent",
+      "weight": 6,
+      "testable": true,
+      "acceptance_criteria": [
+        "Calendar agent type registered in agent configuration",
+        "Calendar API integration (Google Calendar) for reading events",
+        "Cross-reference meetings with artifact activity",
+        "Cancellation recommendation logic based on artifact coverage",
+        "meta:calendar_review artifact generation",
+        "Notification to meeting organizer with cancellation suggestion",
+        "Schedule-based trigger (runs before start of day)",
+        "Calendar review prompt templates in /prompts/calendar_review",
+        "Configurable aggressiveness for cancellation suggestions",
+        "Respect for user preferences on which meetings to evaluate"
+      ]
+    },
+    {
+      "id": "dod-09",
+      "name": "Customer Health Agent",
+      "description": "Customer health agent computes health scores from cross-functional artifacts.",
+      "category": "agent",
+      "weight": 7,
+      "testable": true,
+      "acceptance_criteria": [
+        "Customer health agent type registered in agent configuration",
+        "Cross-functional artifact reading (sales, support, engineering, CS)",
+        "CustomerHealthSignal computation with healthScore (0-100)",
+        "Trend classification: improving, stable, declining, critical",
+        "Signal sources: call_sentiment, support_tickets, engagement_frequency, contract_renewal",
+        "Alert levels: none, watch, action_required, escalation",
+        "meta:customer_health artifact generation",
+        "Firestore customerHealth collection updates",
+        "Notification to account owner when alertLevel >= action_required",
+        "Customer health prompt templates in /prompts/customer_health"
+      ]
+    },
+    {
+      "id": "dod-10",
+      "name": "YOLO Mode Auto-Merge",
+      "description": "YOLO mode auto-merges PRs meeting configurable criteria.",
+      "category": "agent",
+      "weight": 7,
+      "testable": true,
+      "acceptance_criteria": [
+        "YOLO mode toggle in user preferences and org policy",
+        "Configurable criteria: confidence threshold, agent types, artifact types",
+        "Auto-merge eligibility check on PR creation",
+        "Automatic merge execution when criteria are met",
+        "Rollback window configuration (time-based undo)",
+        "Notification on auto-merge (non-blocking, for awareness)",
+        "YOLO config stored in ledger and user profile",
+        "Org-level YOLO policy can restrict or disable",
+        "Audit log entry for every auto-merge action",
+        "Kill switch can disable YOLO mode org-wide"
+      ]
+    },
+    {
+      "id": "dod-11",
+      "name": "PR Voice Narration via TTS",
+      "description": "PR voice narration works via OpenAI TTS on iOS.",
+      "category": "platform",
+      "weight": 5,
+      "testable": true,
+      "acceptance_criteria": [
+        "TTS service exists with OpenAI TTS API integration",
+        "PR summary text converted to speech audio",
+        "Audio file stored in GCS and served via CDN",
+        "voiceNarrationUrl field populated on PR documents",
+        "iOS app plays voice narration inline on PR view",
+        "Push notification includes audio attachment option",
+        "TTS generation triggered on PR creation",
+        "Multiple voice options configurable",
+        "Audio format compatible with iOS playback (AAC/MP3)",
+        "Fallback when TTS service is unavailable"
+      ]
+    },
+    {
+      "id": "dod-12",
+      "name": "Slack Migration",
+      "description": "Migration from Slack works via API import and agentic Browserbase crawl.",
+      "category": "migration",
+      "weight": 8,
+      "testable": true,
+      "acceptance_criteria": [
+        "Migration service exists and is deployable",
+        "Slack API import mode using Slack Export API + Web API",
+        "Agentic browser crawl mode using Browserbase SDK",
+        "OAuth2 authentication flow for Slack workspace admin",
+        "Channel-by-channel crawl strategy implementation",
+        "Message to artifact mapping (text -> document:note, files -> appropriate type)",
+        "Relationship mapping (threads, replies, cross-channel links)",
+        "PII scrubbing on imported content before commit",
+        "Migration plan generation with volume estimation",
+        "Admin preview and approval before commit",
+        "Migration verification with count comparison and quality check",
+        "Rollback capability for entire migration batch"
+      ]
+    },
+    {
+      "id": "dod-13",
+      "name": "Agent Marketplace and Builder",
+      "description": "Agent marketplace offers 7+ built-in templates; custom agent builder works.",
+      "category": "agent",
+      "weight": 6,
+      "testable": true,
+      "acceptance_criteria": [
+        "Agent marketplace UI in web admin console",
+        "Minimum 7 built-in agent templates in agentTemplates collection",
+        "Templates include: personal, team, org, voice, calendar, customer_health, analytics",
+        "Custom agent builder UI (low-code interface)",
+        "Configurable prompts, triggers, capabilities, and scope per template",
+        "Agent installation flow from marketplace to active agent",
+        "Agent SDK package for building custom agents",
+        "Template versioning and update mechanism",
+        "Category browsing and search in marketplace",
+        "Agent rating/feedback system via feedback collection"
+      ]
+    },
+    {
+      "id": "dod-14",
+      "name": "Local-Only Mode",
+      "description": "Local-only mode stops all network traffic immediately.",
+      "category": "privacy",
+      "weight": 9,
+      "testable": true,
+      "acceptance_criteria": [
+        "Local-only mode toggle in Mac app, iOS app, and Chrome extension",
+        "All network requests cease immediately on activation",
+        "Cloud sync paused with queued operations preserved",
+        "Agent execution paused (no Claude API calls)",
+        "Local ledger operations continue functioning",
+        "PII detection continues running locally",
+        "Visual indicator showing local-only mode is active",
+        "Graceful reconnection when local-only mode is deactivated",
+        "No data loss during local-only period",
+        "Feature flag: local_only_mode available at org policy level"
+      ]
+    },
+    {
+      "id": "dod-15",
+      "name": "Kill Switches at All Levels",
+      "description": "Kill switches work at all levels (org, team, agent, user, migration, meeting).",
+      "category": "infrastructure",
+      "weight": 9,
+      "testable": true,
+      "acceptance_criteria": [
+        "org_global_kill: stops everything org-wide",
+        "org_agent_kill: stops all agent execution",
+        "org_capture_kill: stops all artifact capture",
+        "org_meeting_capture_kill: stops meeting audio capture",
+        "org_migration_kill: stops all active migrations",
+        "team_kill:{teamId}: stops all activity for a specific team",
+        "agent_kill:{agentId}: stops a specific agent",
+        "user_kill:{userId}: stops all activity for a specific user",
+        "federation_kill:{federationId}: stops cross-org federation",
+        "Kill switch UI in web admin console",
+        "Kill switches take effect within seconds",
+        "Audit log entry for every kill switch activation"
+      ]
+    },
+    {
+      "id": "dod-16",
+      "name": "Privacy Regression Tests",
+      "description": "Privacy regression tests confirm no raw text or audio leaves the device.",
+      "category": "privacy",
+      "weight": 10,
+      "testable": true,
+      "acceptance_criteria": [
+        "Test suite verifying no raw text in outgoing HTTP requests",
+        "Test suite verifying no raw audio data in network traffic",
+        "Test suite verifying no raw text stored in Firestore documents",
+        "Test suite verifying no raw text in Cloud Run service logs",
+        "Network traffic inspection in integration tests",
+        "Redaction verification: all PII tokens present in transit content",
+        "Content hash verification: raw content hashes match but raw content absent",
+        "Mac app audit of all network call sites",
+        "Chrome extension audit of all fetch/XHR calls",
+        "iOS app audit of all URLSession calls"
+      ]
+    },
+    {
+      "id": "dod-17",
+      "name": "PII Detection Recall >95%",
+      "description": "PII detection achieves >95% recall across all entity types.",
+      "category": "privacy",
+      "weight": 10,
+      "testable": true,
+      "acceptance_criteria": [
+        "PII test dataset with labeled ground truth for all entity types",
+        "EMAIL detection recall >95%",
+        "PHONE detection recall >95%",
+        "SSN detection recall >95%",
+        "CREDIT_CARD detection recall >95%",
+        "PERSON (NER) detection recall >95%",
+        "ORGANIZATION (NER) detection recall >95%",
+        "ADDRESS (NER) detection recall >95%",
+        "Precision >90% across all entity types (acceptable false positive rate)",
+        "Parity test: Swift and WASM implementations produce same results",
+        "PII service server-side validation as defense-in-depth"
+      ]
+    },
+    {
+      "id": "dod-18",
+      "name": "Cross-Org Federation",
+      "description": "Cross-org federation works with aggressive redaction.",
+      "category": "infrastructure",
+      "weight": 6,
+      "testable": true,
+      "acceptance_criteria": [
+        "Federation agreement creation between two orgs",
+        "Shared scope configuration (which artifact types, teams)",
+        "Aggressive redaction applied to all cross-org content",
+        "federations collection in Firestore with approval from both orgs",
+        "Expiration date enforcement on federation agreements",
+        "federation_kill switch for emergency disconnection",
+        "ACL resolver handles cross-org access tier calculations",
+        "Redaction level configuration per federation",
+        "Audit trail for all cross-org artifact access",
+        "Guest access tokens with limited scope"
+      ]
+    },
+    {
+      "id": "dod-19",
+      "name": "Comprehensive Audit Logs",
+      "description": "Audit logs capture all actions with full lineage.",
+      "category": "infrastructure",
+      "weight": 8,
+      "testable": true,
+      "acceptance_criteria": [
+        "Audit service exists and is deployable",
+        "audits collection in Firestore for real-time access",
+        "BigQuery export for long-term audit storage and analysis",
+        "All agent actions logged with actorType=agent",
+        "All user actions logged with actorType=user",
+        "Kill switch activations logged",
+        "Policy changes logged with version diff",
+        "PR lifecycle events logged (create, review, merge, close)",
+        "Migration events logged with full execution trace",
+        "Lineage tracking: every audit entry references source action chain"
+      ]
+    },
+    {
+      "id": "dod-20",
+      "name": "Performance at Scale",
+      "description": "System handles 100 concurrent users with <500ms P95 for PR review.",
+      "category": "infrastructure",
+      "weight": 7,
+      "testable": true,
+      "acceptance_criteria": [
+        "Load test configuration for 100 concurrent users",
+        "PR review API endpoint responds in <500ms P95",
+        "Artifact listing responds in <500ms P95",
+        "Agent orchestrator handles concurrent agent executions",
+        "Firestore read/write latency within acceptable bounds",
+        "Cloud Run auto-scaling configured for all services",
+        "API gateway rate limiting prevents abuse",
+        "Connection pooling for database operations",
+        "CDN caching for voice narration audio files",
+        "Performance monitoring and alerting configured"
+      ]
+    }
+  ]
+}

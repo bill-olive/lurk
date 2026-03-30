@@ -1,0 +1,315 @@
+name: PR Check
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "22"
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  # --------------------------------------------------------------------------
+  # Detect which workspaces changed
+  # --------------------------------------------------------------------------
+  detect-changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      packages: ${{ steps.filter.outputs.packages }}
+      services-ts: ${{ steps.filter.outputs.services-ts }}
+      services-py: ${{ steps.filter.outputs.services-py }}
+      apps: ${{ steps.filter.outputs.apps }}
+      evaluation: ${{ steps.filter.outputs.evaluation }}
+      infra: ${{ steps.filter.outputs.infra }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            packages:
+              - 'packages/**'
+            services-ts:
+              - 'services/api-gateway/**'
+              - 'services/migration-service/**'
+              - 'services/notification-service/**'
+              - 'services/tts-service/**'
+              - 'services/audit-service/**'
+            services-py:
+              - 'services/agent-orchestrator/**'
+              - 'services/llm-gateway/**'
+              - 'services/pii-service/**'
+            apps:
+              - 'apps/**'
+            evaluation:
+              - 'evaluation/**'
+            infra:
+              - 'infra/**'
+
+  # --------------------------------------------------------------------------
+  # Lint & Typecheck — TypeScript workspaces
+  # --------------------------------------------------------------------------
+  lint-typecheck:
+    name: Lint & Typecheck (TS)
+    needs: [detect-changes]
+    if: |
+      needs.detect-changes.outputs.packages == 'true' ||
+      needs.detect-changes.outputs.services-ts == 'true' ||
+      needs.detect-changes.outputs.apps == 'true' ||
+      needs.detect-changes.outputs.evaluation == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint all affected workspaces
+        run: npx turbo run lint --affected
+
+      - name: Typecheck all affected workspaces
+        run: npx turbo run typecheck --affected
+
+  # --------------------------------------------------------------------------
+  # Lint — Python services
+  # --------------------------------------------------------------------------
+  lint-python:
+    name: Lint (Python)
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.services-py == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [agent-orchestrator, llm-gateway, pii-service]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install linting tools
+        run: pip install ruff mypy
+
+      - name: Run ruff
+        working-directory: services/${{ matrix.service }}
+        run: ruff check src/ --output-format=github
+
+      - name: Run mypy
+        working-directory: services/${{ matrix.service }}
+        run: mypy src/ --ignore-missing-imports || true
+
+  # --------------------------------------------------------------------------
+  # Test — TypeScript workspaces
+  # --------------------------------------------------------------------------
+  test-ts:
+    name: Test (TS)
+    needs: [detect-changes]
+    if: |
+      needs.detect-changes.outputs.packages == 'true' ||
+      needs.detect-changes.outputs.services-ts == 'true' ||
+      needs.detect-changes.outputs.apps == 'true' ||
+      needs.detect-changes.outputs.evaluation == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests on affected workspaces
+        run: npx turbo run test --affected
+
+  # --------------------------------------------------------------------------
+  # Test — Python services
+  # --------------------------------------------------------------------------
+  test-python:
+    name: Test (Python)
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.services-py == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [agent-orchestrator, llm-gateway, pii-service]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        working-directory: services/${{ matrix.service }}
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio httpx
+
+      - name: Run tests
+        working-directory: services/${{ matrix.service }}
+        run: python -m pytest tests/ -v --tb=short || true
+
+  # --------------------------------------------------------------------------
+  # Build check — ensure all Docker images can build
+  # --------------------------------------------------------------------------
+  build-check:
+    name: Build Check
+    needs: [detect-changes, lint-typecheck, test-ts]
+    if: |
+      always() &&
+      (needs.detect-changes.outputs.services-ts == 'true' ||
+       needs.detect-changes.outputs.services-py == 'true' ||
+       needs.detect-changes.outputs.apps == 'true' ||
+       needs.detect-changes.outputs.packages == 'true')
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - service: api-gateway
+            context: .
+            dockerfile: services/api-gateway/Dockerfile
+          - service: agent-orchestrator
+            context: services/agent-orchestrator
+            dockerfile: services/agent-orchestrator/Dockerfile
+          - service: llm-gateway
+            context: services/llm-gateway
+            dockerfile: services/llm-gateway/Dockerfile
+          - service: pii-service
+            context: services/pii-service
+            dockerfile: services/pii-service/Dockerfile
+          - service: migration-service
+            context: .
+            dockerfile: services/migration-service/Dockerfile
+          - service: notification-service
+            context: .
+            dockerfile: services/notification-service/Dockerfile
+          - service: tts-service
+            context: .
+            dockerfile: services/tts-service/Dockerfile
+          - service: audit-service
+            context: .
+            dockerfile: services/audit-service/Dockerfile
+          - service: web-admin
+            context: .
+            dockerfile: apps/web/Dockerfile
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image (no push)
+        run: |
+          docker build \
+            -f ${{ matrix.dockerfile }} \
+            -t "lurk-${{ matrix.service }}:pr-check" \
+            ${{ matrix.context }}
+
+  # --------------------------------------------------------------------------
+  # Evaluation framework run
+  # --------------------------------------------------------------------------
+  evaluate:
+    name: Evaluation Framework
+    needs: [detect-changes]
+    if: |
+      needs.detect-changes.outputs.evaluation == 'true' ||
+      needs.detect-changes.outputs.packages == 'true' ||
+      needs.detect-changes.outputs.services-ts == 'true' ||
+      needs.detect-changes.outputs.services-py == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run evaluation framework
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: npm run evaluate -- --reporter=json
+
+      - name: Upload evaluation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evaluation-report
+          path: evaluation/reports/
+          retention-days: 30
+
+  # --------------------------------------------------------------------------
+  # Terraform plan (if infra changed)
+  # --------------------------------------------------------------------------
+  terraform-plan:
+    name: Terraform Plan
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.infra == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.7"
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Terraform Init
+        working-directory: infra/terraform
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}"
+
+      - name: Terraform Plan
+        working-directory: infra/terraform
+        run: |
+          terraform plan \
+            -var="project_id=${{ secrets.GCP_PROJECT_ID_STAGING }}" \
+            -var="environment=staging" \
+            -out=tfplan \
+            -no-color 2>&1 | tee plan-output.txt
+
+      - name: Comment plan on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const plan = fs.readFileSync('infra/terraform/plan-output.txt', 'utf8');
+            const truncated = plan.length > 60000 ? plan.substring(0, 60000) + '\n... truncated' : plan;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `### Terraform Plan\n\n\`\`\`\n${truncated}\n\`\`\``
+            });

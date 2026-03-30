@@ -1,0 +1,30 @@
+{
+  "name": "lurk",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Lurk — Autonomous, artifact-centric collaboration platform",
+  "workspaces": [
+    "packages/*",
+    "apps/*",
+    "services/*",
+    "evaluation"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "evaluate": "node evaluation/run-evaluation.mjs",
+    "clean": "turbo run clean"
+  },
+  "devDependencies": {
+    "turbo": "^2.4.0",
+    "typescript": "^5.7.0",
+    "@types/node": "^22.0.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "packageManager": "npm@10.8.0"
+}

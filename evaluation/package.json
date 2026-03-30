@@ -1,0 +1,20 @@
+{
+  "name": "@lurk/evaluation",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Evaluation framework for Lurk platform — Customer Agent evaluator",
+  "scripts": {
+    "evaluate": "node run-evaluation.mjs",
+    "evaluate:json": "node run-evaluation.mjs --reporter=json",
+    "evaluate:all": "node run-evaluation.mjs --reporter=all",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "vitest": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

@@ -1,0 +1,123 @@
+name: Evaluate Customer Agent
+
+on:
+  workflow_dispatch:
+    inputs:
+      model:
+        description: "LLM model to evaluate"
+        required: false
+        default: "claude-sonnet-4-20250514"
+        type: choice
+        options:
+          - claude-sonnet-4-20250514
+          - claude-opus-4-20250514
+          - gpt-4o
+      scenarios:
+        description: "Comma-separated scenario names (empty = all)"
+        required: false
+        default: ""
+        type: string
+      verbose:
+        description: "Enable verbose output"
+        required: false
+        default: false
+        type: boolean
+
+  # Also run on schedule — nightly
+  schedule:
+    - cron: "0 6 * * *" # 06:00 UTC daily
+
+env:
+  NODE_VERSION: "22"
+
+jobs:
+  evaluate:
+    name: Run Customer Agent Evaluation
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build packages
+        run: npx turbo run build --filter=@lurk/shared-types --filter=@lurk/policy-engine --filter=@lurk/diff-engine
+
+      - name: Run evaluation
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          EVAL_MODEL: ${{ github.event.inputs.model || 'claude-sonnet-4-20250514' }}
+          EVAL_SCENARIOS: ${{ github.event.inputs.scenarios || '' }}
+          EVAL_VERBOSE: ${{ github.event.inputs.verbose || 'false' }}
+        run: |
+          ARGS="--reporter=all"
+          if [ -n "${EVAL_SCENARIOS}" ]; then
+            ARGS="${ARGS} --scenarios=${EVAL_SCENARIOS}"
+          fi
+          if [ "${EVAL_VERBOSE}" = "true" ]; then
+            ARGS="${ARGS} --verbose"
+          fi
+          npm run evaluate -- ${ARGS}
+
+      - name: Upload evaluation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evaluation-report-${{ github.run_id }}
+          path: evaluation/reports/
+          retention-days: 90
+
+      - name: Post summary
+        if: always()
+        run: |
+          REPORT_FILE=$(ls -t evaluation/reports/*.json 2>/dev/null | head -1)
+          if [ -f "$REPORT_FILE" ]; then
+            echo "## Evaluation Results" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "**Model:** ${EVAL_MODEL:-claude-sonnet-4-20250514}" >> "$GITHUB_STEP_SUMMARY"
+            echo "**Date:** $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+
+            # Extract top-level pass/fail from JSON
+            node -e "
+              const r = require('./${REPORT_FILE}');
+              const total = r.results?.length || 0;
+              const passed = r.results?.filter(x => x.passed).length || 0;
+              console.log('| Metric | Value |');
+              console.log('|--------|-------|');
+              console.log('| Total scenarios | ' + total + ' |');
+              console.log('| Passed | ' + passed + ' |');
+              console.log('| Failed | ' + (total - passed) + ' |');
+              console.log('| Pass rate | ' + (total ? Math.round(passed/total*100) : 0) + '% |');
+              if (r.overallScore != null) {
+                console.log('| Overall score | ' + r.overallScore.toFixed(2) + ' |');
+              }
+            " >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || echo "Could not parse report." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No evaluation report file found." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Fail if score below threshold
+        if: always()
+        run: |
+          REPORT_FILE=$(ls -t evaluation/reports/*.json 2>/dev/null | head -1)
+          if [ -f "$REPORT_FILE" ]; then
+            node -e "
+              const r = require('./${REPORT_FILE}');
+              const total = r.results?.length || 0;
+              const passed = r.results?.filter(x => x.passed).length || 0;
+              const rate = total ? passed / total : 0;
+              if (rate < 0.7) {
+                console.error('FAIL: Pass rate ' + (rate * 100).toFixed(1) + '% is below 70% threshold.');
+                process.exit(1);
+              }
+              console.log('PASS: ' + (rate * 100).toFixed(1) + '% pass rate.');
+            "
+          fi

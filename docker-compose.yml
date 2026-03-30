@@ -1,0 +1,321 @@
+# ---------------------------------------------------------------------------
+# Lurk Platform — Docker Compose for Local Development
+# ---------------------------------------------------------------------------
+#
+# Usage:
+#   docker compose up                  Start all services
+#   docker compose up api-gateway      Start a specific service + deps
+#   docker compose --profile emulator up   Start with Firebase emulators
+#
+# Prerequisites:
+#   cp .env.example .env   (then fill in API keys)
+# ---------------------------------------------------------------------------
+
+name: lurk
+
+services:
+  # -------------------------------------------------------------------------
+  # Firebase Emulator Suite
+  # -------------------------------------------------------------------------
+  firebase-emulator:
+    image: node:22-slim
+    profiles: [emulator, full]
+    working_dir: /app
+    command: >
+      sh -c "
+        npm install -g firebase-tools &&
+        firebase emulators:start --project=lurk-local --import=./emulator-data --export-on-exit
+      "
+    volumes:
+      - ./infra/firebase:/app/infra/firebase:ro
+      - firebase-emulator-data:/app/emulator-data
+    ports:
+      - "4000:4000"   # Emulator UI
+      - "8081:8081"   # Firestore
+      - "9099:9099"   # Auth
+      - "8085:8085"   # Pub/Sub
+      - "9199:9199"   # Storage
+    environment:
+      - GCLOUD_PROJECT=lurk-local
+      - FIREBASE_CONFIG=/app/infra/firebase/firebase.json
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - lurk-net
+
+  # -------------------------------------------------------------------------
+  # API Gateway (Node.js / Express)
+  # -------------------------------------------------------------------------
+  api-gateway:
+    build:
+      context: .
+      dockerfile: services/api-gateway/Dockerfile
+    ports:
+      - "8080:8080"
+    env_file: .env
+    environment:
+      - NODE_ENV=development
+      - PORT=8080
+      - ENVIRONMENT=local
+      - FIRESTORE_EMULATOR_HOST=firebase-emulator:8081
+      - FIREBASE_AUTH_EMULATOR_HOST=firebase-emulator:9099
+      - PUBSUB_EMULATOR_HOST=firebase-emulator:8085
+      - AGENT_ORCHESTRATOR_URL=http://agent-orchestrator:8080
+      - LLM_GATEWAY_URL=http://llm-gateway:8080
+      - PII_SERVICE_URL=http://pii-service:8080
+      - NOTIFICATION_SERVICE_URL=http://notification-service:8080
+      - TTS_SERVICE_URL=http://tts-service:8080
+      - AUDIT_SERVICE_URL=http://audit-service:8080
+      - MIGRATION_SERVICE_URL=http://migration-service:8080
+    depends_on:
+      firebase-emulator:
+        condition: service_healthy
+        required: false
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - lurk-net
+
+  # -------------------------------------------------------------------------
+  # Agent Orchestrator (Python / FastAPI)
+  # -------------------------------------------------------------------------
+  agent-orchestrator:
+    build:
+      context: services/agent-orchestrator
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8080"
+    env_file: .env
+    environment:
+      - ENVIRONMENT=local
+      - PORT=8080
+      - FIRESTORE_EMULATOR_HOST=firebase-emulator:8081
+      - PUBSUB_EMULATOR_HOST=firebase-emulator:8085
+      - LLM_GATEWAY_URL=http://llm-gateway:8080
+      - PII_SERVICE_URL=http://pii-service:8080
+    depends_on:
+      firebase-emulator:
+        condition: service_healthy
+        required: false
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - lurk-net
+
+  # -------------------------------------------------------------------------
+  # LLM Gateway (Python / FastAPI)
+  # -------------------------------------------------------------------------
+  llm-gateway:
+    build:
+      context: services/llm-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8083:8080"
+    env_file: .env
+    environment:
+      - ENVIRONMENT=local
+      - PORT=8080
+      - FIRESTORE_EMULATOR_HOST=firebase-emulator:8081
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - lurk-net
+
+  # -------------------------------------------------------------------------
+  # PII Service (Python / FastAPI + Presidio)
+  # -------------------------------------------------------------------------
+  pii-service:
+    build:
+      context: services/pii-service
+      dockerfile: Dockerfile
+    ports:
+      - "8084:8080"
+    env_file: .env
+    environment:
+      - ENVIRONMENT=local
+      - PORT=8080
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - lurk-net
+
+  # -------------------------------------------------------------------------
+  # Migration Service (Python / FastAPI)
+  # -------------------------------------------------------------------------
+  migration-service:
+    build:
+      context: services/migration-service
+      dockerfile: Dockerfile
+    ports:
+      - "8085:8080"
+    env_file: .env
+    environment:
+      - ENVIRONMENT=local
+      - PORT=8080
+      - FIRESTORE_EMULATOR_HOST=firebase-emulator:8081
+      - STORAGE_EMULATOR_HOST=firebase-emulator:9199
+      - PUBSUB_EMULATOR_HOST=firebase-emulator:8085
+    depends_on:
+      firebase-emulator:
+        condition: service_healthy
+        required: false
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - lurk-net
+
+  # -------------------------------------------------------------------------
+  # Notification Service (Node.js)
+  # -------------------------------------------------------------------------
+  notification-service:
+    build:
+      context: .
+      dockerfile: services/notification-service/Dockerfile
+    ports:
+      - "8086:8080"
+    env_file: .env
+    environment:
+      - NODE_ENV=development
+      - PORT=8080
+      - ENVIRONMENT=local
+      - FIRESTORE_EMULATOR_HOST=firebase-emulator:8081
+      - FIREBASE_AUTH_EMULATOR_HOST=firebase-emulator:9099
+      - PUBSUB_EMULATOR_HOST=firebase-emulator:8085
+    depends_on:
+      firebase-emulator:
+        condition: service_healthy
+        required: false
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - lurk-net
+
+  # -------------------------------------------------------------------------
+  # TTS Service (Node.js)
+  # -------------------------------------------------------------------------
+  tts-service:
+    build:
+      context: .
+      dockerfile: services/tts-service/Dockerfile
+    ports:
+      - "8087:8080"
+    env_file: .env
+    environment:
+      - NODE_ENV=development
+      - PORT=8080
+      - ENVIRONMENT=local
+      - STORAGE_EMULATOR_HOST=firebase-emulator:9199
+    depends_on:
+      firebase-emulator:
+        condition: service_healthy
+        required: false
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - lurk-net
+
+  # -------------------------------------------------------------------------
+  # Audit Service (Node.js)
+  # -------------------------------------------------------------------------
+  audit-service:
+    build:
+      context: .
+      dockerfile: services/audit-service/Dockerfile
+    ports:
+      - "8088:8080"
+    env_file: .env
+    environment:
+      - NODE_ENV=development
+      - PORT=8080
+      - ENVIRONMENT=local
+      - FIRESTORE_EMULATOR_HOST=firebase-emulator:8081
+      - PUBSUB_EMULATOR_HOST=firebase-emulator:8085
+    depends_on:
+      firebase-emulator:
+        condition: service_healthy
+        required: false
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - lurk-net
+
+  # -------------------------------------------------------------------------
+  # Web Admin (Next.js)
+  # -------------------------------------------------------------------------
+  web-admin:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    ports:
+      - "3000:3000"
+    env_file: .env
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - ENVIRONMENT=local
+      - NEXT_PUBLIC_API_URL=http://localhost:8080
+      - NEXT_PUBLIC_FIREBASE_PROJECT_ID=lurk-local
+      - NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST=localhost:9099
+      - NEXT_PUBLIC_FIRESTORE_EMULATOR_HOST=localhost:8081
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+        required: false
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - lurk-net
+
+# ---------------------------------------------------------------------------
+# Volumes
+# ---------------------------------------------------------------------------
+volumes:
+  firebase-emulator-data:
+    driver: local
+
+# ---------------------------------------------------------------------------
+# Networks
+# ---------------------------------------------------------------------------
+networks:
+  lurk-net:
+    driver: bridge

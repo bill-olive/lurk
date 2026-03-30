@@ -1,0 +1,518 @@
+{
+  "version": "1.0.0",
+  "description": "Evaluation rubric for each Lurk platform component across quality dimensions",
+  "dimensions": {
+    "code_quality": {
+      "max_score": 10,
+      "description": "TypeScript/Python code quality, error handling, type safety, naming conventions",
+      "scoring": {
+        "0-2": "Missing or non-functional code. No types, no error handling.",
+        "3-4": "Skeleton code. Basic structure but incomplete implementation, few types.",
+        "5-6": "Functional code with some types and basic error handling. Some best practices.",
+        "7-8": "Well-structured code with comprehensive types, proper error handling, good naming.",
+        "9-10": "Production-quality code. Full type coverage, exhaustive error handling, clean architecture."
+      }
+    },
+    "api_completeness": {
+      "max_score": 10,
+      "description": "All PRD-specified API endpoints, routes, and service interfaces are implemented",
+      "scoring": {
+        "0-2": "No API routes or fewer than 20% of required endpoints.",
+        "3-4": "30-50% of required endpoints exist. Major gaps.",
+        "5-6": "50-70% of required endpoints exist. Core operations covered.",
+        "7-8": "70-90% of required endpoints exist. Minor gaps only.",
+        "9-10": "All PRD-specified endpoints exist with correct HTTP methods and request/response types."
+      }
+    },
+    "security": {
+      "max_score": 10,
+      "description": "Authentication, authorization, input validation, PII handling, secrets management",
+      "scoring": {
+        "0-2": "No auth integration, no input validation, secrets in code.",
+        "3-4": "Basic auth check exists but incomplete. Some validation.",
+        "5-6": "Firebase Auth integrated. Basic input validation. No hardcoded secrets.",
+        "7-8": "Full auth with role-based access. Comprehensive validation. Proper secrets management.",
+        "9-10": "Defense-in-depth. Auth + ACL + validation + PII checks + audit logging on all operations."
+      }
+    },
+    "test_coverage": {
+      "max_score": 10,
+      "description": "Unit tests, integration tests, and test infrastructure present and functional",
+      "scoring": {
+        "0-2": "No tests present.",
+        "3-4": "A few unit tests exist but incomplete coverage.",
+        "5-6": "Unit tests for core logic. Test configuration present.",
+        "7-8": "Unit + integration tests. Good coverage of happy paths and edge cases.",
+        "9-10": "Comprehensive test suite. Unit + integration + edge cases + error paths. CI-ready."
+      }
+    },
+    "integration": {
+      "max_score": 10,
+      "description": "Proper use of shared types, service-to-service communication, Firestore references",
+      "scoring": {
+        "0-2": "No integration with other services. Standalone code.",
+        "3-4": "References shared types but does not properly import. Hardcoded URLs.",
+        "5-6": "Uses shared types. Basic service communication patterns.",
+        "7-8": "Full shared types integration. Proper service discovery. Firestore collection references match data model.",
+        "9-10": "Seamless integration. Shared types, proper error propagation, circuit breakers, health checks."
+      }
+    },
+    "ux_quality": {
+      "max_score": 10,
+      "description": "UI component quality — responsive design, accessibility, intuitive layout. Only scored for UI components.",
+      "applies_to": ["web-admin", "chrome-extension", "ui-web"],
+      "scoring": {
+        "0-2": "No UI components or completely non-functional.",
+        "3-4": "Basic HTML/JSX structure but no styling or layout.",
+        "5-6": "Functional UI with Tailwind styling. Basic responsive design.",
+        "7-8": "Well-designed UI. Responsive, accessible (aria attributes), intuitive navigation.",
+        "9-10": "Production-quality UI. Full accessibility, responsive, keyboard navigation, loading states, error states."
+      }
+    }
+  },
+  "components": {
+    "web-admin": {
+      "path": "apps/web",
+      "technology": "Next.js 15, React, Tailwind",
+      "description": "Web admin console for org administration",
+      "evaluated_dimensions": ["code_quality", "api_completeness", "security", "test_coverage", "integration", "ux_quality"],
+      "required_features": [
+        "Dashboard with org-wide metrics",
+        "Policies management (privacy, agent, group, YOLO)",
+        "Agent management with marketplace and custom builder",
+        "Teams and access control management",
+        "Artifact explorer with relationship graph",
+        "Audit log viewer with compliance reports",
+        "Migration configuration and monitoring",
+        "Connector configuration",
+        "Customer health dashboard",
+        "Analytics dashboard",
+        "Kill switch controls"
+      ],
+      "expected_files": {
+        "package.json": "Next.js 15 dependencies, React, Tailwind",
+        "next.config.*": "Next.js configuration",
+        "tailwind.config.*": "Tailwind CSS configuration",
+        "src/app/layout.tsx": "Root layout with navigation",
+        "src/app/page.tsx": "Dashboard page",
+        "src/app/policies/**": "Policies section",
+        "src/app/agents/**": "Agents section with marketplace",
+        "src/app/teams/**": "Teams and access section",
+        "src/app/artifacts/**": "Artifact explorer section",
+        "src/app/audit/**": "Audit log section",
+        "src/app/migration/**": "Migration section",
+        "src/app/connectors/**": "Connectors section",
+        "src/app/customer-health/**": "Customer health section",
+        "src/app/analytics/**": "Analytics section",
+        "src/app/kill-switches/**": "Kill switches section",
+        "Dockerfile": "Container configuration for Cloud Run"
+      },
+      "firestore_collections": [
+        "organizations",
+        "policies",
+        "agents",
+        "agentTemplates",
+        "teams",
+        "artifacts",
+        "audits",
+        "migrations",
+        "customerHealth",
+        "notifications",
+        "federations"
+      ]
+    },
+    "chrome-extension": {
+      "path": "apps/extension",
+      "technology": "Manifest V3, React, Shadow DOM",
+      "description": "Chrome extension for browser-level artifact capture",
+      "evaluated_dimensions": ["code_quality", "api_completeness", "security", "test_coverage", "integration", "ux_quality"],
+      "required_features": [
+        "Manifest V3 configuration",
+        "DOM observer for Google Docs",
+        "DOM observer for Gmail",
+        "Native Messaging to Mac app",
+        "Sidebar UI with Shadow DOM",
+        "Standalone mode with WASM PII",
+        "Content scripts for target domains"
+      ],
+      "expected_files": {
+        "manifest.json": "Manifest V3 with nativeMessaging permission",
+        "package.json": "React, build tooling",
+        "src/background/*": "Service worker background script",
+        "src/content/*": "Content scripts for DOM observation",
+        "src/sidebar/*": "Sidebar React components",
+        "src/native-messaging/*": "Native Messaging host communication",
+        "src/pii/*": "WASM PII detection fallback"
+      }
+    },
+    "api-gateway": {
+      "path": "services/api-gateway",
+      "technology": "Node.js, Express/Fastify, Cloud Run",
+      "description": "API gateway handling auth, routing, and rate limiting",
+      "evaluated_dimensions": ["code_quality", "api_completeness", "security", "test_coverage", "integration"],
+      "required_features": [
+        "Firebase Auth token verification middleware",
+        "Request routing to backend services",
+        "Rate limiting per user and org",
+        "Input validation middleware",
+        "CORS configuration",
+        "Health check endpoint",
+        "Request logging with PII redaction"
+      ],
+      "expected_files": {
+        "package.json": "Express/Fastify, Firebase Admin SDK",
+        "src/index.ts": "Server entry point",
+        "src/middleware/auth.ts": "Firebase Auth middleware",
+        "src/middleware/rate-limit.ts": "Rate limiting middleware",
+        "src/middleware/validation.ts": "Input validation",
+        "src/routes/**": "Route definitions",
+        "Dockerfile": "Cloud Run container"
+      },
+      "expected_routes": [
+        "GET /health",
+        "POST /api/artifacts",
+        "GET /api/artifacts/:id",
+        "GET /api/artifacts",
+        "POST /api/ledgers/:id/commit",
+        "POST /api/ledgers/:id/branch",
+        "POST /api/ledgers/:id/merge",
+        "GET /api/ledgers/:id/log",
+        "POST /api/forks",
+        "POST /api/pull-requests",
+        "GET /api/pull-requests/:id",
+        "PATCH /api/pull-requests/:id/review",
+        "POST /api/pull-requests/:id/merge",
+        "GET /api/agents",
+        "POST /api/agents",
+        "PATCH /api/agents/:id",
+        "GET /api/agents/templates",
+        "GET /api/organizations/:id",
+        "PATCH /api/organizations/:id",
+        "GET /api/policies",
+        "POST /api/policies",
+        "GET /api/teams",
+        "POST /api/teams",
+        "GET /api/audits",
+        "POST /api/migrations",
+        "GET /api/migrations/:id",
+        "GET /api/customer-health",
+        "POST /api/kill-switches",
+        "GET /api/notifications",
+        "POST /api/tts/generate"
+      ]
+    },
+    "agent-orchestrator": {
+      "path": "services/agent-orchestrator",
+      "technology": "Python, Cloud Run",
+      "description": "Agent execution engine managing all agent types and Claude API calls",
+      "evaluated_dimensions": ["code_quality", "api_completeness", "security", "test_coverage", "integration"],
+      "required_features": [
+        "Agent execution loop (trigger, scope, analyze, gate, execute, audit)",
+        "Personal agent implementation",
+        "Team agent implementation",
+        "Org agent implementation",
+        "Voice agent implementation",
+        "Calendar agent implementation",
+        "Customer health agent implementation",
+        "Analytics agent implementation",
+        "Action budget enforcement",
+        "YOLO mode auto-merge evaluation",
+        "Agent marketplace template management"
+      ],
+      "expected_files": {
+        "requirements.txt": "anthropic, firebase-admin, fastapi/flask",
+        "pyproject.toml": "Python project configuration",
+        "src/main.py": "FastAPI/Flask entry point",
+        "src/agents/personal.py": "Personal agent implementation",
+        "src/agents/team.py": "Team agent implementation",
+        "src/agents/org.py": "Org agent implementation",
+        "src/agents/voice.py": "Voice agent implementation",
+        "src/agents/calendar.py": "Calendar agent implementation",
+        "src/agents/customer_health.py": "Customer health agent",
+        "src/agents/analytics.py": "Analytics agent",
+        "src/orchestrator.py": "Core orchestration logic",
+        "src/budget.py": "Action budget management",
+        "src/yolo.py": "YOLO mode evaluation",
+        "Dockerfile": "Cloud Run container"
+      }
+    },
+    "llm-gateway": {
+      "path": "services/llm-gateway",
+      "technology": "Python, Anthropic SDK, OpenAI SDK",
+      "description": "Centralized LLM access gateway for Claude and OpenAI",
+      "evaluated_dimensions": ["code_quality", "api_completeness", "security", "test_coverage", "integration"],
+      "required_features": [
+        "Anthropic Claude API integration (Sonnet 4.6 + Opus 4.6)",
+        "OpenAI API integration (TTS only)",
+        "Model routing based on agent type",
+        "Token metering and usage tracking",
+        "Rate limiting per org",
+        "Prompt template loading from /prompts",
+        "Error handling with retries and fallbacks"
+      ],
+      "expected_files": {
+        "requirements.txt": "anthropic, openai, fastapi/flask",
+        "src/main.py": "Entry point",
+        "src/claude_client.py": "Anthropic API client wrapper",
+        "src/openai_client.py": "OpenAI API client wrapper",
+        "src/router.py": "Model routing logic",
+        "src/metering.py": "Token usage tracking",
+        "Dockerfile": "Cloud Run container"
+      }
+    },
+    "pii-service": {
+      "path": "services/pii-service",
+      "technology": "Python, Presidio, custom rules",
+      "description": "Server-side PII detection and validation as defense-in-depth",
+      "evaluated_dimensions": ["code_quality", "api_completeness", "security", "test_coverage", "integration"],
+      "required_features": [
+        "Regex-based PII detectors (EMAIL, PHONE, SSN, CREDIT_CARD, API_KEY, etc.)",
+        "NER-based PII detectors (PERSON, ORGANIZATION, ADDRESS)",
+        "Context-aware detectors (FINANCIAL_TERM, HEALTH_TERM)",
+        "Server-side validation endpoint for double-checking client PII scrubbing",
+        "Org-configurable custom detector patterns",
+        ">95% recall target with test harness"
+      ],
+      "expected_files": {
+        "requirements.txt": "presidio-analyzer, presidio-anonymizer, spacy, fastapi",
+        "src/main.py": "Entry point",
+        "src/detectors/regex.py": "Regex-based detectors",
+        "src/detectors/ner.py": "NER-based detectors",
+        "src/detectors/context.py": "Context-aware detectors",
+        "src/validator.py": "Validation endpoint logic",
+        "Dockerfile": "Cloud Run container"
+      }
+    },
+    "migration-service": {
+      "path": "services/migration-service",
+      "technology": "Python, Browserbase SDK",
+      "description": "Migration orchestration for importing data from Slack, Drive, Notion, etc.",
+      "evaluated_dimensions": ["code_quality", "api_completeness", "security", "test_coverage", "integration"],
+      "required_features": [
+        "Slack API import (Export API + Web API)",
+        "Agentic browser crawl via Browserbase",
+        "File upload processing (slack_export.zip, google_takeout.zip, etc.)",
+        "Migration pipeline: plan, authenticate, extract, classify, redact, preview, commit, verify",
+        "Admin approval flow before commit",
+        "Rollback capability",
+        "Migration verification and reporting"
+      ],
+      "expected_files": {
+        "requirements.txt": "browserbase, slack-sdk, fastapi, anthropic",
+        "src/main.py": "Entry point",
+        "src/importers/slack.py": "Slack import implementation",
+        "src/importers/gdrive.py": "Google Drive import",
+        "src/importers/notion.py": "Notion import",
+        "src/crawl/browserbase.py": "Browserbase crawl orchestration",
+        "src/pipeline.py": "Migration pipeline orchestration",
+        "Dockerfile": "Cloud Run container"
+      }
+    },
+    "notification-service": {
+      "path": "services/notification-service",
+      "technology": "Node.js, APNs, SendGrid",
+      "description": "Notification routing and dispatch service",
+      "evaluated_dimensions": ["code_quality", "api_completeness", "security", "test_coverage", "integration"],
+      "required_features": [
+        "APNs push notification delivery for iOS",
+        "Email notifications via SendGrid",
+        "Webhook notification delivery",
+        "Notification preference enforcement",
+        "Quiet hours and digest mode",
+        "Action-required filtering",
+        "Voice narration audio attachment on push"
+      ],
+      "expected_files": {
+        "package.json": "apn, @sendgrid/mail, firebase-admin",
+        "src/index.ts": "Entry point",
+        "src/channels/apns.ts": "APNs integration",
+        "src/channels/email.ts": "SendGrid integration",
+        "src/channels/webhook.ts": "Webhook delivery",
+        "src/preferences.ts": "User notification preferences",
+        "Dockerfile": "Cloud Run container"
+      }
+    },
+    "tts-service": {
+      "path": "services/tts-service",
+      "technology": "Python, OpenAI SDK",
+      "description": "Text-to-speech generation for PR voice narration",
+      "evaluated_dimensions": ["code_quality", "api_completeness", "security", "test_coverage", "integration"],
+      "required_features": [
+        "OpenAI TTS API integration",
+        "PR summary to speech conversion",
+        "Audio file upload to GCS",
+        "CDN URL generation",
+        "Multiple voice options",
+        "Fallback handling when TTS unavailable"
+      ],
+      "expected_files": {
+        "requirements.txt": "openai, google-cloud-storage, fastapi",
+        "src/main.py": "Entry point",
+        "src/tts.py": "TTS generation logic",
+        "src/storage.py": "GCS upload and CDN URL",
+        "Dockerfile": "Cloud Run container"
+      }
+    },
+    "audit-service": {
+      "path": "services/audit-service",
+      "technology": "Node.js, BigQuery",
+      "description": "Append-only audit log ingestion and BigQuery export",
+      "evaluated_dimensions": ["code_quality", "api_completeness", "security", "test_coverage", "integration"],
+      "required_features": [
+        "Audit event ingestion endpoint",
+        "Firestore audits collection writes",
+        "BigQuery streaming insert for long-term storage",
+        "Lineage tracking (action chain references)",
+        "Compliance report generation",
+        "Query API for audit log retrieval with filters"
+      ],
+      "expected_files": {
+        "package.json": "firebase-admin, @google-cloud/bigquery",
+        "src/index.ts": "Entry point",
+        "src/ingest.ts": "Audit event ingestion",
+        "src/bigquery.ts": "BigQuery export",
+        "src/reports.ts": "Compliance report generation",
+        "Dockerfile": "Cloud Run container"
+      }
+    },
+    "shared-types": {
+      "path": "packages/shared-types",
+      "technology": "TypeScript",
+      "description": "Shared TypeScript types used across all Node.js services",
+      "evaluated_dimensions": ["code_quality", "api_completeness", "test_coverage", "integration"],
+      "required_features": [
+        "Artifact type definitions matching PRD Section 4",
+        "Ledger, Branch, CommitEntry types",
+        "PullRequest, Fork types",
+        "Agent, AgentTemplate types",
+        "Policy types",
+        "Organization, User, Team types",
+        "CustomerHealth types",
+        "Audit event types",
+        "Migration types",
+        "Notification types",
+        "Federation types",
+        "Kill switch types",
+        "Firestore collection name constants"
+      ],
+      "expected_files": {
+        "package.json": "TypeScript compilation config",
+        "src/index.ts": "Re-exports all types",
+        "src/artifact.ts": "Artifact and ArtifactType",
+        "src/ledger.ts": "Ledger, Branch, CommitEntry",
+        "src/pull-request.ts": "PullRequest, Fork, ReviewResult",
+        "src/agent.ts": "Agent, AgentTemplate, AgentType",
+        "src/policy.ts": "Policy types",
+        "src/organization.ts": "Organization, User, Team",
+        "src/customer-health.ts": "CustomerHealthSignal",
+        "src/audit.ts": "AuditEvent types",
+        "src/migration.ts": "Migration types",
+        "src/notification.ts": "Notification types",
+        "src/collections.ts": "Firestore collection name constants"
+      }
+    },
+    "policy-engine": {
+      "path": "packages/policy-engine",
+      "technology": "TypeScript",
+      "description": "Policy evaluation library for privacy, agent, and access policies",
+      "evaluated_dimensions": ["code_quality", "api_completeness", "security", "test_coverage", "integration"],
+      "required_features": [
+        "Privacy policy evaluation",
+        "Agent policy evaluation",
+        "Group policy evaluation",
+        "YOLO policy evaluation",
+        "Policy version comparison",
+        "Default action handling"
+      ],
+      "expected_files": {
+        "package.json": "TypeScript compilation",
+        "src/index.ts": "Policy engine exports",
+        "src/evaluator.ts": "Core policy evaluation logic",
+        "src/privacy.ts": "Privacy policy rules",
+        "src/agent-policy.ts": "Agent policy rules",
+        "src/yolo.ts": "YOLO policy evaluation"
+      }
+    },
+    "diff-engine": {
+      "path": "packages/diff-engine",
+      "technology": "TypeScript",
+      "description": "Artifact diffing and merge logic supporting semantic diffs",
+      "evaluated_dimensions": ["code_quality", "api_completeness", "test_coverage", "integration"],
+      "required_features": [
+        "Text diff computation",
+        "Structured data diff",
+        "Merge strategies: fast_forward, three_way, semantic_merge, theirs, ours",
+        "Conflict detection",
+        "Diff display formatting"
+      ],
+      "expected_files": {
+        "package.json": "TypeScript compilation",
+        "src/index.ts": "Diff engine exports",
+        "src/diff.ts": "Core diff computation",
+        "src/merge.ts": "Merge strategy implementations",
+        "src/format.ts": "Diff display formatting"
+      }
+    },
+    "acl-resolver": {
+      "path": "packages/acl-resolver",
+      "technology": "TypeScript",
+      "description": "Access control resolution for multi-tier artifact access",
+      "evaluated_dimensions": ["code_quality", "api_completeness", "security", "test_coverage", "integration"],
+      "required_features": [
+        "Access tier resolution (public, internal, confidential, restricted)",
+        "ACL override handling",
+        "Cross-org federation access checks",
+        "Team-based access computation",
+        "Role-based access computation"
+      ],
+      "expected_files": {
+        "package.json": "TypeScript compilation",
+        "src/index.ts": "ACL resolver exports",
+        "src/resolver.ts": "Core ACL resolution logic",
+        "src/federation.ts": "Cross-org access rules",
+        "src/tiers.ts": "Access tier definitions"
+      }
+    },
+    "agent-sdk": {
+      "path": "packages/agent-sdk",
+      "technology": "TypeScript",
+      "description": "SDK for building custom Lurk agents",
+      "evaluated_dimensions": ["code_quality", "api_completeness", "test_coverage", "integration"],
+      "required_features": [
+        "Agent base class/interface",
+        "Trigger registration API",
+        "Capability declaration API",
+        "Scope management",
+        "Budget tracking utilities",
+        "Artifact read/write helpers"
+      ],
+      "expected_files": {
+        "package.json": "TypeScript compilation",
+        "src/index.ts": "SDK exports",
+        "src/agent.ts": "Base agent class",
+        "src/triggers.ts": "Trigger types and registration",
+        "src/capabilities.ts": "Capability declarations",
+        "src/scope.ts": "Scope management"
+      }
+    },
+    "ui-web": {
+      "path": "packages/ui-web",
+      "technology": "React, Tailwind",
+      "description": "Shared React UI components for extension and admin console",
+      "evaluated_dimensions": ["code_quality", "test_coverage", "integration", "ux_quality"],
+      "required_features": [
+        "Shared button, input, card components",
+        "PR diff viewer component",
+        "Artifact list/detail components",
+        "Agent status components",
+        "Navigation components",
+        "Theme/design system tokens"
+      ],
+      "expected_files": {
+        "package.json": "React, Tailwind",
+        "src/index.ts": "Component exports",
+        "src/components/**": "Shared React components"
+      }
+    }
+  }
+}

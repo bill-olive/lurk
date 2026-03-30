@@ -1,0 +1,160 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---- Base ---- */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ---- Scrollbar ---- */
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ---- Custom Components ---- */
+
+@layer components {
+  .lurk-card {
+    @apply bg-surface-100 border border-surface-300 rounded-lg p-3 transition-colors;
+  }
+
+  .lurk-card:hover {
+    @apply bg-surface-200 border-surface-400;
+  }
+
+  .lurk-badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded-full text-2xs font-medium;
+  }
+
+  .lurk-badge-green {
+    @apply bg-accent-green/15 text-accent-green;
+  }
+
+  .lurk-badge-red {
+    @apply bg-accent-red/15 text-accent-red;
+  }
+
+  .lurk-badge-yellow {
+    @apply bg-accent-yellow/15 text-accent-yellow;
+  }
+
+  .lurk-badge-blue {
+    @apply bg-accent-blue/15 text-accent-blue;
+  }
+
+  .lurk-badge-purple {
+    @apply bg-accent-purple/15 text-accent-purple;
+  }
+
+  .lurk-badge-gray {
+    @apply bg-white/10 text-white/60;
+  }
+
+  .lurk-btn {
+    @apply inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-150;
+  }
+
+  .lurk-btn-primary {
+    @apply lurk-btn bg-lurk-600 text-white hover:bg-lurk-500 active:bg-lurk-700;
+  }
+
+  .lurk-btn-success {
+    @apply lurk-btn bg-accent-green/15 text-accent-green hover:bg-accent-green/25 active:bg-accent-green/30;
+  }
+
+  .lurk-btn-danger {
+    @apply lurk-btn bg-accent-red/15 text-accent-red hover:bg-accent-red/25 active:bg-accent-red/30;
+  }
+
+  .lurk-btn-ghost {
+    @apply lurk-btn bg-transparent text-white/60 hover:bg-white/5 hover:text-white/80;
+  }
+
+  .lurk-input {
+    @apply w-full bg-surface-200 border border-surface-400 rounded-md px-3 py-1.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-lurk-500 focus:ring-1 focus:ring-lurk-500/30 transition-colors;
+  }
+
+  .lurk-tab {
+    @apply flex-1 flex items-center justify-center gap-1 py-2 px-1 text-2xs font-medium text-white/40 border-b-2 border-transparent transition-colors cursor-pointer;
+  }
+
+  .lurk-tab:hover {
+    @apply text-white/60;
+  }
+
+  .lurk-tab-active {
+    @apply text-lurk-400 border-lurk-400;
+  }
+
+  .lurk-diff-add {
+    @apply bg-accent-green/10 text-accent-green border-l-2 border-accent-green/40;
+  }
+
+  .lurk-diff-remove {
+    @apply bg-accent-red/10 text-accent-red border-l-2 border-accent-red/40;
+  }
+
+  .lurk-diff-context {
+    @apply text-white/50;
+  }
+
+  .lurk-toggle {
+    @apply relative inline-flex h-5 w-9 items-center rounded-full transition-colors cursor-pointer;
+  }
+
+  .lurk-toggle-on {
+    @apply bg-lurk-600;
+  }
+
+  .lurk-toggle-off {
+    @apply bg-surface-400;
+  }
+
+  .lurk-toggle-thumb {
+    @apply inline-block h-3.5 w-3.5 rounded-full bg-white transition-transform;
+  }
+
+  .lurk-toggle-thumb-on {
+    @apply translate-x-4;
+  }
+
+  .lurk-toggle-thumb-off {
+    @apply translate-x-0.5;
+  }
+}
+
+/* ---- Animations ---- */
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.lurk-skeleton {
+  background: linear-gradient(90deg, theme('colors.surface.200') 0%, theme('colors.surface.300') 50%, theme('colors.surface.200') 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+}

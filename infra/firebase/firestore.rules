@@ -1,0 +1,244 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // -----------------------------------------------------------------------
+    // Helper functions
+    // -----------------------------------------------------------------------
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated()
+          && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isOrgMember(orgId) {
+      return isAuthenticated()
+          && exists(/databases/$(database)/documents/orgs/$(orgId)/members/$(request.auth.uid));
+    }
+
+    function isOrgAdmin(orgId) {
+      return isAuthenticated()
+          && get(/databases/$(database)/documents/orgs/$(orgId)/members/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isServiceAccount() {
+      // Cloud Run service accounts authenticate via Firebase Admin SDK
+      // and are identified by their token claims
+      return request.auth != null
+          && request.auth.token.firebase != null
+          && request.auth.token.firebase.sign_in_provider == 'custom';
+    }
+
+    function isAgentServiceAccount() {
+      return isServiceAccount()
+          && request.auth.token.agent == true;
+    }
+
+    // -----------------------------------------------------------------------
+    // Users
+    // -----------------------------------------------------------------------
+
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // -----------------------------------------------------------------------
+    // Organizations
+    // -----------------------------------------------------------------------
+
+    match /orgs/{orgId} {
+      allow read: if isOrgMember(orgId) || isAdmin();
+      allow create: if isAuthenticated();
+      allow update: if isOrgAdmin(orgId) || isAdmin();
+      allow delete: if isAdmin();
+
+      // Org members subcollection
+      match /members/{memberId} {
+        allow read: if isOrgMember(orgId) || isAdmin();
+        allow write: if isOrgAdmin(orgId) || isAdmin();
+      }
+    }
+
+    // -----------------------------------------------------------------------
+    // Ledgers — users can only read/write their own ledger
+    // -----------------------------------------------------------------------
+
+    match /ledgers/{ledgerId} {
+      allow read: if isAuthenticated()
+                  && (resource.data.ownerId == request.auth.uid
+                      || isOrgMember(resource.data.orgId)
+                      || isAdmin()
+                      || isAgentServiceAccount());
+
+      allow create: if isAuthenticated()
+                    && request.resource.data.ownerId == request.auth.uid;
+
+      allow update: if isAuthenticated()
+                    && (resource.data.ownerId == request.auth.uid
+                        || isAgentServiceAccount()
+                        || isAdmin());
+
+      allow delete: if isAdmin();
+
+      // Commits subcollection — append-only for agents, read for owner
+      match /commits/{commitId} {
+        allow read: if isAuthenticated()
+                    && (get(/databases/$(database)/documents/ledgers/$(ledgerId)).data.ownerId == request.auth.uid
+                        || isOrgMember(get(/databases/$(database)/documents/ledgers/$(ledgerId)).data.orgId)
+                        || isAdmin()
+                        || isAgentServiceAccount());
+
+        allow create: if isAgentServiceAccount()
+                      || get(/databases/$(database)/documents/ledgers/$(ledgerId)).data.ownerId == request.auth.uid
+                      || isAdmin();
+
+        // Commits are immutable once written
+        allow update, delete: if false;
+      }
+    }
+
+    // -----------------------------------------------------------------------
+    // Artifacts — team members can read (redacted), owners can write
+    // -----------------------------------------------------------------------
+
+    match /artifacts/{artifactId} {
+      allow read: if isAuthenticated()
+                  && (resource.data.ownerId == request.auth.uid
+                      || isOrgMember(resource.data.orgId)
+                      || isAdmin()
+                      || isAgentServiceAccount());
+
+      allow create: if isAuthenticated()
+                    && (request.resource.data.ownerId == request.auth.uid
+                        || isAgentServiceAccount()
+                        || isAdmin());
+
+      allow update: if isAuthenticated()
+                    && (resource.data.ownerId == request.auth.uid
+                        || isAgentServiceAccount()
+                        || isAdmin());
+
+      allow delete: if isAdmin();
+    }
+
+    // -----------------------------------------------------------------------
+    // Pull Requests
+    // -----------------------------------------------------------------------
+
+    match /pullRequests/{prId} {
+      allow read: if isAuthenticated()
+                  && (isOrgMember(resource.data.orgId)
+                      || isAdmin()
+                      || isAgentServiceAccount());
+
+      allow create: if isAuthenticated()
+                    && (isOrgMember(request.resource.data.orgId)
+                        || isAgentServiceAccount());
+
+      allow update: if isAuthenticated()
+                    && (resource.data.createdBy == request.auth.uid
+                        || isOrgAdmin(resource.data.orgId)
+                        || isAgentServiceAccount()
+                        || isAdmin());
+
+      allow delete: if isAdmin();
+    }
+
+    // -----------------------------------------------------------------------
+    // Forks
+    // -----------------------------------------------------------------------
+
+    match /forks/{forkId} {
+      allow read: if isAuthenticated()
+                  && (isOrgMember(resource.data.orgId) || isAdmin() || isAgentServiceAccount());
+      allow create: if isAuthenticated()
+                    && (isOrgMember(request.resource.data.orgId) || isAgentServiceAccount());
+      allow update: if isAuthenticated()
+                    && (resource.data.createdBy == request.auth.uid
+                        || isAgentServiceAccount()
+                        || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    // -----------------------------------------------------------------------
+    // Audit Logs — append-only, read by admins only
+    // -----------------------------------------------------------------------
+
+    match /audits/{auditId} {
+      allow read: if isOrgAdmin(resource.data.orgId) || isAdmin();
+
+      // Only service accounts can write audit logs
+      allow create: if isAgentServiceAccount() || isServiceAccount();
+
+      // Audit logs are immutable — no updates or deletes
+      allow update, delete: if false;
+    }
+
+    // -----------------------------------------------------------------------
+    // Notifications
+    // -----------------------------------------------------------------------
+
+    match /notifications/{notifId} {
+      allow read: if isOwner(resource.data.userId) || isAdmin();
+      allow create: if isServiceAccount() || isAgentServiceAccount() || isAdmin();
+      allow update: if isOwner(resource.data.userId) || isAdmin();
+      allow delete: if isOwner(resource.data.userId) || isAdmin();
+    }
+
+    // -----------------------------------------------------------------------
+    // Migrations
+    // -----------------------------------------------------------------------
+
+    match /migrations/{migrationId} {
+      allow read: if isAuthenticated()
+                  && (isOrgMember(resource.data.orgId) || isAdmin());
+      allow create: if isOrgAdmin(request.resource.data.orgId) || isAdmin();
+      allow update: if isServiceAccount() || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // -----------------------------------------------------------------------
+    // Customer Health
+    // -----------------------------------------------------------------------
+
+    match /customerHealth/{healthId} {
+      allow read: if isAuthenticated()
+                  && (isOrgMember(resource.data.orgId) || isAdmin() || isAgentServiceAccount());
+      allow create, update: if isAgentServiceAccount() || isServiceAccount() || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // -----------------------------------------------------------------------
+    // Agents
+    // -----------------------------------------------------------------------
+
+    match /agents/{agentId} {
+      allow read: if isAuthenticated()
+                  && (isOrgMember(resource.data.orgId) || isAdmin());
+      allow create, update: if isOrgAdmin(request.resource.data.orgId)
+                            || isAgentServiceAccount()
+                            || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // -----------------------------------------------------------------------
+    // Catch-all deny
+    // -----------------------------------------------------------------------
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

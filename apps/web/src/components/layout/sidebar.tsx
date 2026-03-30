@@ -1,0 +1,147 @@
+"use client";
+
+import { usePathname } from "next/navigation";
+import Link from "next/link";
+import { clsx } from "clsx";
+import {
+  LayoutDashboard,
+  Shield,
+  Bot,
+  Users,
+  FileText,
+  ScrollText,
+  ArrowLeftRight,
+  Plug,
+  HeartPulse,
+  BarChart3,
+  Power,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+} from "lucide-react";
+import { useState } from "react";
+
+const navSections = [
+  {
+    title: "Overview",
+    items: [
+      { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+    ],
+  },
+  {
+    title: "Governance",
+    items: [
+      { label: "Policies", href: "/policies", icon: Shield },
+      { label: "Agents", href: "/agents", icon: Bot },
+      { label: "Teams & Access", href: "/teams", icon: Users },
+    ],
+  },
+  {
+    title: "Data",
+    items: [
+      { label: "Artifacts", href: "/artifacts", icon: FileText },
+      { label: "Audit", href: "/audit", icon: ScrollText },
+      { label: "Migration", href: "/migration", icon: ArrowLeftRight },
+      { label: "Connectors", href: "/connectors", icon: Plug },
+    ],
+  },
+  {
+    title: "Intelligence",
+    items: [
+      { label: "Customer Health", href: "/customer-health", icon: HeartPulse },
+      { label: "Analytics", href: "/analytics", icon: BarChart3 },
+    ],
+  },
+  {
+    title: "Operations",
+    items: [
+      { label: "Kill Switches", href: "/kill-switches", icon: Power },
+    ],
+  },
+];
+
+export function Sidebar() {
+  const pathname = usePathname();
+  const [collapsed, setCollapsed] = useState(false);
+
+  return (
+    <aside
+      className={clsx(
+        "fixed left-0 top-0 h-screen bg-surface-50 border-r border-gray-800/60 flex flex-col z-40 transition-all duration-200",
+        collapsed ? "w-16" : "w-60"
+      )}
+    >
+      {/* Logo */}
+      <div className="h-14 flex items-center gap-2.5 px-4 border-b border-gray-800/60 shrink-0">
+        <div className="w-8 h-8 rounded-lg bg-lurk-600 flex items-center justify-center shrink-0">
+          <Eye className="w-4 h-4 text-white" />
+        </div>
+        {!collapsed && (
+          <div className="flex flex-col">
+            <span className="text-sm font-bold text-gray-100 tracking-tight">
+              Lurk
+            </span>
+            <span className="text-2xs text-gray-500">Admin Console</span>
+          </div>
+        )}
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 overflow-y-auto py-3 px-2.5">
+        {navSections.map((section) => (
+          <div key={section.title} className="mb-4">
+            {!collapsed && (
+              <div className="px-3 py-1 mb-1">
+                <span className="text-2xs font-semibold text-gray-600 uppercase tracking-widest">
+                  {section.title}
+                </span>
+              </div>
+            )}
+            {section.items.map((item) => {
+              const isActive =
+                pathname === item.href ||
+                (item.href !== "/dashboard" &&
+                  pathname.startsWith(item.href));
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={clsx(
+                    "flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-150 mb-0.5",
+                    isActive
+                      ? "text-lurk-400 bg-lurk-950/50"
+                      : "text-gray-400 hover:text-gray-200 hover:bg-surface-200"
+                  )}
+                  title={collapsed ? item.label : undefined}
+                >
+                  <Icon
+                    className={clsx(
+                      "w-4 h-4 shrink-0",
+                      isActive ? "text-lurk-400" : "text-gray-500"
+                    )}
+                  />
+                  {!collapsed && <span>{item.label}</span>}
+                </Link>
+              );
+            })}
+          </div>
+        ))}
+      </nav>
+
+      {/* Collapse Toggle */}
+      <div className="p-2.5 border-t border-gray-800/60 shrink-0">
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="w-full flex items-center justify-center p-2 rounded-lg text-gray-500 hover:text-gray-300 hover:bg-surface-200 transition-colors"
+        >
+          {collapsed ? (
+            <ChevronRight className="w-4 h-4" />
+          ) : (
+            <ChevronLeft className="w-4 h-4" />
+          )}
+        </button>
+      </div>
+    </aside>
+  );
+}
