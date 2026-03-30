@@ -10,7 +10,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@lurk/shared-types": "workspace:*"
+    "@lurk/shared-types": "*"
   },
   "devDependencies": {
     "vitest": "^2.1.0"

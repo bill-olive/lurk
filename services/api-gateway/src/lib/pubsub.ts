@@ -68,7 +68,7 @@ export interface EventEnvelope {
  */
 export async function publishEvent(
   topicName: TopicName,
-  payload: Omit<EventEnvelope, 'eventId' | 'timestamp' | 'source'>,
+  payload: Omit<EventEnvelope, 'eventId' | 'eventType' | 'timestamp' | 'source'>,
 ): Promise<string> {
   const { v4: uuid } = await import('uuid');
 

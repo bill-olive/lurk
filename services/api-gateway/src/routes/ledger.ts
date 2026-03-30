@@ -1,6 +1,6 @@
 import { Router, type Request, type Response } from 'express';
 import { z } from 'zod';
-import { FieldValue } from 'firebase-admin/firestore';
+import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { requireAuth } from '../middleware/auth.js';
 import { validate, validateQuery } from '../middleware/validation.js';
 import { defaultLimiter, writeLimiter } from '../middleware/rate-limit.js';
@@ -269,7 +269,7 @@ router.post(
             message: commit.message,
             authorId: user.uid,
             authorType: 'user' as const,
-            timestamp: new Date(commit.timestamp),
+            timestamp: Timestamp.fromDate(new Date(commit.timestamp)),
             signature: '',
             policyVersion: '',
           });

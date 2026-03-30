@@ -5,5 +5,5 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": { "build": "tsc", "typecheck": "tsc --noEmit" },
-  "dependencies": { "@lurk/shared-types": "workspace:*" }
+  "dependencies": { "@lurk/shared-types": "*" }
 }

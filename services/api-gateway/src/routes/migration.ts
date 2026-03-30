@@ -569,7 +569,7 @@ router.get(
             estimatedTotal: (plan?.estimatedArtifacts as number) || 0,
             errorCount: migration.errors.length,
             startedAt: migration.executionLog.find(
-              (e: { action: string }) => e.action === 'execution_started',
+              (e: Record<string, unknown>) => e.action === 'execution_started',
             )?.timestamp ?? null,
             completedAt: migration.completedAt,
           },

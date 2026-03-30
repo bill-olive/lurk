@@ -9,7 +9,7 @@
     "dev": "tsx watch src/index.ts"
   },
   "dependencies": {
-    "@lurk/shared-types": "workspace:*",
+    "@lurk/shared-types": "*",
     "express": "^4.21.0",
     "firebase-admin": "^12.7.0",
     "@google-cloud/bigquery": "^7.9.0"

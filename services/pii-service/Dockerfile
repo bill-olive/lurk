@@ -12,13 +12,12 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Download spaCy model into the install prefix
-RUN PYTHONPATH=/install/lib/python3.12/site-packages \
-    python -m spacy download en_core_web_lg --target=/install/lib/python3.12/site-packages
+# Download spaCy model (use sm for faster builds — swap to lg in prod if needed)
+RUN python -m spacy download en_core_web_sm
 
-# Stage 2: Production
+# Stage 2: Production (copy from builder's full site-packages)
 FROM python:3.12-slim AS production
 
 RUN apt-get update && \
@@ -27,8 +26,9 @@ RUN apt-get update && \
 
 WORKDIR /app
 
-# Copy installed packages and spaCy model from builder
-COPY --from=builder /install /usr/local
+# Copy all installed packages from builder
+COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
 
 # Copy application code
 COPY src/ ./src/
@@ -39,6 +39,7 @@ USER appuser
 
 ENV PORT=8080
 ENV PYTHONUNBUFFERED=1
+ENV SPACY_MODEL=en_core_web_sm
 EXPOSE 8080
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=45s --retries=3 \
