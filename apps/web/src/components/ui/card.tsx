@@ -13,10 +13,10 @@ interface CardProps {
 }
 
 const variantStyles = {
-  default: "bg-white border border-ink-100 shadow-warm-sm",
-  bordered: "bg-ivory border border-ink-200",
+  default: "bg-transparent",
+  bordered: "border-b border-hairline border-[#d1cfc5]",
   ghost: "bg-transparent",
-  glow: "bg-white border border-clay-200 shadow-warm",
+  glow: "bg-white border border-ink-100 rounded-lg shadow-warm",
 };
 
 const paddingStyles = {
@@ -37,10 +37,10 @@ export function Card({
   return (
     <div
       className={clsx(
-        "rounded-xl transition-all duration-150",
+        "transition-colors duration-150",
         variantStyles[variant],
         paddingStyles[padding],
-        hover && "hover:bg-ink-50 hover:border-ink-200 cursor-pointer hover:shadow-warm",
+        hover && "hover:text-ink-700 cursor-pointer",
         onClick && "cursor-pointer",
         className
       )}
@@ -111,7 +111,7 @@ export function CardFooter({
   return (
     <div
       className={clsx(
-        "flex items-center justify-between mt-4 pt-4 border-t border-ink-100",
+        "flex items-center justify-between mt-4 pt-4 border-t border-hairline border-[#d1cfc5]",
         className
       )}
     >

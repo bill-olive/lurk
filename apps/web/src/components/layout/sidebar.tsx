@@ -16,8 +16,6 @@ import {
   BarChart3,
   Power,
   BookOpen,
-  ChevronLeft,
-  ChevronRight,
   Feather,
 } from "lucide-react";
 import { useState } from "react";
@@ -74,12 +72,15 @@ export function Sidebar() {
   return (
     <aside
       className={clsx(
-        "fixed left-0 top-0 h-screen bg-white border-r border-ink-100 flex flex-col z-40 transition-all duration-300",
+        "fixed left-0 top-0 h-screen bg-ivory border-r border-[#d1cfc5] flex flex-col z-40 transition-all duration-300",
         collapsed ? "w-16" : "w-60"
       )}
     >
-      {/* Logo */}
-      <div className="h-14 flex items-center gap-2.5 px-4 border-b border-ink-100 shrink-0">
+      {/* Logo — click to toggle sidebar */}
+      <button
+        onClick={() => setCollapsed(!collapsed)}
+        className="h-14 flex items-center gap-2.5 px-4 border-b border-[#d1cfc5] shrink-0 w-full text-left cursor-pointer hover:bg-ink-50 transition-colors"
+      >
         <div className="w-8 h-8 rounded-lg bg-clay-500 flex items-center justify-center shrink-0">
           <Feather className="w-4 h-4 text-white" />
         </div>
@@ -91,7 +92,7 @@ export function Sidebar() {
             <span className="text-2xs text-ink-300">Knowledge Platform</span>
           </div>
         )}
-      </div>
+      </button>
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto py-3 px-2.5">
@@ -99,7 +100,7 @@ export function Sidebar() {
           <div key={section.title} className="mb-4">
             {!collapsed && (
               <div className="px-3 py-1 mb-1">
-                <span className="text-2xs font-semibold text-ink-300 uppercase tracking-widest">
+                <span className="text-caption text-ink-300 font-medium">
                   {section.title}
                 </span>
               </div>
@@ -115,10 +116,10 @@ export function Sidebar() {
                   key={item.href}
                   href={item.href}
                   className={clsx(
-                    "flex items-center gap-3 px-3 py-2 text-body-sm font-medium rounded-lg transition-all duration-200 mb-0.5",
+                    "flex items-center gap-3 px-3 py-2 text-body-sm transition-colors duration-200 mb-0.5",
                     isActive
-                      ? "text-clay-600 bg-clay-50"
-                      : "text-ink-400 hover:text-ink-700 hover:bg-ink-50"
+                      ? "text-clay-600 font-bold"
+                      : "text-ink-400 font-medium hover:text-ink-700"
                   )}
                   title={collapsed ? item.label : undefined}
                 >
@@ -135,20 +136,6 @@ export function Sidebar() {
           </div>
         ))}
       </nav>
-
-      {/* Collapse Toggle */}
-      <div className="p-2.5 border-t border-ink-100 shrink-0">
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="w-full flex items-center justify-center p-2 rounded-lg text-ink-300 hover:text-ink-500 hover:bg-ink-50 transition-colors"
-        >
-          {collapsed ? (
-            <ChevronRight className="w-4 h-4" />
-          ) : (
-            <ChevronLeft className="w-4 h-4" />
-          )}
-        </button>
-      </div>
     </aside>
   );
 }

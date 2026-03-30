@@ -52,14 +52,18 @@
 }
 
 @layer components {
+  /* Anthropic-style: no boxes, content sits flat on background */
   .card-editorial {
-    @apply bg-white rounded-editorial border border-ink-100/60 shadow-warm-sm
-      transition-all duration-300;
+    @apply pb-6 mb-2 transition-colors duration-200;
   }
 
   .card-editorial:hover {
-    @apply shadow-warm border-ink-200/60;
-    transform: translateY(-1px);
+    @apply opacity-90;
+  }
+
+  /* Hairline divider following Anthropic research style */
+  .hairline {
+    border-top: 0.5px solid #d1cfc5;
   }
 
   .input-base {

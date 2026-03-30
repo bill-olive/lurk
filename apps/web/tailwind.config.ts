@@ -133,6 +133,10 @@ const config: Config = {
       },
       borderRadius: {
         "editorial": "0.625rem",
+        "subtle": "0.25rem",
+      },
+      borderWidth: {
+        "hairline": "0.5px",
       },
       spacing: {
         "18": "4.5rem",

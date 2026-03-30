@@ -5,13 +5,11 @@ import Link from "next/link";
 import clsx from "clsx";
 import {
   Clock,
-  User,
   GitBranch,
   MessageSquare,
   ArrowLeft,
   Check,
   FileText,
-  ChevronRight,
 } from "lucide-react";
 
 // ── Types ────────────────────────────────────
@@ -145,12 +143,15 @@ export default function ArtifactReadingView() {
   return (
     <div className="min-h-screen bg-ivory">
       {/* ── Top Bar ─────────────────────────── */}
-      <header className="sticky top-0 z-20 bg-ivory/90 backdrop-blur-sm border-b border-ink-100/60">
+      <header
+        className="sticky top-0 z-20 bg-ivory/90 backdrop-blur-sm"
+        style={{ borderBottom: "0.5px solid #d1cfc5" }}
+      >
         <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link
               href="/artifacts"
-              className="flex items-center gap-1.5 text-ink-400 hover:text-ink-700 transition-colors text-sm"
+              className="flex items-center gap-1.5 text-ink-400 hover:text-ink-700 hover:underline underline-offset-2 transition-colors text-sm"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>All Artifacts</span>
@@ -210,7 +211,10 @@ export default function ArtifactReadingView() {
           </p>
 
           {/* Byline */}
-          <div className="flex items-center gap-3 pb-8 mb-10 border-b border-ink-100">
+          <div
+            className="flex items-center gap-3 pb-8 mb-10"
+            style={{ borderBottom: "0.5px solid #d1cfc5" }}
+          >
             <div
               className={clsx(
                 "w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-medium",
@@ -337,7 +341,7 @@ export default function ArtifactReadingView() {
             </p>
             <p>
               <span className="addition">
-                We are building what we internally call "contextual co-authoring"
+                We are building what we internally call &ldquo;contextual co-authoring&rdquo;
                 &mdash; an AI layer that does not merely autocomplete sentences
                 but actively participates in knowledge creation. It flags when
                 new content contradicts existing documentation. It suggests
@@ -443,7 +447,7 @@ export default function ArtifactReadingView() {
 
         {/* ── Right Margin: Notes ────────────── */}
         <aside className="hidden lg:block">
-          <div className="sticky top-24 space-y-4">
+          <div className="sticky top-24 space-y-0">
             <div className="flex items-center gap-2 mb-6">
               <MessageSquare className="w-4 h-4 text-heather-500" />
               <span className="text-sm font-medium text-ink-500">
@@ -451,15 +455,18 @@ export default function ArtifactReadingView() {
               </span>
             </div>
 
-            {artifact.comments.map((comment) => (
+            {artifact.comments.map((comment, idx) => (
               <div
                 key={comment.id}
                 className={clsx(
-                  "p-3.5 rounded-editorial border transition-all duration-200 hover:shadow-warm-sm",
-                  comment.resolved
-                    ? "bg-ink-50/50 border-ink-100/40 opacity-60"
-                    : "bg-white border-heather-200/60"
+                  "py-4",
+                  comment.resolved && "opacity-60"
                 )}
+                style={
+                  idx < artifact.comments.length - 1
+                    ? { borderBottom: "0.5px solid #d1cfc5" }
+                    : undefined
+                }
               >
                 <div className="flex items-center gap-2 mb-2">
                   <div
@@ -496,26 +503,36 @@ export default function ArtifactReadingView() {
       </div>
 
       {/* ── Submission Details (Bottom Section) ── */}
-      <section className="border-t border-ink-100 bg-white/60">
+      <section style={{ borderTop: "0.5px solid #d1cfc5" }}>
         <div className="max-w-6xl mx-auto px-6 py-12">
           <div className="max-w-[65ch]">
             {/* Section header */}
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-8 h-8 rounded-lg bg-clay-100 flex items-center justify-center">
-                <GitBranch className="w-4 h-4 text-clay-600" />
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-3">
+                <GitBranch className="w-4 h-4 text-ink-400" />
+                <div>
+                  <h3 className="font-serif text-lg text-ink-800">
+                    Current Submission
+                  </h3>
+                  <p className="text-xs text-ink-400">
+                    Tracked changes from this edition
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-serif text-lg text-ink-800">
-                  Current Submission
-                </h3>
-                <p className="text-xs text-ink-400">
-                  Tracked changes from this edition
-                </p>
+
+              {/* Accept / Reject buttons */}
+              <div className="flex items-center gap-4">
+                <button className="text-sm font-medium text-olive-700 hover:text-olive-800 hover:underline underline-offset-2 transition-colors">
+                  Accept Changes
+                </button>
+                <button className="text-sm font-medium text-clay-600 hover:text-clay-700 hover:underline underline-offset-2 transition-colors">
+                  Request Revisions
+                </button>
               </div>
             </div>
 
-            {/* Submission card */}
-            <div className="card-editorial p-5 mb-6">
+            {/* Submission info */}
+            <div className="pb-6" style={{ borderBottom: "0.5px solid #d1cfc5" }}>
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div
@@ -541,13 +558,10 @@ export default function ArtifactReadingView() {
                 </div>
                 <span
                   className={clsx(
-                    "px-2.5 py-1 rounded-full text-xs font-medium",
-                    artifact.submission.status === "open" &&
-                      "bg-olive-100 text-olive-700",
-                    artifact.submission.status === "merged" &&
-                      "bg-heather-100 text-heather-700",
-                    artifact.submission.status === "closed" &&
-                      "bg-ink-100 text-ink-500"
+                    "text-xs font-medium",
+                    artifact.submission.status === "open" && "text-olive-700",
+                    artifact.submission.status === "merged" && "text-heather-700",
+                    artifact.submission.status === "closed" && "text-ink-500"
                   )}
                 >
                   {artifact.submission.status === "open"
@@ -559,7 +573,7 @@ export default function ArtifactReadingView() {
               </div>
 
               {/* Stats */}
-              <div className="flex items-center gap-6 text-xs text-ink-400 mb-4">
+              <div className="flex items-center gap-6 text-xs text-ink-400">
                 <div className="flex items-center gap-1.5">
                   <FileText className="w-3.5 h-3.5" />
                   <span>
@@ -581,46 +595,48 @@ export default function ArtifactReadingView() {
                   <span>{artifact.comments.length} notes</span>
                 </div>
               </div>
+            </div>
 
-              {/* Divider */}
-              <div className="divider mb-4" />
-
-              {/* Revision timeline */}
-              <div className="space-y-3">
-                {artifact.submission.revisions.map((rev, idx) => (
-                  <div
-                    key={rev.id}
-                    className="flex items-start gap-3 group"
-                  >
-                    {/* Timeline dot + line */}
-                    <div className="flex flex-col items-center pt-1">
-                      <div
-                        className={clsx(
-                          "w-2 h-2 rounded-full",
-                          idx === 0 ? "bg-clay-400" : "bg-ink-200"
-                        )}
-                      />
-                      {idx < artifact.submission.revisions.length - 1 && (
-                        <div className="w-px h-6 bg-ink-100 mt-1" />
+            {/* Revision timeline */}
+            <div className="mt-6">
+              {artifact.submission.revisions.map((rev, idx) => (
+                <div
+                  key={rev.id}
+                  className="flex items-start gap-3 py-4"
+                  style={
+                    idx < artifact.submission.revisions.length - 1
+                      ? { borderBottom: "0.5px solid #d1cfc5" }
+                      : undefined
+                  }
+                >
+                  {/* Timeline dot */}
+                  <div className="flex flex-col items-center pt-1.5">
+                    <div
+                      className={clsx(
+                        "w-2 h-2 rounded-full",
+                        idx === 0 ? "bg-clay-400" : "bg-ink-200"
                       )}
-                    </div>
+                    />
+                  </div>
 
-                    {/* Content */}
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm text-ink-600">
-                        {rev.message}
-                      </div>
-                      <div className="text-xs text-ink-300 mt-0.5">
-                        {rev.author} &middot; {rev.timestamp}
-                      </div>
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm text-ink-600">
+                      {rev.message}
+                    </div>
+                    <div className="text-xs text-ink-300 mt-0.5">
+                      {rev.author} &middot; {rev.timestamp}
                     </div>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
 
             {/* Contributors */}
-            <div className="flex items-center gap-3">
+            <div
+              className="flex items-center gap-3 pt-6 mt-2"
+              style={{ borderTop: "0.5px solid #d1cfc5" }}
+            >
               <span className="text-xs text-ink-400 font-medium">
                 Contributors
               </span>

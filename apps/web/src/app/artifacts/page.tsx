@@ -1,17 +1,19 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import {
   FileText,
   Mail,
-  BookOpen,
+  Table,
+  HardDrive,
   Clock,
   Users,
-  ArrowRight,
-  Filter,
-  Search,
+  ExternalLink,
+  Loader2,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useGoogleArtifacts, type GoogleArtifact } from "@/lib/google";
 
 // -- Types -------------------------------------------------------------------
 
@@ -19,16 +21,18 @@ interface Artifact {
   id: string;
   title: string;
   excerpt: string;
-  source: "google-docs" | "gmail" | "notion";
+  source: "google-docs" | "gmail" | "spreadsheet";
   status: "under-review" | "published" | "draft";
   date: string;
   contributor: string;
   editions: number;
 }
 
+type SourceFilter = "all" | "google-docs" | "gmail" | "spreadsheet" | "drive";
+
 // -- Data --------------------------------------------------------------------
 
-const artifacts: Artifact[] = [
+const sampleArtifacts: Artifact[] = [
   {
     id: "art-q2-product-spec",
     title: "Q2 Product Roadmap & Feature Spec",
@@ -67,7 +71,7 @@ const artifacts: Artifact[] = [
     title: "Agent Orchestration Architecture",
     excerpt:
       "Technical design document for the multi-agent pipeline, covering task decomposition, context windowing, and the safety rail framework for autonomous operations.",
-    source: "notion",
+    source: "spreadsheet",
     status: "published",
     date: "Mar 25, 2026",
     contributor: "Jake Moreno",
@@ -111,7 +115,7 @@ const artifacts: Artifact[] = [
     title: "Lurk Design System - Components & Tokens",
     excerpt:
       "Living design reference documenting the full token set, component variants, accessibility guidelines, and the editorial visual language with typography and color specs.",
-    source: "notion",
+    source: "spreadsheet",
     status: "published",
     date: "Mar 22, 2026",
     contributor: "Rina Takahashi",
@@ -122,7 +126,7 @@ const artifacts: Artifact[] = [
     title: "Connector SDK Developer Guide",
     excerpt:
       "Step-by-step guide for third-party developers building Lurk connectors, covering the authentication flow, webhook registration, artifact schema mapping, and rate limits.",
-    source: "notion",
+    source: "spreadsheet",
     status: "published",
     date: "Mar 21, 2026",
     contributor: "Jake Moreno",
@@ -149,7 +153,14 @@ const sourceConfig: Record<
 > = {
   "google-docs": { icon: FileText, label: "Google Docs" },
   gmail: { icon: Mail, label: "Gmail" },
-  notion: { icon: BookOpen, label: "Notion" },
+  spreadsheet: { icon: Table, label: "Spreadsheets" },
+};
+
+const googleSourceIcons: Record<GoogleArtifact["source"], typeof FileText> = {
+  "google-docs": FileText,
+  gmail: Mail,
+  spreadsheet: Table,
+  drive: HardDrive,
 };
 
 const statusConfig: Record<
@@ -161,9 +172,43 @@ const statusConfig: Record<
   draft: { label: "Draft", variant: "default" },
 };
 
+const tabs: { key: SourceFilter; label: string }[] = [
+  { key: "all", label: "All" },
+  { key: "google-docs", label: "Docs" },
+  { key: "gmail", label: "Emails" },
+  { key: "spreadsheet", label: "Spreadsheets" },
+  { key: "drive", label: "Drive" },
+];
+
 // -- Page --------------------------------------------------------------------
 
 export default function ArtifactsPage() {
+  const [activeTab, setActiveTab] = useState<SourceFilter>("all");
+
+  const {
+    artifacts: googleArtifacts,
+    loading: googleLoading,
+  } = useGoogleArtifacts();
+
+  // Filter Google artifacts by active tab
+  const filteredGoogle =
+    activeTab === "all"
+      ? googleArtifacts
+      : activeTab === "drive"
+        ? googleArtifacts
+        : googleArtifacts.filter((a) => a.source === activeTab);
+
+  // Filter sample artifacts by active tab
+  const filteredSample =
+    activeTab === "all"
+      ? sampleArtifacts
+      : activeTab === "drive"
+        ? sampleArtifacts
+        : sampleArtifacts.filter((a) => a.source === activeTab);
+
+  // Check if Google token exists (no artifacts and not loading means no token)
+  const hasToken = typeof window !== "undefined" && !!sessionStorage.getItem("google_access_token");
+
   return (
     <div className="min-h-screen bg-ivory">
       <div className="max-w-5xl mx-auto px-6 py-16 sm:px-8 lg:px-12">
@@ -177,75 +222,167 @@ export default function ArtifactsPage() {
           </p>
         </header>
 
-        {/* Card Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {artifacts.map((artifact) => {
-            const source = sourceConfig[artifact.source];
-            const status = statusConfig[artifact.status];
-            const SourceIcon = source.icon;
+        {/* Source Tabs */}
+        <nav className="flex items-center gap-6 mb-12" style={{ borderBottom: "0.5px solid #d1cfc5" }}>
+          {tabs.map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={
+                activeTab === tab.key
+                  ? "text-ink-800 font-medium text-sm pb-3 relative"
+                  : "text-ink-400 text-sm pb-3 hover:text-ink-600 transition-colors"
+              }
+              style={
+                activeTab === tab.key
+                  ? { borderBottom: "2px solid currentColor", marginBottom: "-0.5px" }
+                  : undefined
+              }
+            >
+              {tab.label}
+            </button>
+          ))}
+        </nav>
 
-            return (
-              <Link
-                key={artifact.id}
-                href={`/artifacts/${artifact.id}`}
-                className="group block bg-white border border-ink-100 rounded-editorial shadow-warm-sm hover:shadow-warm transition-shadow duration-200"
-              >
-                <div className="p-6">
-                  {/* Source eyebrow */}
-                  <div className="flex items-center gap-2 mb-3">
-                    <SourceIcon className="w-4 h-4 text-ink-400" />
-                    <span className="text-xs font-medium uppercase tracking-wider text-ink-400">
-                      {source.label}
-                    </span>
+        {/* Your Files */}
+        <section className="mb-16">
+          <h2 className="font-serif text-2xl font-semibold text-ink-800 tracking-tight mb-6">
+            Your Files
+          </h2>
+
+          {googleLoading ? (
+            <div className="flex items-center gap-3 py-8">
+              <Loader2 className="w-4 h-4 text-ink-400 animate-spin" />
+              <p className="text-sm text-ink-400">Loading your files...</p>
+            </div>
+          ) : !hasToken && filteredGoogle.length === 0 ? (
+            <div className="flex items-center gap-3 py-8">
+              <HardDrive className="w-5 h-5 text-ink-300" />
+              <p className="text-sm text-ink-400">
+                Sign in with Google to see your files
+              </p>
+            </div>
+          ) : filteredGoogle.length === 0 ? (
+            <div className="flex items-center gap-3 py-8">
+              <HardDrive className="w-5 h-5 text-ink-300" />
+              <p className="text-sm text-ink-400">
+                No files match this filter
+              </p>
+            </div>
+          ) : (
+            <div>
+              {filteredGoogle.map((file, idx) => {
+                const Icon = googleSourceIcons[file.source] ?? HardDrive;
+                const formattedDate = new Date(file.lastModified).toLocaleDateString(undefined, {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                });
+
+                return (
+                  <div
+                    key={file.id}
+                    style={
+                      idx < filteredGoogle.length - 1
+                        ? { borderBottom: "0.5px solid #d1cfc5" }
+                        : undefined
+                    }
+                  >
+                    <div className="flex items-center justify-between py-5 gap-6">
+                      {/* Left: icon + title */}
+                      <div className="flex items-center gap-3 min-w-0">
+                        <Icon className="w-4 h-4 text-ink-400 shrink-0" />
+                        <h3 className="text-sm font-medium text-ink-800 truncate">
+                          {file.title}
+                        </h3>
+                      </div>
+
+                      {/* Right: date + owner + external link */}
+                      <div className="flex items-center gap-4 shrink-0">
+                        <span className="flex items-center gap-1 text-xs text-ink-400">
+                          <Clock className="w-3 h-3" />
+                          {formattedDate}
+                        </span>
+
+                        <span className="flex items-center gap-1 text-xs text-ink-400 w-28 justify-end">
+                          <Users className="w-3 h-3" />
+                          {file.owner}
+                        </span>
+
+                        <a
+                          href={file.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-ink-400 hover:text-ink-600 transition-colors"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                      </div>
+                    </div>
                   </div>
+                );
+              })}
+            </div>
+          )}
 
-                  {/* Title */}
-                  <h2 className="font-serif text-xl font-semibold text-ink-800 leading-snug group-hover:text-clay-500 transition-colors duration-200">
-                    {artifact.title}
-                  </h2>
+          <div style={{ borderBottom: "0.5px solid #d1cfc5" }} />
+        </section>
 
-                  {/* Excerpt */}
-                  <p className="mt-2 text-sm text-ink-500 leading-relaxed line-clamp-2">
-                    {artifact.excerpt}
-                  </p>
+        {/* Recent */}
+        <section>
+          <h2 className="font-serif text-2xl font-semibold text-ink-800 tracking-tight mb-8">
+            Recent
+          </h2>
 
-                  {/* Meta row */}
-                  <div className="mt-4 flex items-center flex-wrap gap-3">
-                    <Badge variant={status.variant} size="sm">
-                      {status.label}
-                    </Badge>
+          <div>
+            {filteredSample.map((artifact, idx) => {
+              const source = sourceConfig[artifact.source];
+              const status = statusConfig[artifact.status];
+              const SourceIcon = source.icon;
 
-                    <span className="flex items-center gap-1 text-xs text-ink-400">
-                      <Clock className="w-3.5 h-3.5" />
-                      {artifact.date}
-                    </span>
+              return (
+                <div
+                  key={artifact.id}
+                  style={
+                    idx < filteredSample.length - 1
+                      ? { borderBottom: "0.5px solid #d1cfc5" }
+                      : undefined
+                  }
+                >
+                  <Link
+                    href={`/artifacts/${artifact.id}`}
+                    className="group flex items-center justify-between py-5 gap-6"
+                  >
+                    {/* Left: icon + title */}
+                    <div className="flex items-center gap-3 min-w-0">
+                      <SourceIcon className="w-4 h-4 text-ink-400 shrink-0" />
+                      <h3 className="text-sm font-medium text-ink-800 truncate group-hover:underline underline-offset-2">
+                        {artifact.title}
+                      </h3>
+                    </div>
 
-                    <span className="flex items-center gap-1 text-xs text-ink-400">
-                      <Users className="w-3.5 h-3.5" />
-                      {artifact.contributor}
-                    </span>
+                    {/* Right: status + date + contributor */}
+                    <div className="flex items-center gap-4 shrink-0">
+                      <Badge variant={status.variant} size="sm">
+                        {status.label}
+                      </Badge>
 
-                    <span className="text-xs text-ink-300">
-                      {artifact.editions}{" "}
-                      {artifact.editions === 1 ? "edition" : "editions"}
-                    </span>
-                  </div>
+                      <span className="flex items-center gap-1 text-xs text-ink-400">
+                        <Clock className="w-3 h-3" />
+                        {artifact.date}
+                      </span>
+
+                      <span className="flex items-center gap-1 text-xs text-ink-400 w-28 justify-end">
+                        <Users className="w-3 h-3" />
+                        {artifact.contributor}
+                      </span>
+                    </div>
+                  </Link>
                 </div>
-              </Link>
-            );
-          })}
-        </div>
-
-        {/* View All link */}
-        <div className="mt-12 text-center">
-          <Link
-            href="/artifacts?view=all"
-            className="inline-flex items-center gap-2 text-sm font-medium text-clay-500 hover:text-clay-600 transition-colors duration-200"
-          >
-            View all artifacts
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
+              );
+            })}
+          </div>
+        </section>
       </div>
     </div>
   );
