@@ -1,36 +1,27 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Feather, Shield, FileText, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { signInWithGoogle } from "@/lib/firebase";
-import { useAuth } from "@/lib/hooks";
+import { signInWithGoogle, setSessionCookie } from "@/lib/firebase";
 
 function LoginPageInner() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // After redirect auth completes, navigate away from login
-  useEffect(() => {
-    if (user) {
-      const redirect = searchParams.get("redirect") || "/artifacts";
-      router.replace(redirect);
-    }
-  }, [user, router, searchParams]);
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
     setError(null);
     try {
-      // signInWithRedirect navigates away; loading state is visual only
-      await signInWithGoogle();
+      const user = await signInWithGoogle();
+      await setSessionCookie(user);
+      router.push("/artifacts");
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Sign-in failed. Please try again.";
       setError(message);
+    } finally {
       setLoading(false);
     }
   };
@@ -196,9 +187,5 @@ function LoginPageInner() {
 }
 
 export default function LoginPage() {
-  return (
-    <Suspense>
-      <LoginPageInner />
-    </Suspense>
-  );
+  return <LoginPageInner />;
 }
