@@ -288,11 +288,14 @@ export default function ArtifactsPage() {
                         : undefined
                     }
                   >
-                    <div className="flex items-center justify-between py-5 gap-6">
+                    <Link
+                      href={`/artifacts/${file.id}?source=${file.source}&title=${encodeURIComponent(file.title)}&owner=${encodeURIComponent(file.owner)}&date=${encodeURIComponent(file.lastModified)}&url=${encodeURIComponent(file.url)}`}
+                      className="group flex items-center justify-between py-5 gap-6"
+                    >
                       {/* Left: icon + title */}
                       <div className="flex items-center gap-3 min-w-0">
                         <Icon className="w-4 h-4 text-ink-400 shrink-0" />
-                        <h3 className="text-sm font-medium text-ink-800 truncate">
+                        <h3 className="text-sm font-medium text-ink-800 truncate group-hover:underline underline-offset-2">
                           {file.title}
                         </h3>
                       </div>
@@ -309,16 +312,9 @@ export default function ArtifactsPage() {
                           {file.owner}
                         </span>
 
-                        <a
-                          href={file.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-ink-400 hover:text-ink-600 transition-colors"
-                        >
-                          <ExternalLink className="w-3.5 h-3.5" />
-                        </a>
+                        <ExternalLink className="w-3.5 h-3.5 text-ink-400" />
                       </div>
-                    </div>
+                    </Link>
                   </div>
                 );
               })}

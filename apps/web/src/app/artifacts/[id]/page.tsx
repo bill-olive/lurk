@@ -1,8 +1,9 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import clsx from "clsx";
+import { Suspense } from "react";
 import {
   Clock,
   GitBranch,
@@ -10,6 +11,10 @@ import {
   ArrowLeft,
   Check,
   FileText,
+  Mail,
+  Table,
+  HardDrive,
+  ExternalLink,
 } from "lucide-react";
 
 // ── Types ────────────────────────────────────
@@ -133,16 +138,274 @@ const MOCK_ARTIFACT: ArtifactData = {
   ],
 };
 
-// ── Component ────────────────────────────────
+const sourceIcons: Record<string, typeof FileText> = {
+  "google-docs": FileText,
+  gmail: Mail,
+  spreadsheet: Table,
+  drive: HardDrive,
+};
 
-export default function ArtifactReadingView() {
+function getEmbedUrl(source: string, fileId: string, externalUrl: string): string {
+  switch (source) {
+    case "google-docs":
+      return `https://docs.google.com/document/d/${fileId}/preview`;
+    case "spreadsheet":
+      return `https://docs.google.com/spreadsheets/d/${fileId}/preview`;
+    case "gmail":
+      return externalUrl;
+    default:
+      return `https://drive.google.com/file/d/${fileId}/preview`;
+  }
+}
+
+function getSourceLabel(source: string): string {
+  switch (source) {
+    case "google-docs": return "Google Docs";
+    case "gmail": return "Gmail";
+    case "spreadsheet": return "Google Sheets";
+    case "drive": return "Google Drive";
+    default: return source;
+  }
+}
+
+// ── Comments Sidebar ────────────────────────
+
+function CommentsSidebar({ comments }: { comments: InlineComment[] }) {
+  return (
+    <aside className="hidden lg:block">
+      <div className="sticky top-24 space-y-0">
+        <div className="flex items-center gap-2 mb-6">
+          <MessageSquare className="w-4 h-4 text-heather-500" />
+          <span className="text-sm font-medium text-ink-500">
+            {comments.length} Notes
+          </span>
+        </div>
+
+        {comments.map((comment, idx) => (
+          <div
+            key={comment.id}
+            className={clsx("py-4", comment.resolved && "opacity-60")}
+            style={
+              idx < comments.length - 1
+                ? { borderBottom: "0.5px solid #d1cfc5" }
+                : undefined
+            }
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <div
+                className={clsx(
+                  "w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-medium",
+                  comment.avatarColor
+                )}
+              >
+                {comment.author
+                  .split(" ")
+                  .map((n) => n[0])
+                  .join("")}
+              </div>
+              <span className="text-xs font-medium text-ink-600">
+                {comment.author}
+              </span>
+              <span className="text-xs text-ink-300 ml-auto">
+                {comment.timestamp}
+              </span>
+            </div>
+            <p className="text-xs text-ink-500 leading-relaxed max-w-full">
+              {comment.body}
+            </p>
+            {comment.resolved && (
+              <div className="flex items-center gap-1 mt-2 text-xs text-olive-600">
+                <Check className="w-3 h-3" />
+                <span>Resolved</span>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </aside>
+  );
+}
+
+// ── Google Artifact View ────────────────────
+
+function GoogleArtifactView() {
   const params = useParams();
-  const artifactId = params.id as string;
+  const searchParams = useSearchParams();
+  const fileId = params.id as string;
+
+  const source = searchParams.get("source") || "drive";
+  const title = searchParams.get("title") || "Untitled";
+  const owner = searchParams.get("owner") || "Unknown";
+  const date = searchParams.get("date") || "";
+  const externalUrl = searchParams.get("url") || "";
+
+  const SourceIcon = sourceIcons[source] || HardDrive;
+  const embedUrl = getEmbedUrl(source, fileId, externalUrl);
+  const isGmail = source === "gmail";
+
+  const formattedDate = date
+    ? new Date(date).toLocaleDateString(undefined, {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      })
+    : "";
+
+  return (
+    <div className="min-h-screen bg-ivory">
+      {/* Top Bar */}
+      <header
+        className="sticky top-0 z-20 bg-ivory/90 backdrop-blur-sm"
+        style={{ borderBottom: "0.5px solid #d1cfc5" }}
+      >
+        <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link
+              href="/artifacts"
+              className="flex items-center gap-1.5 text-ink-400 hover:text-ink-700 hover:underline underline-offset-2 transition-colors text-sm"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>All Artifacts</span>
+            </Link>
+            <span className="text-ink-200">/</span>
+            <span className="text-sm text-ink-500 font-medium flex items-center gap-1.5">
+              <SourceIcon className="w-3.5 h-3.5" />
+              {getSourceLabel(source)}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-5">
+            {formattedDate && (
+              <div className="flex items-center gap-2 text-sm text-ink-400">
+                <Clock className="w-3.5 h-3.5" />
+                <span>{formattedDate}</span>
+              </div>
+            )}
+            {externalUrl && (
+              <a
+                href={externalUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-sm text-ink-400 hover:text-ink-700 transition-colors"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span>Open original</span>
+              </a>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* Main Layout */}
+      <div className="max-w-6xl mx-auto px-6 pt-12 pb-24 grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-12">
+        {/* Reading Area */}
+        <article>
+          <div className="eyebrow mb-4">{getSourceLabel(source)}</div>
+
+          <h1 className="font-serif text-4xl md:text-5xl font-semibold text-ink-800 leading-tight tracking-tight mb-4">
+            {title}
+          </h1>
+
+          <div
+            className="flex items-center gap-3 pb-8 mb-10"
+            style={{ borderBottom: "0.5px solid #d1cfc5" }}
+          >
+            <div className="w-10 h-10 rounded-full bg-clay-400 flex items-center justify-center text-white text-sm font-medium">
+              {owner
+                .split(" ")
+                .map((n) => n[0])
+                .join("")
+                .slice(0, 2)
+                .toUpperCase()}
+            </div>
+            <div>
+              <div className="text-sm font-medium text-ink-700">{owner}</div>
+              {formattedDate && (
+                <div className="text-xs text-ink-400">{formattedDate}</div>
+              )}
+            </div>
+          </div>
+
+          {/* Embedded Content */}
+          {isGmail ? (
+            <div className="prose-reading">
+              <div className="p-6 bg-white border border-ink-100 rounded-editorial">
+                <div className="flex items-center gap-2 mb-4">
+                  <Mail className="w-5 h-5 text-ink-400" />
+                  <span className="text-sm text-ink-500">Email Message</span>
+                </div>
+                <p className="text-sm text-ink-600 mb-4">
+                  Email content cannot be embedded directly. View the full message in Gmail.
+                </p>
+                <a
+                  href={externalUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-clay-500 hover:bg-clay-600 rounded-lg transition-colors"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  Open in Gmail
+                </a>
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-editorial overflow-hidden border border-ink-100 bg-white">
+              <iframe
+                src={embedUrl}
+                className="w-full border-0"
+                style={{ height: "80vh" }}
+                title={title}
+                sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+              />
+            </div>
+          )}
+        </article>
+
+        {/* Right Margin: Notes */}
+        <aside className="hidden lg:block">
+          <div className="sticky top-24 space-y-0">
+            <div className="flex items-center gap-2 mb-6">
+              <MessageSquare className="w-4 h-4 text-heather-500" />
+              <span className="text-sm font-medium text-ink-500">Notes</span>
+            </div>
+
+            <div
+              className="py-4"
+              style={{ borderBottom: "0.5px solid #d1cfc5" }}
+            >
+              <p className="text-xs text-ink-400 leading-relaxed">
+                No notes yet. Comments and annotations for this artifact will appear here.
+              </p>
+            </div>
+
+            {externalUrl && (
+              <div className="pt-4">
+                <a
+                  href={externalUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-xs text-clay-500 hover:text-clay-600 transition-colors"
+                >
+                  <ExternalLink className="w-3 h-3" />
+                  View original in {getSourceLabel(source)}
+                </a>
+              </div>
+            )}
+          </div>
+        </aside>
+      </div>
+    </div>
+  );
+}
+
+// ── Sample Artifact View ────────────────────
+
+function SampleArtifactView() {
   const artifact = MOCK_ARTIFACT;
 
   return (
     <div className="min-h-screen bg-ivory">
-      {/* ── Top Bar ─────────────────────────── */}
+      {/* Top Bar */}
       <header
         className="sticky top-0 z-20 bg-ivory/90 backdrop-blur-sm"
         style={{ borderBottom: "0.5px solid #d1cfc5" }}
@@ -193,24 +456,20 @@ export default function ArtifactReadingView() {
         </div>
       </header>
 
-      {/* ── Main Layout ─────────────────────── */}
+      {/* Main Layout */}
       <div className="max-w-6xl mx-auto px-6 pt-12 pb-24 grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-12">
-        {/* ── Reading Area ───────────────────── */}
+        {/* Reading Area */}
         <article className="max-w-[65ch]">
-          {/* Eyebrow */}
           <div className="eyebrow mb-4">{artifact.source}</div>
 
-          {/* Title */}
           <h1 className="font-serif text-4xl md:text-5xl font-semibold text-ink-800 leading-tight tracking-tight mb-4">
             {artifact.title}
           </h1>
 
-          {/* Subtitle */}
           <p className="text-xl text-ink-400 leading-relaxed mb-8 max-w-full">
             {artifact.subtitle}
           </p>
 
-          {/* Byline */}
           <div
             className="flex items-center gap-3 pb-8 mb-10"
             style={{ borderBottom: "0.5px solid #d1cfc5" }}
@@ -236,7 +495,7 @@ export default function ArtifactReadingView() {
             </div>
           </div>
 
-          {/* ── Document Content (prose-reading) ── */}
+          {/* Document Content */}
           <div className="prose-reading">
             <h2>Executive Summary</h2>
             <p>
@@ -445,68 +704,14 @@ export default function ArtifactReadingView() {
           </div>
         </article>
 
-        {/* ── Right Margin: Notes ────────────── */}
-        <aside className="hidden lg:block">
-          <div className="sticky top-24 space-y-0">
-            <div className="flex items-center gap-2 mb-6">
-              <MessageSquare className="w-4 h-4 text-heather-500" />
-              <span className="text-sm font-medium text-ink-500">
-                {artifact.comments.length} Notes
-              </span>
-            </div>
-
-            {artifact.comments.map((comment, idx) => (
-              <div
-                key={comment.id}
-                className={clsx(
-                  "py-4",
-                  comment.resolved && "opacity-60"
-                )}
-                style={
-                  idx < artifact.comments.length - 1
-                    ? { borderBottom: "0.5px solid #d1cfc5" }
-                    : undefined
-                }
-              >
-                <div className="flex items-center gap-2 mb-2">
-                  <div
-                    className={clsx(
-                      "w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-medium",
-                      comment.avatarColor
-                    )}
-                  >
-                    {comment.author
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
-                  </div>
-                  <span className="text-xs font-medium text-ink-600">
-                    {comment.author}
-                  </span>
-                  <span className="text-xs text-ink-300 ml-auto">
-                    {comment.timestamp}
-                  </span>
-                </div>
-                <p className="text-xs text-ink-500 leading-relaxed max-w-full">
-                  {comment.body}
-                </p>
-                {comment.resolved && (
-                  <div className="flex items-center gap-1 mt-2 text-xs text-olive-600">
-                    <Check className="w-3 h-3" />
-                    <span>Resolved</span>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </aside>
+        {/* Right Margin: Notes */}
+        <CommentsSidebar comments={artifact.comments} />
       </div>
 
-      {/* ── Submission Details (Bottom Section) ── */}
+      {/* Submission Details */}
       <section style={{ borderTop: "0.5px solid #d1cfc5" }}>
         <div className="max-w-6xl mx-auto px-6 py-12">
           <div className="max-w-[65ch]">
-            {/* Section header */}
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-3">
                 <GitBranch className="w-4 h-4 text-ink-400" />
@@ -520,7 +725,6 @@ export default function ArtifactReadingView() {
                 </div>
               </div>
 
-              {/* Accept / Reject buttons */}
               <div className="flex items-center gap-4">
                 <button className="text-sm font-medium text-olive-700 hover:text-olive-800 hover:underline underline-offset-2 transition-colors">
                   Accept Changes
@@ -531,7 +735,6 @@ export default function ArtifactReadingView() {
               </div>
             </div>
 
-            {/* Submission info */}
             <div className="pb-6" style={{ borderBottom: "0.5px solid #d1cfc5" }}>
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
@@ -572,7 +775,6 @@ export default function ArtifactReadingView() {
                 </span>
               </div>
 
-              {/* Stats */}
               <div className="flex items-center gap-6 text-xs text-ink-400">
                 <div className="flex items-center gap-1.5">
                   <FileText className="w-3.5 h-3.5" />
@@ -597,7 +799,6 @@ export default function ArtifactReadingView() {
               </div>
             </div>
 
-            {/* Revision timeline */}
             <div className="mt-6">
               {artifact.submission.revisions.map((rev, idx) => (
                 <div
@@ -609,7 +810,6 @@ export default function ArtifactReadingView() {
                       : undefined
                   }
                 >
-                  {/* Timeline dot */}
                   <div className="flex flex-col items-center pt-1.5">
                     <div
                       className={clsx(
@@ -618,12 +818,8 @@ export default function ArtifactReadingView() {
                       )}
                     />
                   </div>
-
-                  {/* Content */}
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm text-ink-600">
-                      {rev.message}
-                    </div>
+                    <div className="text-sm text-ink-600">{rev.message}</div>
                     <div className="text-xs text-ink-300 mt-0.5">
                       {rev.author} &middot; {rev.timestamp}
                     </div>
@@ -632,7 +828,6 @@ export default function ArtifactReadingView() {
               ))}
             </div>
 
-            {/* Contributors */}
             <div
               className="flex items-center gap-3 pt-6 mt-2"
               style={{ borderTop: "0.5px solid #d1cfc5" }}
@@ -669,5 +864,39 @@ export default function ArtifactReadingView() {
         </div>
       </section>
     </div>
+  );
+}
+
+// ── Router ───────────────────────────────────
+
+const SAMPLE_IDS = new Set([
+  "art-q2-product-spec",
+  "art-series-b-deck",
+  "art-acme-onboarding",
+  "art-agent-architecture",
+  "art-privacy-framework",
+  "art-standup-mar24",
+  "art-enterprise-pricing",
+  "art-design-system",
+  "art-connector-sdk",
+  "art-wellspring-feedback",
+]);
+
+function ArtifactRouter() {
+  const params = useParams();
+  const id = params.id as string;
+
+  if (SAMPLE_IDS.has(id)) {
+    return <SampleArtifactView />;
+  }
+
+  return <GoogleArtifactView />;
+}
+
+export default function ArtifactPage() {
+  return (
+    <Suspense>
+      <ArtifactRouter />
+    </Suspense>
   );
 }
