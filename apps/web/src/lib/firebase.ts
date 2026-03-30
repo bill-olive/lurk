@@ -2,8 +2,7 @@ import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
 import {
   getAuth,
   GoogleAuthProvider,
-  signInWithRedirect,
-  getRedirectResult,
+  signInWithPopup,
   signOut as firebaseSignOut,
   onAuthStateChanged,
   type Auth,
@@ -56,18 +55,8 @@ googleProvider.setCustomParameters({
 
 export async function signInWithGoogle() {
   const auth = getFirebaseAuth();
-  await signInWithRedirect(auth, googleProvider);
-}
-
-export async function handleRedirectResult(): Promise<User | null> {
-  const auth = getFirebaseAuth();
-  try {
-    const result = await getRedirectResult(auth);
-    return result?.user ?? null;
-  } catch (error) {
-    console.error("Google redirect sign-in error:", error);
-    throw error;
-  }
+  const result = await signInWithPopup(auth, googleProvider);
+  return result.user;
 }
 
 export async function signOut() {
