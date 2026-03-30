@@ -176,10 +176,10 @@ const recommendations = [
   },
 ];
 
-const priorityColors = {
-  high: "danger" as const,
-  medium: "warning" as const,
-  low: "info" as const,
+const priorityColors: Record<string, "danger" | "warning" | "info"> = {
+  high: "danger",
+  medium: "warning",
+  low: "info",
 };
 
 function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ name: string; value: number; color: string }>; label?: string }) {

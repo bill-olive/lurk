@@ -76,7 +76,7 @@ export function TableHeaderCell({
   sortDirection,
   onSort,
 }: {
-  children: ReactNode;
+  children?: ReactNode;
   className?: string;
   sortable?: boolean;
   sortDirection?: "asc" | "desc" | null;
