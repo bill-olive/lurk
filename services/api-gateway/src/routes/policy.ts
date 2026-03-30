@@ -91,4 +91,30 @@ router.get(
   },
 );
 
+// ---------------------------------------------------------------------------
+// GET /v1/policy/client-config — public client config for extension bootstrap
+// ---------------------------------------------------------------------------
+// Returns non-secret configuration the Chrome extension needs at startup.
+// The Firebase client API key is a *public* project identifier, not a secret.
+// See: https://firebase.google.com/docs/projects/api-keys
+
+router.get(
+  '/client-config',
+  defaultLimiter,
+  async (_req: Request, res: Response): Promise<void> => {
+    res.set('Cache-Control', 'public, max-age=3600'); // 1 hour
+    res.json({
+      firebase: {
+        apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ?? '',
+        authDomain: process.env.FIREBASE_AUTH_DOMAIN ?? 'lurk-a692c.firebaseapp.com',
+        projectId: process.env.GCP_PROJECT_ID ?? 'lurk-a692c',
+        storageBucket: process.env.FIREBASE_STORAGE_BUCKET ?? 'lurk-a692c.firebasestorage.app',
+      },
+      api: {
+        version: 'v1',
+      },
+    });
+  },
+);
+
 export default router;

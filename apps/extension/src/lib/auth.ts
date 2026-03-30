@@ -27,8 +27,13 @@ export interface AuthState {
 // ---- Constants -------------------------------------------------------------
 
 const AUTH_STORAGE_KEY = 'lurk_auth';
-const FIREBASE_API_KEY = '__FIREBASE_API_KEY__'; // Replaced at build time
-const FIREBASE_AUTH_DOMAIN = 'lurk-platform.firebaseapp.com';
+
+// Injected at build time via Vite define (see vite.config.ts).
+// VITE_FIREBASE_API_KEY is the Firebase *client* API key — a public identifier
+// that scopes requests to the Firebase project. It is NOT a secret.
+// See: https://firebase.google.com/docs/projects/api-keys
+const FIREBASE_API_KEY = import.meta.env.VITE_FIREBASE_API_KEY ?? '';
+const FIREBASE_AUTH_DOMAIN = import.meta.env.VITE_FIREBASE_AUTH_DOMAIN ?? 'lurk-a692c.firebaseapp.com';
 
 // ---- Auth Manager ----------------------------------------------------------
 

@@ -4,6 +4,11 @@ import { resolve } from 'path';
 
 export default defineConfig({
   plugins: [react()],
+  // Vite automatically exposes env vars prefixed with VITE_ to client code
+  // via import.meta.env. Set these before building:
+  //   VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN,
+  //   VITE_FIREBASE_PROJECT_ID, VITE_LURK_API_URL
+  envPrefix: 'VITE_',
   build: {
     outDir: 'dist',
     emptyOutDir: true,

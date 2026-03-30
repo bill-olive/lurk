@@ -68,9 +68,8 @@ export interface YoloTogglePayload {
 
 // ---- Constants -------------------------------------------------------------
 
-const API_BASE = process.env.NODE_ENV === 'production'
-  ? 'https://api.lurk.dev/v1'
-  : 'http://localhost:3001/v1';
+// Injected at build time via Vite. Falls back to localhost for dev.
+const API_BASE = (import.meta.env.VITE_LURK_API_URL ?? 'http://localhost:8080') + '/v1';
 
 // ---- HTTP Client -----------------------------------------------------------
 
