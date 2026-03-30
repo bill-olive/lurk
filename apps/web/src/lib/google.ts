@@ -27,6 +27,29 @@ export function getGoogleToken(): string | null {
   return sessionStorage.getItem("google_access_token");
 }
 
+export function clearGoogleToken(): void {
+  if (typeof window !== "undefined") {
+    sessionStorage.removeItem("google_access_token");
+  }
+}
+
+async function googleFetch(url: string): Promise<Response | null> {
+  const token = getGoogleToken();
+  if (!token) return null;
+
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (res.status === 401) {
+    clearGoogleToken();
+    return null;
+  }
+
+  if (!res.ok) return null;
+  return res;
+}
+
 // ──────────────────────────────────────────────
 // Google Docs
 // ──────────────────────────────────────────────
@@ -42,9 +65,6 @@ interface DriveFile {
 
 export async function fetchGoogleDocs(): Promise<GoogleArtifact[]> {
   try {
-    const token = getGoogleToken();
-    if (!token) return [];
-
     const query = encodeURIComponent("mimeType='application/vnd.google-apps.document'");
     const fields = encodeURIComponent("files(id,name,modifiedTime,owners,webViewLink,mimeType)");
     const url =
@@ -54,11 +74,8 @@ export async function fetchGoogleDocs(): Promise<GoogleArtifact[]> {
       `&pageSize=10` +
       `&fields=${fields}`;
 
-    const res = await fetch(url, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    if (!res.ok) return [];
+    const res = await googleFetch(url);
+    if (!res) return [];
 
     const data: { files: DriveFile[] } = await res.json();
 
@@ -98,27 +115,21 @@ function extractHeader(msg: GmailMessageMeta, name: string): string {
 
 export async function fetchGmailMessages(): Promise<GoogleArtifact[]> {
   try {
-    const token = getGoogleToken();
-    if (!token) return [];
-
-    const listRes = await fetch(
-      "https://www.googleapis.com/gmail/v1/users/me/messages?maxResults=10",
-      { headers: { Authorization: `Bearer ${token}` } }
+    const listRes = await googleFetch(
+      "https://www.googleapis.com/gmail/v1/users/me/messages?maxResults=10"
     );
-
-    if (!listRes.ok) return [];
+    if (!listRes) return [];
 
     const listData: { messages?: GmailMessageRef[] } = await listRes.json();
     if (!listData.messages?.length) return [];
 
     const messages = await Promise.all(
       listData.messages.map(async (ref) => {
-        const res = await fetch(
+        const res = await googleFetch(
           `https://www.googleapis.com/gmail/v1/users/me/messages/${ref.id}` +
-            `?format=metadata&metadataHeaders=Subject&metadataHeaders=From&metadataHeaders=Date`,
-          { headers: { Authorization: `Bearer ${token}` } }
+            `?format=metadata&metadataHeaders=Subject&metadataHeaders=From&metadataHeaders=Date`
         );
-        if (!res.ok) return null;
+        if (!res) return null;
         return res.json() as Promise<GmailMessageMeta>;
       })
     );
@@ -151,9 +162,6 @@ function mimeToSource(mimeType: string): GoogleArtifact["source"] {
 
 export async function fetchDriveFiles(): Promise<GoogleArtifact[]> {
   try {
-    const token = getGoogleToken();
-    if (!token) return [];
-
     const fields = encodeURIComponent("files(id,name,modifiedTime,owners,webViewLink,mimeType)");
     const url =
       `https://www.googleapis.com/drive/v3/files` +
@@ -161,11 +169,8 @@ export async function fetchDriveFiles(): Promise<GoogleArtifact[]> {
       `&pageSize=10` +
       `&fields=${fields}`;
 
-    const res = await fetch(url, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    if (!res.ok) return [];
+    const res = await googleFetch(url);
+    if (!res) return [];
 
     const data: { files: DriveFile[] } = await res.json();
 

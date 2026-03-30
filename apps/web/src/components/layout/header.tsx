@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { clsx } from "clsx";
 import {
   ChevronDown,
@@ -14,6 +15,7 @@ import {
 import { useAuth, useOrg } from "@/lib/hooks";
 
 export function Header() {
+  const router = useRouter();
   const { user, signOut } = useAuth();
   const { currentOrg, orgs, switchOrg } = useOrg();
   const [showOrgMenu, setShowOrgMenu] = useState(false);
@@ -126,7 +128,13 @@ export function Header() {
                   {user?.email || "admin@lurk.dev"}
                 </div>
               </div>
-              <button className="w-full flex items-center gap-2.5 px-3 py-2 text-body-sm text-ink-400 hover:text-ink-700 hover:bg-ink-50 transition-colors">
+              <button
+                onClick={() => {
+                  router.push("/settings");
+                  setShowUserMenu(false);
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-body-sm text-ink-400 hover:text-ink-700 hover:bg-ink-50 transition-colors"
+              >
                 <Settings className="w-4 h-4" />
                 Settings
               </button>

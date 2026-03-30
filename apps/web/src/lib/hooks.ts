@@ -6,6 +6,32 @@ import { onAuthChange, signInWithGoogle, signOut, setSessionCookie, clearSession
 import { fetcher, api } from "./api";
 
 // ──────────────────────────────────────────────
+// Sidebar Context
+// ──────────────────────────────────────────────
+
+interface SidebarContextValue {
+  collapsed: boolean;
+  setCollapsed: (v: boolean) => void;
+  toggle: () => void;
+}
+
+export const SidebarContext = createContext<SidebarContextValue>({
+  collapsed: false,
+  setCollapsed: () => {},
+  toggle: () => {},
+});
+
+export function useSidebar(): SidebarContextValue {
+  return useContext(SidebarContext);
+}
+
+export function useSidebarProvider(): SidebarContextValue {
+  const [collapsed, setCollapsed] = useState(false);
+  const toggle = useCallback(() => setCollapsed((c) => !c), []);
+  return { collapsed, setCollapsed, toggle };
+}
+
+// ──────────────────────────────────────────────
 // Auth Hook
 // ──────────────────────────────────────────────
 

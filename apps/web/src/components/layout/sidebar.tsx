@@ -18,7 +18,7 @@ import {
   BookOpen,
   Feather,
 } from "lucide-react";
-import { useState } from "react";
+import { useSidebar } from "@/lib/hooks";
 
 const navSections = [
   {
@@ -67,7 +67,7 @@ const navSections = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const [collapsed, setCollapsed] = useState(false);
+  const { collapsed, toggle } = useSidebar();
 
   return (
     <aside
@@ -78,7 +78,7 @@ export function Sidebar() {
     >
       {/* Logo — click to toggle sidebar */}
       <button
-        onClick={() => setCollapsed(!collapsed)}
+        onClick={toggle}
         className="h-14 flex items-center gap-2.5 px-4 border-b border-[#d1cfc5] shrink-0 w-full text-left cursor-pointer hover:bg-ink-50 transition-colors"
       >
         <div className="w-8 h-8 rounded-lg bg-clay-500 flex items-center justify-center shrink-0">
