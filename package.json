@@ -5,7 +5,8 @@
   "description": "Lurk — Autonomous, artifact-centric collaboration platform",
   "workspaces": [
     "packages/*",
-    "apps/*",
+    "apps/web",
+    "apps/extension",
     "services/*",
     "evaluation"
   ],
