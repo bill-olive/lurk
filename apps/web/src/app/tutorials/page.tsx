@@ -10,6 +10,8 @@ import { Badge } from "@/components/ui/badge";
 type Category =
   | "All"
   | "Getting Started"
+  | "Desktop"
+  | "System"
   | "Artifacts"
   | "Agents"
   | "Privacy"
@@ -33,6 +35,8 @@ interface Tutorial {
 const categories: Category[] = [
   "All",
   "Getting Started",
+  "Desktop",
+  "System",
   "Artifacts",
   "Agents",
   "Privacy",
@@ -160,6 +164,66 @@ const tutorials: Tutorial[] = [
     readingTime: "16 min",
     difficulty: "Advanced",
     colorClass: "bg-ivory",
+  },
+  {
+    id: "installing-the-desktop-app",
+    title: "Installing the Lurk Desktop App",
+    description:
+      "Download and install the Lurk Desktop menu bar app on macOS. This guide covers DMG installation, first launch, what the tray icon does, and how to verify the daemon is running. Your files are versioned locally before anything touches the cloud.",
+    category: "Desktop",
+    readingTime: "6 min",
+    difficulty: "Beginner",
+    colorClass: "bg-clay-100",
+  },
+  {
+    id: "using-the-desktop-daemon",
+    title: "Using the Desktop Daemon",
+    description:
+      "Master the Lurk Desktop dashboard: add and remove watched folders, monitor file changes in real time, understand how artifacts are versioned with SHA-256 hashes and content diffs, and use the localhost API for advanced integrations.",
+    category: "Desktop",
+    readingTime: "12 min",
+    difficulty: "Beginner",
+    colorClass: "bg-olive-100",
+  },
+  {
+    id: "how-the-lurk-system-works",
+    title: "How the Lurk System Works",
+    description:
+      "A complete architecture overview of the Lurk platform: how the Desktop daemon, Web app, Chrome extension, and cloud sync layer work together. Understand the data flow from a file change on your Mac to a versioned artifact visible to your entire team.",
+    category: "System",
+    readingTime: "15 min",
+    difficulty: "Intermediate",
+    colorClass: "bg-heather-100",
+  },
+  {
+    id: "voice-profile-and-digital-twin",
+    title: "Voice Profile and Digital Twin",
+    description:
+      "Learn how Lurk builds a Digital Twin of your writing style by analyzing your documents, emails, and local files. Understand style dimensions, confidence scoring, how agents use your voice profile to write in your voice, and how to provide corrections.",
+    category: "Agents",
+    readingTime: "14 min",
+    difficulty: "Intermediate",
+    colorClass: "bg-clay-100",
+  },
+  {
+    id: "understanding-autonomy-and-yolo-mode",
+    title: "Understanding Autonomy and YOLO Mode",
+    description:
+      "Explore Lurk's progressive autonomy system where AI agents earn trust over time. Learn about autonomy tiers from Supervised to YOLO, trust scores, acceptance rates, automatic rollback, and how the Voice Profile feeds into autonomous decision-making.",
+    category: "Agents",
+    readingTime: "16 min",
+    difficulty: "Advanced",
+    colorClass: "bg-olive-100",
+  },
+  {
+    id: "connecting-desktop-web-and-extension",
+    title: "Connecting Desktop, Web, and Extension",
+    description:
+      "Wire all three Lurk surfaces together: the Desktop daemon for local file watching, the Web app for team collaboration, and the Chrome extension for browser-based capture. This guide covers cloud sync, native messaging, and troubleshooting connectivity.",
+    category: "Integrations",
+    readingTime: "11 min",
+    difficulty: "Intermediate",
+    colorClass: "bg-heather-100",
   },
 ];
 

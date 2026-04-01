@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 
 type Category =
   | "Getting Started"
+  | "Desktop"
+  | "System"
   | "Artifacts"
   | "Agents"
   | "Privacy"
@@ -27,14 +29,20 @@ interface TutorialMeta {
 
 const tutorialOrder: string[] = [
   "getting-started-with-lurk",
+  "installing-the-desktop-app",
+  "using-the-desktop-daemon",
   "understanding-artifacts-and-editions",
   "connecting-google-docs",
   "setting-up-gmail-integration",
+  "how-the-lurk-system-works",
   "configuring-privacy-policies",
   "working-with-ai-agents",
+  "voice-profile-and-digital-twin",
+  "understanding-autonomy-and-yolo-mode",
   "managing-team-access-controls",
   "tracked-changes-and-notes",
   "setting-up-kill-switches",
+  "connecting-desktop-web-and-extension",
   "building-custom-connectors",
   "understanding-the-audit-trail",
   "migrating-from-existing-tools",
@@ -195,6 +203,84 @@ const tutorials: Record<string, TutorialMeta> = {
       "Bulk import from Slack, Teams, Google Workspace, and Notion",
       "How channels and threads map to artifacts and notes",
       "Managing a phased team transition",
+    ],
+  },
+  "installing-the-desktop-app": {
+    id: "installing-the-desktop-app",
+    title: "Installing the Lurk Desktop App",
+    category: "Desktop",
+    readingTime: "6 min",
+    difficulty: "Beginner",
+    learns: [
+      "Downloading and installing the Lurk DMG on macOS",
+      "What the menu bar tray icon does and how to interact with it",
+      "How the daemon starts automatically and runs in the background",
+      "Verifying the daemon is healthy and watching your files",
+    ],
+  },
+  "using-the-desktop-daemon": {
+    id: "using-the-desktop-daemon",
+    title: "Using the Desktop Daemon",
+    category: "Desktop",
+    readingTime: "12 min",
+    difficulty: "Beginner",
+    learns: [
+      "Adding and removing watched folders from the dashboard",
+      "How file changes are detected, hashed, and versioned",
+      "Understanding the Recent tab, stats bar, and health indicator",
+      "Using the localhost API and WebSocket for advanced integrations",
+    ],
+  },
+  "how-the-lurk-system-works": {
+    id: "how-the-lurk-system-works",
+    title: "How the Lurk System Works",
+    category: "System",
+    readingTime: "15 min",
+    difficulty: "Intermediate",
+    learns: [
+      "The four layers: Desktop Daemon, Web App, Chrome Extension, and Cloud",
+      "Data flow from a local file change to a team-visible artifact",
+      "How SQLite, Firestore, and the sync queue work together",
+      "The role of the Express server, WebSocket, and native messaging",
+    ],
+  },
+  "voice-profile-and-digital-twin": {
+    id: "voice-profile-and-digital-twin",
+    title: "Voice Profile and Digital Twin",
+    category: "Agents",
+    readingTime: "14 min",
+    difficulty: "Intermediate",
+    learns: [
+      "What a Voice Profile is and why it matters for agent quality",
+      "How style dimensions are extracted from your writing",
+      "The confidence score and how it improves over time",
+      "Providing corrections so agents write more like you",
+    ],
+  },
+  "understanding-autonomy-and-yolo-mode": {
+    id: "understanding-autonomy-and-yolo-mode",
+    title: "Understanding Autonomy and YOLO Mode",
+    category: "Agents",
+    readingTime: "16 min",
+    difficulty: "Advanced",
+    learns: [
+      "The four autonomy tiers: Supervised, Assisted, Autonomous, and YOLO",
+      "How trust scores are computed from acceptance rates and voice confidence",
+      "What happens when an agent reaches YOLO mode",
+      "Rollback mechanics and how to undo autonomous agent actions",
+    ],
+  },
+  "connecting-desktop-web-and-extension": {
+    id: "connecting-desktop-web-and-extension",
+    title: "Connecting Desktop, Web, and Extension",
+    category: "Integrations",
+    readingTime: "11 min",
+    difficulty: "Intermediate",
+    learns: [
+      "How the Desktop daemon syncs artifacts to the cloud",
+      "Connecting the Chrome extension to the desktop daemon via native messaging",
+      "How the Web app displays artifacts from all sources",
+      "Troubleshooting connectivity between the three surfaces",
     ],
   },
 };
@@ -1647,6 +1733,953 @@ function TutorialContent({ id }: { id: string }) {
               Connecting Google Docs to Lurk
             </Link>{" "}
             — Set up real-time sync for your Google Docs now that your historical data is imported.
+          </p>
+        </>
+      );
+
+    // ========================================================================
+    // 13. Installing the Lurk Desktop App
+    // ========================================================================
+    case "installing-the-desktop-app":
+      return (
+        <>
+          <h2>What is the Desktop App?</h2>
+          <p>
+            The Lurk Desktop App is a lightweight macOS menu bar application that lives in your
+            system tray — the row of small icons in the upper-right corner of your screen, next to
+            the clock, Wi-Fi, and battery indicators. It works like other menu bar apps you may
+            already use (Zoom, Dropbox, or Claude Desktop): no dock icon, no windows cluttering your
+            workspace, just a small icon that you click when you need it.
+          </p>
+          <p>
+            Behind that icon, a daemon runs continuously in the background. It watches folders you
+            choose, detects file changes, computes content diffs, and stores every version in a local
+            SQLite database. Think of it as Time Machine for your documents, but intelligent — it
+            understands content changes, not just file metadata. Every edit to a Markdown file, every
+            update to a spreadsheet, every revision to a PDF is captured, versioned, and eventually
+            synced to the cloud so your team can see it.
+          </p>
+
+          <h2>Downloading the DMG</h2>
+          <p>
+            The Lurk Desktop App is distributed as a standard macOS DMG (disk image) file. You can
+            download it from the <strong>Settings</strong> page in the Lurk Web App under the{" "}
+            <strong>Desktop</strong> section, or ask your team admin for the direct download link.
+            The DMG is a universal binary that supports both Apple Silicon (M1/M2/M3/M4) and Intel
+            Macs.
+          </p>
+          <p>
+            Once downloaded, double-click the <code>.dmg</code> file to mount it. You will see the
+            Lurk app icon and a shortcut to your Applications folder. Drag the Lurk icon into
+            Applications — this is the standard macOS installation gesture. After the copy completes,
+            you can eject the DMG from Finder.
+          </p>
+
+          <h2>First Launch</h2>
+          <p>
+            Open Lurk from your Applications folder (or search for &ldquo;Lurk&rdquo; in Spotlight).
+            Because this is a menu bar app, you will not see a window appear immediately. Instead,
+            look for a small icon in your menu bar — it appears as a minimal dark shape that adapts
+            to your system&apos;s light or dark mode automatically.
+          </p>
+          <p>
+            On first launch, macOS may show a security prompt: &ldquo;Lurk is an application
+            downloaded from the internet. Are you sure you want to open it?&rdquo; Click{" "}
+            <strong>Open</strong>. If macOS blocks the app entirely, go to{" "}
+            <strong>System Settings &rarr; Privacy &amp; Security</strong> and click{" "}
+            <strong>Open Anyway</strong> next to the Lurk entry.
+          </p>
+          <p>
+            Click the tray icon to open the dashboard dropdown. You will see three sections: a stats
+            bar showing your artifact count, sync status, and number of watched folders; a tabbed
+            area with Recent files, Watched Dirs, and Voice profile; and a footer with a link to the
+            full Lurk Web App.
+          </p>
+
+          <h2>Understanding the Menu Bar Dashboard</h2>
+          <p>
+            The dashboard is a compact 420-pixel-wide panel that anchors directly below the tray
+            icon, similar to how the macOS Wi-Fi or Bluetooth panels work. It provides a quick
+            overview without opening a full application window.
+          </p>
+          <p>
+            The <strong>stats bar</strong> at the top shows three numbers: <strong>Artifacts</strong>{" "}
+            is the total number of files being tracked, <strong>Synced</strong> is how many have been
+            uploaded to the cloud, and <strong>Folders</strong> is the count of directories you are
+            watching.
+          </p>
+          <p>
+            A green dot next to the &ldquo;Lurk&rdquo; title indicates the daemon is healthy and
+            running. A red dot means something needs attention — usually the local server failed to
+            start, which can happen if the port is already in use.
+          </p>
+          <p>
+            The dashboard auto-refreshes every ten seconds, so you can leave it open and watch
+            artifacts appear in real time as you edit files.
+          </p>
+
+          <h2>Default Configuration</h2>
+          <p>
+            Out of the box, Lurk watches your <strong>Desktop</strong> folder. It tracks files with
+            these extensions: <code>.md</code>, <code>.txt</code>, <code>.docx</code>,{" "}
+            <code>.pdf</code>, <code>.xlsx</code>, <code>.csv</code>, <code>.json</code>,{" "}
+            <code>.html</code>, and <code>.rtf</code>. It automatically excludes system directories
+            like <code>node_modules</code>, <code>.git</code>, <code>.DS_Store</code>,{" "}
+            <code>Library</code>, and cache folders.
+          </p>
+          <p>
+            You can add more folders immediately by switching to the <strong>Watched Dirs</strong>{" "}
+            tab. The next tutorial covers this in detail.
+          </p>
+
+          <h2>Verifying the Daemon</h2>
+          <p>
+            To confirm the daemon is running correctly, click the tray icon to open the dashboard.
+            If you see the green health dot and your Artifacts count is increasing as existing files
+            are discovered, everything is working.
+          </p>
+          <p>
+            For advanced verification, open Terminal and run:{" "}
+            <code>curl http://localhost:3847/health</code>. You should see a JSON response:{" "}
+            <code>{`{"status":"ok","version":"0.1.0"}`}</code>. This confirms the daemon&apos;s
+            Express server is running on port 3847.
+          </p>
+          <p>
+            The daemon starts automatically with the app and shuts down cleanly when you quit from
+            the menu bar. To quit, click the tray icon and then the <strong>X</strong> button in the
+            top-right of the dashboard, or right-click the tray icon.
+          </p>
+
+          <h2>Next Steps</h2>
+          <p>
+            Now that the Desktop App is installed and running, learn how to configure it:
+          </p>
+          <p>
+            <Link href="/tutorials/using-the-desktop-daemon" className="text-clay-500 hover:text-clay-600 underline underline-offset-2">
+              Using the Desktop Daemon
+            </Link>{" "}
+            — Add watched folders, understand how versioning works, and explore the stats dashboard.
+          </p>
+          <p>
+            <Link href="/tutorials/how-the-lurk-system-works" className="text-clay-500 hover:text-clay-600 underline underline-offset-2">
+              How the Lurk System Works
+            </Link>{" "}
+            — Understand the full architecture from desktop to cloud.
+          </p>
+        </>
+      );
+
+    // ========================================================================
+    // 14. Using the Desktop Daemon
+    // ========================================================================
+    case "using-the-desktop-daemon":
+      return (
+        <>
+          <h2>The Watched Dirs Tab</h2>
+          <p>
+            Click the tray icon and switch to the <strong>Watched Dirs</strong> tab. This is where
+            you control which folders the daemon monitors for file changes. Each folder appears as a
+            row with its full path and a remove button (X) on the right side.
+          </p>
+          <p>
+            To add a new folder, click the <strong>+ Add Folder</strong> button at the bottom.
+            This opens a native macOS folder picker — the same dialog you see in Finder when
+            choosing a destination. Navigate to the folder you want to watch and click{" "}
+            <strong>Watch This Folder</strong>. The daemon immediately begins monitoring that
+            directory and all its subdirectories (up to 3 levels deep).
+          </p>
+          <p>
+            To remove a folder, click the <strong>X</strong> button next to it. The daemon stops
+            watching that directory immediately, but artifacts already captured from that folder
+            remain in your local database — removing a watched folder does not delete historical
+            data.
+          </p>
+          <p>
+            Your watched folder configuration is persisted in the local SQLite database, so it
+            survives app restarts. When you launch Lurk the next day, it picks up exactly where it
+            left off with the same folders.
+          </p>
+
+          <h2>How File Change Detection Works</h2>
+          <p>
+            The daemon uses macOS FSEvents — the same native file system notification API that
+            Spotlight, Time Machine, and Finder use. When a file is created or modified in a watched
+            folder, the operating system notifies the daemon within milliseconds.
+          </p>
+          <p>
+            To avoid capturing every keystroke in an active editor, the daemon applies a five-second
+            debounce per file. If a file changes multiple times within five seconds, only the final
+            state is processed. The daemon also waits for the write to finish (using a two-second
+            stability threshold) so it never reads a half-written file.
+          </p>
+          <p>
+            When processing a change, the daemon performs these steps in order: it reads the file
+            content, computes a SHA-256 hash, and compares it to the hash stored in the database.
+            If the hash has not changed (the content is identical), the change is silently skipped.
+            If the hash differs, the daemon creates a new versioned commit with a full content
+            snapshot and a computed diff against the previous version.
+          </p>
+
+          <h2>Understanding Artifacts and Commits</h2>
+          <p>
+            In the desktop daemon, an <strong>artifact</strong> represents a single tracked file.
+            Each artifact has a unique ID, a file path, a file name, an extension, the current
+            content hash, and its size in bytes. The first time the daemon sees a file, it creates a
+            new artifact. Every subsequent change to that file creates a new <strong>commit</strong>{" "}
+            — a versioned snapshot of the content at that moment, along with a diff showing exactly
+            what changed.
+          </p>
+          <p>
+            This is conceptually identical to how Git tracks source code, but applied to your
+            documents. You get a complete, granular history of every change to every file, without
+            ever running a commit command manually. The daemon handles it all transparently.
+          </p>
+
+          <h2>The Recent Tab</h2>
+          <p>
+            The <strong>Recent</strong> tab shows the latest file changes detected by the daemon.
+            Each entry displays the file name with a colored extension badge (Markdown in olive,
+            JSON in terracotta, CSV in purple, and so on), a relative timestamp (&ldquo;just
+            now&rdquo;, &ldquo;5m ago&rdquo;, &ldquo;2h ago&rdquo;), and the file size.
+          </p>
+          <p>
+            This tab refreshes automatically every ten seconds, so you can leave the dashboard open
+            while editing files and watch new entries appear as the daemon captures changes. If no
+            artifacts have been tracked yet, the tab shows an empty state with a document icon and a
+            message prompting you to add folders.
+          </p>
+
+          <h2>The Stats Bar</h2>
+          <p>
+            The three numbers across the top of the dashboard give you a quick health check.{" "}
+            <strong>Artifacts</strong> is the total count of unique files the daemon has ever tracked
+            — this number only grows, because removing a watched folder does not delete historical
+            artifacts. <strong>Synced</strong> is how many artifacts have been successfully uploaded
+            to the Lurk cloud. <strong>Folders</strong> is the number of directories currently being
+            watched.
+          </p>
+
+          <h2>The Voice Tab</h2>
+          <p>
+            The third tab, <strong>Voice</strong>, shows the status of your Digital Twin voice
+            profile. The daemon automatically extracts writing samples from text-based files (
+            <code>.md</code>, <code>.txt</code>, <code>.html</code>, <code>.csv</code>) and stores
+            them locally. These samples are used by the Voice Profile system to learn how you write
+            so that AI agents can produce content in your style. View your full voice profile
+            analysis in the Web App under <strong>Settings &rarr; Voice Profile</strong>.
+          </p>
+
+          <h2>The Localhost API</h2>
+          <p>
+            The daemon runs a full REST API on <code>http://localhost:3847</code>. While the
+            dashboard UI is the primary interface, power users and developers can interact with the
+            API directly. Key endpoints include:
+          </p>
+          <p>
+            <code>GET /health</code> — Returns daemon status and version.
+            <br />
+            <code>GET /api/stats</code> — Returns artifact count, sync status, watched dirs, and
+            recent changes.
+            <br />
+            <code>GET /api/artifacts?limit=50&amp;offset=0</code> — Lists tracked artifacts with
+            pagination.
+            <br />
+            <code>GET /api/artifacts/:id</code> — Returns a single artifact with its full commit
+            history.
+            <br />
+            <code>GET /api/artifacts/:id/commits</code> — Returns the version history for an
+            artifact.
+            <br />
+            <code>GET /api/watched-dirs</code> — Lists all watched directories.
+            <br />
+            <code>POST /api/watched-dirs</code> — Adds a directory (body:{" "}
+            <code>{`{"dir": "/path/to/folder"}`}</code>).
+            <br />
+            <code>DELETE /api/watched-dirs</code> — Removes a directory.
+          </p>
+          <p>
+            The daemon also runs a WebSocket server on the same port. Connect to{" "}
+            <code>ws://localhost:3847</code> to receive real-time notifications when files change.
+            Each message is a JSON object with an <code>event</code> field, a <code>data</code>{" "}
+            payload, and a <code>timestamp</code>.
+          </p>
+
+          <h2>Handling Large Directories</h2>
+          <p>
+            The daemon is designed to handle large folders gracefully. It limits concurrent file
+            reads (processing at most ten files simultaneously) to avoid exhausting system resources.
+            It watches subdirectories up to three levels deep and filters by supported file
+            extensions, so it skips application binaries, images, and other non-document files
+            automatically.
+          </p>
+          <p>
+            If you add a very large directory (like your entire Documents folder), the daemon will
+            process files progressively. You may notice the artifact count climbing over several
+            minutes as it works through the backlog. The dashboard remains responsive throughout this
+            process because file processing happens asynchronously.
+          </p>
+
+          <h2>Next Steps</h2>
+          <p>
+            Understand how the desktop daemon fits into the broader Lurk platform:
+          </p>
+          <p>
+            <Link href="/tutorials/how-the-lurk-system-works" className="text-clay-500 hover:text-clay-600 underline underline-offset-2">
+              How the Lurk System Works
+            </Link>{" "}
+            — See the full architecture from desktop to cloud.
+          </p>
+          <p>
+            <Link href="/tutorials/connecting-desktop-web-and-extension" className="text-clay-500 hover:text-clay-600 underline underline-offset-2">
+              Connecting Desktop, Web, and Extension
+            </Link>{" "}
+            — Wire all three Lurk surfaces together for a complete workflow.
+          </p>
+        </>
+      );
+
+    // ========================================================================
+    // 15. How the Lurk System Works
+    // ========================================================================
+    case "how-the-lurk-system-works":
+      return (
+        <>
+          <h2>The Four Layers</h2>
+          <p>
+            Lurk is not a single application — it is a platform composed of four layers that work
+            together. Understanding how these layers connect is essential for getting the most out of
+            the system and for troubleshooting when something does not work as expected.
+          </p>
+          <p>
+            <strong>Layer 1: Desktop Daemon</strong> — A macOS menu bar app that watches your local
+            filesystem, versions every document change, and stores everything in a local SQLite
+            database. This layer works entirely offline. Even if you never connect to the internet,
+            you get a complete version history of every document you edit.
+          </p>
+          <p>
+            <strong>Layer 2: Web App</strong> — A Next.js application hosted at{" "}
+            <code>lurk-web.vercel.app</code> that provides the team collaboration interface.
+            Artifacts from all team members appear here, along with dashboards, agent management,
+            policy configuration, and the full tutorial library you are reading right now.
+          </p>
+          <p>
+            <strong>Layer 3: Chrome Extension</strong> — A browser extension that captures content
+            from web pages, Google Docs, Gmail threads, and other browser-based sources. It
+            communicates with the desktop daemon through Chrome&apos;s native messaging protocol.
+          </p>
+          <p>
+            <strong>Layer 4: Cloud Services</strong> — Firebase (authentication and Firestore
+            database), Google APIs (Docs, Gmail, Drive, Calendar), and the Lurk API gateway that
+            coordinates AI agents, voice profile analysis, and the policy engine.
+          </p>
+
+          <h2>Data Flow: From File Change to Team Artifact</h2>
+          <p>
+            Here is the complete journey of a document change through the Lurk system:
+          </p>
+          <p>
+            <strong>Step 1: File change detected.</strong> You edit a Markdown file in your Documents
+            folder. macOS FSEvents notifies the Lurk daemon within milliseconds. The daemon waits
+            five seconds for the write to stabilize (debounce), then reads the file.
+          </p>
+          <p>
+            <strong>Step 2: Hash and diff.</strong> The daemon computes a SHA-256 hash of the file
+            content and compares it to the stored hash. If the content changed, it computes a
+            line-by-line diff against the previous version using a longest-common-subsequence
+            algorithm.
+          </p>
+          <p>
+            <strong>Step 3: Local commit.</strong> A new commit is created in the local SQLite
+            database with the full content snapshot, the diff, diff statistics (lines added, removed,
+            changed), and a timestamp. The artifact record is updated with the new hash and size.
+          </p>
+          <p>
+            <strong>Step 4: Sync queue.</strong> The commit is added to the sync queue with a pending
+            status. The queue tracks whether each item needs to be created, updated, or deleted on
+            the cloud.
+          </p>
+          <p>
+            <strong>Step 5: Cloud sync.</strong> The syncer runs every 60 seconds, picks up pending
+            items from the queue, and POSTs them to the Lurk API gateway. On success, the queue item
+            is marked as synced. On failure, it stays pending and retries on the next cycle.
+          </p>
+          <p>
+            <strong>Step 6: Team visibility.</strong> Once synced, the artifact and its complete
+            edition history appear in the Lurk Web App. Your teammates can see the change, view the
+            diff, add notes, and assign agents to review or improve the content.
+          </p>
+
+          <h2>The Local Database</h2>
+          <p>
+            The heart of the desktop daemon is a SQLite database stored at{" "}
+            <code>~/.lurk/ledger.db</code>. It contains five tables:
+          </p>
+          <p>
+            <strong>artifacts</strong> — One row per tracked file. Stores the file path, name,
+            extension, current content hash, size, and timestamps.
+          </p>
+          <p>
+            <strong>commits</strong> — One row per version of a file. Each commit references an
+            artifact, stores the full content snapshot, the diff from the previous version, diff
+            statistics, and the content hash at that point in time.
+          </p>
+          <p>
+            <strong>sync_queue</strong> — Tracks which commits need to be uploaded to the cloud.
+            Each entry has a status (pending, synced, or failed) and an action type (create, update,
+            or delete).
+          </p>
+          <p>
+            <strong>voice_samples</strong> — Writing excerpts extracted from text-based files. Used
+            by the Voice Profile system to learn your writing style. Each sample references an
+            artifact and stores the text content, source extension, and timestamps.
+          </p>
+          <p>
+            <strong>config</strong> — Key-value pairs for persistent settings, including the list of
+            watched directories (stored as a JSON array under the key{" "}
+            <code>watched_dirs</code>).
+          </p>
+
+          <h2>The Express Server and WebSocket</h2>
+          <p>
+            The daemon runs an Express.js HTTP server on <code>localhost:3847</code>. This serves
+            two purposes: it provides the REST API that the dashboard UI and Chrome extension use to
+            read data and manage settings, and it hosts a WebSocket server for real-time push
+            notifications.
+          </p>
+          <p>
+            When a new file change is processed, the server can broadcast a WebSocket message to all
+            connected clients. This is how the dashboard auto-refreshes without polling — it
+            receives push notifications when the underlying data changes. The Chrome extension also
+            uses this channel to stay in sync with the daemon.
+          </p>
+
+          <h2>Native Messaging</h2>
+          <p>
+            The Chrome extension communicates with the desktop daemon through Chrome&apos;s native
+            messaging protocol. This is a stdio-based JSON protocol where the extension sends
+            structured messages to the daemon and receives responses. The protocol supports three
+            message types: <code>handshake</code> (initial connection), <code>artifact_capture</code>{" "}
+            (sending captured web content), and <code>heartbeat</code> (connection health check).
+          </p>
+          <p>
+            The daemon responds with <code>policy_update</code> (current privacy and agent policies)
+            and <code>badge_update</code> (status information to display on the extension icon).
+            This two-way communication ensures the extension always reflects the current state of
+            the daemon.
+          </p>
+
+          <h2>Authentication and Multi-Tenancy</h2>
+          <p>
+            The Web App uses Firebase Authentication with Google OAuth. When you sign in, your Google
+            account is linked to a Lurk organization. All artifacts, policies, and agent
+            configurations are scoped to your organization — you never see another organization&apos;s
+            data. This tenant isolation is enforced at the Firestore security rules level, not just
+            in application code.
+          </p>
+          <p>
+            The desktop daemon currently operates in local-only mode — it does not require
+            authentication to capture and version files. Authentication is required only for the
+            cloud sync step, where the syncer authenticates with the API gateway using credentials
+            stored in the local config.
+          </p>
+
+          <h2>Next Steps</h2>
+          <p>
+            Explore specific parts of the system in detail:
+          </p>
+          <p>
+            <Link href="/tutorials/voice-profile-and-digital-twin" className="text-clay-500 hover:text-clay-600 underline underline-offset-2">
+              Voice Profile and Digital Twin
+            </Link>{" "}
+            — Learn how the system learns your writing style from captured artifacts.
+          </p>
+          <p>
+            <Link href="/tutorials/understanding-autonomy-and-yolo-mode" className="text-clay-500 hover:text-clay-600 underline underline-offset-2">
+              Understanding Autonomy and YOLO Mode
+            </Link>{" "}
+            — Discover how agents earn trust and eventually act independently.
+          </p>
+        </>
+      );
+
+    // ========================================================================
+    // 16. Voice Profile and Digital Twin
+    // ========================================================================
+    case "voice-profile-and-digital-twin":
+      return (
+        <>
+          <h2>Why Voice Profiles Matter</h2>
+          <p>
+            Every person writes differently. You have a vocabulary you reach for, sentence structures
+            you prefer, a level of formality that feels natural, and topics where you dive deep versus
+            skim the surface. When an AI agent drafts a PR description, writes a customer email, or
+            summarizes a document on your behalf, the result should sound like <em>you</em> — not
+            like generic AI output.
+          </p>
+          <p>
+            This is the core problem Lurk&apos;s Voice Profile solves. By analyzing your writing across
+            documents, emails, and local files, Lurk builds a quantitative model of your style —
+            your Digital Twin. This model is then embedded into every agent&apos;s system prompt, so
+            when an agent acts on your behalf, it writes in your voice.
+          </p>
+
+          <h2>What Gets Analyzed</h2>
+          <p>
+            The Voice Profile draws from three sources. First, <strong>local files</strong>: the
+            desktop daemon extracts writing samples from text-based files (<code>.md</code>,{" "}
+            <code>.txt</code>, <code>.html</code>, <code>.rtf</code>, <code>.csv</code>) as you
+            edit them. It looks for substantial paragraphs (at least 50 characters) and filters out
+            code blocks, tables, and formatting-heavy content that does not represent natural
+            writing.
+          </p>
+          <p>
+            Second, <strong>Google Docs</strong>: documents synced through the Google Docs connector
+            provide rich writing samples with full context. Docs tend to be more polished than quick
+            notes, giving the profile a view of your careful, deliberate writing style.
+          </p>
+          <p>
+            Third, <strong>Gmail threads</strong>: email messages capture your conversational writing
+            style — how you communicate with colleagues, clients, and external stakeholders. This is
+            often quite different from document writing, and the profile tracks these variations.
+          </p>
+
+          <h2>Style Dimensions</h2>
+          <p>
+            The Voice Profile is not a single number — it is a multi-dimensional model of your
+            writing. The system measures these quantitative dimensions:
+          </p>
+          <p>
+            <strong>Average sentence length</strong> — Short, punchy sentences (12 words) versus
+            flowing, complex ones (28+ words). This affects readability and tone.
+          </p>
+          <p>
+            <strong>Vocabulary complexity</strong> — On a 1-to-10 scale. A score of 3 means you use
+            plain, accessible language. A score of 8 means you favor precise, domain-specific
+            terminology.
+          </p>
+          <p>
+            <strong>Formality level</strong> — On a 1-to-10 scale. Low formality means contractions,
+            casual phrasing, and conversational tone. High formality means complete sentences,
+            professional language, and structured paragraphs.
+          </p>
+          <p>
+            <strong>Technical depth</strong> — How deep you go into technical details. Some writers
+            explain concepts at a high level; others provide implementation-level specifics.
+          </p>
+          <p>
+            Beyond these numbers, the profile also captures qualitative patterns:{" "}
+            <strong>tone descriptors</strong> (e.g., &ldquo;direct&rdquo;, &ldquo;empathetic&rdquo;,
+            &ldquo;data-driven&rdquo;), <strong>communication patterns</strong> (e.g., &ldquo;leads
+            with context before the ask&rdquo;, &ldquo;uses bullet points for lists of three or
+            more&rdquo;), <strong>signature phrases</strong> you frequently use, and{" "}
+            <strong>patterns you avoid</strong> (e.g., never uses exclamation marks, avoids passive
+            voice).
+          </p>
+
+          <h2>The Confidence Score</h2>
+          <p>
+            Your Voice Profile includes a confidence score from 0% to 100%. This represents how well
+            Lurk knows your writing style. At 20%, the profile has a rough sketch based on a few
+            samples. At 60%, it has captured your major patterns and can produce reasonable
+            approximations. At 85%+, the profile is highly refined and agents consistently produce
+            output that reads like you wrote it.
+          </p>
+          <p>
+            The confidence score increases as more writing samples are analyzed and as you provide
+            corrections. It can also decrease temporarily if the system detects that your writing
+            style has changed — for example, after a role change or when writing for a new audience.
+          </p>
+
+          <h2>Viewing Your Profile</h2>
+          <p>
+            In the Web App, go to <strong>Settings &rarr; Voice Profile</strong>. This tab shows
+            your current style dimensions as visual bars, your confidence score as a percentage, a
+            list of detected tone descriptors and communication patterns, and representative writing
+            excerpts (exemplars) that the system considers most characteristic of your style.
+          </p>
+          <p>
+            On the Desktop App, the <strong>Voice</strong> tab provides a simpler view with a link
+            to the full profile in the Web App. The desktop daemon continuously feeds new writing
+            samples to the profile in the background — you do not need to trigger analysis manually.
+          </p>
+
+          <h2>How Agents Use Your Profile</h2>
+          <p>
+            When an AI agent executes a task on your behalf — drafting a PR description, writing a
+            customer response, summarizing a document — your Voice Profile is converted into a system
+            prompt fragment and prepended to the agent&apos;s instructions. This fragment tells the
+            agent: &ldquo;Write in this person&apos;s style. Use these sentence lengths, this
+            vocabulary level, this tone. Incorporate these phrases. Avoid these patterns.&rdquo;
+          </p>
+          <p>
+            The result is agent output that sounds like you, not like a generic AI assistant. This is
+            especially valuable in team settings where multiple people use agents — each person&apos;s
+            agents produce distinctly different output that matches their individual style.
+          </p>
+
+          <h2>Providing Corrections</h2>
+          <p>
+            The profile improves fastest when you tell it what it got wrong. When you review an
+            agent&apos;s output and it does not sound like you — the tone is too formal, it used a
+            phrase you would never use, it structured the content differently than you would — you
+            can submit a correction.
+          </p>
+          <p>
+            On the Voice Profile settings page, the correction interface shows agent-generated text
+            alongside an editor where you can rewrite it in your own voice. When you save the
+            correction, the system stores both the original and the corrected version. These
+            correction pairs are the highest-signal training data for the profile — they directly
+            encode the gap between what the agent produced and what you actually wanted.
+          </p>
+          <p>
+            After five corrections or every 24 hours (whichever comes first), the refinement
+            pipeline runs automatically. It takes the existing profile, the new writing samples, and
+            the correction pairs, and produces an updated profile. All agents pick up the new profile
+            on their next execution.
+          </p>
+
+          <h2>Next Steps</h2>
+          <p>
+            Understand how the Voice Profile connects to agent autonomy:
+          </p>
+          <p>
+            <Link href="/tutorials/understanding-autonomy-and-yolo-mode" className="text-clay-500 hover:text-clay-600 underline underline-offset-2">
+              Understanding Autonomy and YOLO Mode
+            </Link>{" "}
+            — Learn how voice confidence feeds into trust scores and enables agents to act
+            independently.
+          </p>
+          <p>
+            <Link href="/tutorials/working-with-ai-agents" className="text-clay-500 hover:text-clay-600 underline underline-offset-2">
+              Working with AI Agents
+            </Link>{" "}
+            — Configure agent permissions and review agent submissions.
+          </p>
+        </>
+      );
+
+    // ========================================================================
+    // 17. Understanding Autonomy and YOLO Mode
+    // ========================================================================
+    case "understanding-autonomy-and-yolo-mode":
+      return (
+        <>
+          <h2>The Problem with Agent Autonomy</h2>
+          <p>
+            AI agents are most useful when they can act independently — drafting documents, creating
+            PRs, responding to routine requests without waiting for human approval on every step.
+            But most organizations are not comfortable giving agents free rein from day one, and for
+            good reason. An agent that does not understand your preferences will produce work that
+            needs constant correction, which is worse than doing it yourself.
+          </p>
+          <p>
+            Lurk solves this with <strong>progressive autonomy</strong>: agents start with zero
+            independence and earn trust over time based on measurable performance. The system is
+            designed so that you never have to flip a &ldquo;make it autonomous&rdquo; switch. Instead,
+            autonomy emerges naturally from a track record of accepted work.
+          </p>
+
+          <h2>The Four Autonomy Tiers</h2>
+          <p>
+            Every agent operates at one of four tiers, determined by its composite trust score:
+          </p>
+          <p>
+            <strong>Supervised</strong> (score below 0.4) — The agent can draft content but every
+            action requires explicit human approval before it takes effect. This is the starting
+            tier for all new agents. The agent cannot create PRs, send messages, or modify artifacts
+            without your review and acceptance.
+          </p>
+          <p>
+            <strong>Assisted</strong> (score 0.4 to 0.6) — The agent can take low-risk actions
+            automatically (adding notes, updating metadata) but still requires approval for
+            substantive changes like creating editions or sending external communications. You review
+            less frequently but still approve all important work.
+          </p>
+          <p>
+            <strong>Autonomous</strong> (score 0.6 to 0.8) — The agent can take most actions
+            independently, including creating editions and drafting PRs. Only high-sensitivity
+            actions (deleting content, modifying policies, external communications) still require
+            approval. The &ldquo;While You Were Away&rdquo; feed on the Autonomy page shows what
+            the agent did while you were not watching.
+          </p>
+          <p>
+            <strong>YOLO</strong> (score above 0.8) — Full autonomy. The agent acts independently on
+            all actions within its configured scope, including auto-merging PRs and sending
+            communications. All actions are still logged in the audit trail and can be rolled back.
+            YOLO mode is the destination, not the starting point — agents reach it only after
+            demonstrating consistent quality over dozens of interactions.
+          </p>
+
+          <h2>How Trust Scores Are Computed</h2>
+          <p>
+            The trust score is a weighted composite of four factors:
+          </p>
+          <p>
+            <strong>Voice Profile confidence (30% weight)</strong> — How well Lurk knows your writing
+            style. An agent cannot write like you if the system does not understand how you write. A
+            high voice profile confidence means the agent&apos;s output is more likely to match your
+            expectations.
+          </p>
+          <p>
+            <strong>Historical acceptance rate (30% weight)</strong> — The 30-day exponential weighted
+            average of how often you accept the agent&apos;s work versus rejecting or correcting it.
+            Recent actions weigh more than older ones. If the agent&apos;s last ten submissions were
+            all accepted, the rate trends toward 1.0. If three of the last five were rejected, it
+            drops sharply.
+          </p>
+          <p>
+            <strong>Artifact familiarity (20% weight)</strong> — How well the agent knows the specific
+            artifacts it is working on. An agent that has successfully edited the same document ten
+            times has high familiarity with that artifact. An agent encountering a new document for
+            the first time has zero familiarity.
+          </p>
+          <p>
+            <strong>Domain expertise (20% weight)</strong> — How well the agent performs in the
+            specific domain. An agent that excels at technical documentation but struggles with
+            marketing copy will have different domain scores for each. This prevents an agent from
+            gaining YOLO access in areas where it has not proven itself.
+          </p>
+
+          <h2>The Trust Ledger</h2>
+          <p>
+            Every time you interact with an agent&apos;s output — accepting it, rejecting it,
+            correcting it, or rolling it back — a trust event is recorded in the trust ledger.
+            Each event adjusts the agent&apos;s trust score:
+          </p>
+          <p>
+            <strong>Accepted</strong> — Positive signal. The score increases proportionally.
+            <br />
+            <strong>Rejected</strong> — Moderate negative signal. The score decreases.
+            <br />
+            <strong>Corrected</strong> — Mild negative signal. The agent was close but not right.
+            The correction also feeds back into the Voice Profile.
+            <br />
+            <strong>Rolled back</strong> — Strong negative signal (minus 0.2). A rollback means the
+            agent&apos;s autonomous action was harmful enough to undo. This heavily penalizes the
+            score and can drop an agent from Autonomous to Assisted in a single event.
+          </p>
+
+          <h2>The Autonomy Dashboard</h2>
+          <p>
+            Navigate to the <strong>Autonomy</strong> page from the sidebar. This page is your
+            command center for understanding and controlling agent independence:
+          </p>
+          <p>
+            <strong>Autonomy Score</strong> — A prominent display of your overall score and current
+            tier, shown as a large number with a tier badge. This is the composite score across all
+            your agents.
+          </p>
+          <p>
+            <strong>While You Were Away</strong> — A feed of actions agents took autonomously. Each
+            entry shows what the agent did, when, and includes a one-click Undo button if the action
+            is within the rollback window.
+          </p>
+          <p>
+            <strong>Trust Progression</strong> — A line chart showing how your autonomy score has
+            changed over time. Look for trends — a steadily rising line means agents are improving.
+            A sudden drop means a rollback or a series of rejections occurred.
+          </p>
+          <p>
+            <strong>Per-Agent Breakdown</strong> — Each agent&apos;s individual acceptance rate,
+            current tier, and recent actions. This helps you identify which agents are performing
+            well and which need more supervision or prompt tuning.
+          </p>
+
+          <h2>Rollback</h2>
+          <p>
+            Any autonomous action taken by an agent can be rolled back within the configured rollback
+            window (default: 24 hours). Rolling back an auto-merged PR creates a revert commit from
+            the pre-merge state. Rolling back an edition restores the artifact to its previous
+            version. The rollback action is recorded as a trust event that significantly penalizes
+            the agent&apos;s score.
+          </p>
+          <p>
+            The Rollback Center on the Autonomy page lists all recent auto-merged PRs and autonomous
+            editions within the rollback window. Each entry has an <strong>Undo</strong> button.
+            After the rollback window expires, the action becomes permanent — you can still manually
+            revert but it no longer affects the trust score.
+          </p>
+
+          <h2>Guardrails That Never Go Away</h2>
+          <p>
+            Even at YOLO tier, certain guardrails remain enforced. The policy engine caps daily
+            autonomous actions (default: 50 per day per agent). Cooldown periods prevent rapid-fire
+            autonomous actions (minimum 60 seconds between actions). Diff size limits prevent agents
+            from making sweepingly large changes autonomously. Sensitivity detection flags content
+            involving customer data, financial information, or legal language for human review
+            regardless of tier. And kill switches can instantly revoke all autonomous access.
+          </p>
+          <p>
+            These guardrails ensure that YOLO mode means &ldquo;trusted to act independently on
+            routine work&rdquo;, not &ldquo;trusted to do anything without limits.&rdquo;
+          </p>
+
+          <h2>Next Steps</h2>
+          <p>
+            Configure the safety systems that complement autonomy:
+          </p>
+          <p>
+            <Link href="/tutorials/setting-up-kill-switches" className="text-clay-500 hover:text-clay-600 underline underline-offset-2">
+              Setting Up Kill Switches
+            </Link>{" "}
+            — Configure emergency controls to instantly disable autonomous agents.
+          </p>
+          <p>
+            <Link href="/tutorials/voice-profile-and-digital-twin" className="text-clay-500 hover:text-clay-600 underline underline-offset-2">
+              Voice Profile and Digital Twin
+            </Link>{" "}
+            — Improve the voice confidence component of the trust score.
+          </p>
+        </>
+      );
+
+    // ========================================================================
+    // 18. Connecting Desktop, Web, and Extension
+    // ========================================================================
+    case "connecting-desktop-web-and-extension":
+      return (
+        <>
+          <h2>The Three Surfaces</h2>
+          <p>
+            Lurk meets you where you work through three purpose-built interfaces. The{" "}
+            <strong>Desktop App</strong> runs silently in your menu bar, watching local files and
+            versioning every change. The <strong>Web App</strong> is where your team collaborates —
+            reviewing artifacts, managing agents, configuring policies. The{" "}
+            <strong>Chrome Extension</strong> captures content from your browser — Google Docs edits,
+            Gmail threads, web pages — and routes it through the same versioning pipeline.
+          </p>
+          <p>
+            Each surface can work independently, but the full power of Lurk emerges when all three
+            are connected. A file edited on your desktop appears as a versioned artifact in the web
+            app within minutes. A Google Doc captured by the extension is tracked alongside your
+            local Markdown files. Your team sees a unified view of all knowledge, regardless of where
+            it originated.
+          </p>
+
+          <h2>Setting Up Cloud Sync (Desktop to Web)</h2>
+          <p>
+            The desktop daemon syncs artifacts to the cloud automatically through its built-in sync
+            queue. Every time a new commit is created locally, it is added to the queue with a
+            &ldquo;pending&rdquo; status. The syncer runs every 60 seconds, picks up pending items,
+            and uploads them to the Lurk API gateway.
+          </p>
+          <p>
+            To verify sync is working, check the <strong>Synced</strong> number in the desktop
+            dashboard stats bar. If it is increasing over time, artifacts are reaching the cloud.
+            If it stays at zero while the Artifacts count grows, there may be a connectivity issue
+            or the API endpoint has not been configured.
+          </p>
+          <p>
+            Failed sync attempts are retried automatically on the next cycle. The desktop dashboard
+            does not expose the failure count directly, but you can check via the API:{" "}
+            <code>curl http://localhost:3847/api/sync</code> returns the full queue status including
+            pending, synced, and failed counts.
+          </p>
+
+          <h2>Connecting the Chrome Extension</h2>
+          <p>
+            The Chrome Extension communicates with the desktop daemon through Chrome&apos;s native
+            messaging protocol — a secure, OS-level communication channel that does not go through
+            the network. This means the extension talks directly to the daemon running on your Mac,
+            with no internet involved in the communication.
+          </p>
+          <p>
+            To set up native messaging, the Lurk Desktop installer places a manifest file at the
+            expected location for Chrome native messaging hosts. This manifest tells Chrome where to
+            find the Lurk daemon binary and what extension IDs are allowed to connect to it.
+          </p>
+          <p>
+            Once configured, the extension icon in Chrome shows a green indicator when it is
+            successfully connected to the desktop daemon. A gray or red indicator means the
+            connection failed — usually because the daemon is not running or the native messaging
+            manifest is not installed correctly.
+          </p>
+
+          <h2>What the Extension Captures</h2>
+          <p>
+            The Chrome Extension can capture content from several browser-based sources:
+          </p>
+          <p>
+            <strong>Google Docs</strong> — When you visit a Google Doc, the extension detects the
+            document and can capture its current content as an artifact. If the doc changes later,
+            the extension captures the new version and the daemon creates a diff against the previous
+            one. This works alongside the Google Docs connector in the web app — the extension
+            captures the document from the browser, while the connector accesses it through the API.
+          </p>
+          <p>
+            <strong>Gmail</strong> — The extension can capture email threads as artifacts. It
+            extracts the thread content, subject line, participants, and metadata. This is
+            particularly useful for client communications that your team needs to track.
+          </p>
+          <p>
+            <strong>Web pages</strong> — Any web page can be captured as an artifact using the
+            extension&apos;s capture button. The extension extracts the main content (stripping
+            navigation, ads, and boilerplate) and sends it to the daemon for versioning.
+          </p>
+
+          <h2>How the Web App Unifies Everything</h2>
+          <p>
+            The Web App at <code>lurk-web.vercel.app</code> is the unified view where all artifacts
+            converge. When you sign in, the <strong>Artifacts</strong> page shows documents from
+            every source: local files synced from the desktop daemon, Google Docs accessed through
+            the API connector, Gmail threads captured by the extension, and any other content routed
+            through connectors.
+          </p>
+          <p>
+            Each artifact carries metadata about its source — you can filter by source type (Docs,
+            Emails, Spreadsheets, Drive, Local Files) using the tabs on the Artifacts page. The
+            source badge on each artifact card tells you where it came from.
+          </p>
+          <p>
+            The Web App also provides features that the desktop dashboard cannot: team collaboration
+            (notes, tracked changes, submissions), AI agent management, policy configuration, the
+            full autonomy dashboard, and this tutorial library. Think of the desktop app as your
+            personal capture tool and the web app as your team&apos;s collaboration hub.
+          </p>
+
+          <h2>Troubleshooting Connectivity</h2>
+          <p>
+            <strong>Desktop daemon not running:</strong> Click the tray icon. If you do not see it,
+            open Lurk from Applications. Check the health dot in the dashboard — green means
+            running, red means an error. Run <code>curl http://localhost:3847/health</code> in
+            Terminal to verify.
+          </p>
+          <p>
+            <strong>Sync stuck at zero:</strong> Check the sync queue via{" "}
+            <code>curl http://localhost:3847/api/sync</code>. If you see failed items, the API
+            endpoint may be unreachable. Verify your internet connection and check the daemon logs
+            for error messages.
+          </p>
+          <p>
+            <strong>Chrome extension disconnected:</strong> Make sure the desktop daemon is running
+            first. Then check that the native messaging manifest is installed:{" "}
+            <code>ls ~/Library/Application\ Support/Google/Chrome/NativeMessagingHosts/</code>{" "}
+            should show <code>com.lurk.native_host.json</code>. If missing, reinstall the desktop
+            app.
+          </p>
+          <p>
+            <strong>Artifacts not appearing in web app:</strong> Check the Synced count in the
+            desktop dashboard. If artifacts are synced but not visible in the web app, verify you are
+            signed into the same organization in both places. Artifacts are scoped to organizations
+            — if your desktop syncs to org A but you are viewing org B in the web app, you will not
+            see them.
+          </p>
+
+          <h2>Next Steps</h2>
+          <p>
+            Explore the integrations that expand what Lurk can capture:
+          </p>
+          <p>
+            <Link href="/tutorials/connecting-google-docs" className="text-clay-500 hover:text-clay-600 underline underline-offset-2">
+              Connecting Google Docs to Lurk
+            </Link>{" "}
+            — Set up API-level Google Docs sync for your entire workspace.
+          </p>
+          <p>
+            <Link href="/tutorials/setting-up-gmail-integration" className="text-clay-500 hover:text-clay-600 underline underline-offset-2">
+              Setting Up Gmail Integration
+            </Link>{" "}
+            — Configure which email threads become tracked artifacts.
           </p>
         </>
       );

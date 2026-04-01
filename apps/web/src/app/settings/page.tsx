@@ -14,6 +14,9 @@ import {
   RefreshCw,
   User,
   Plug,
+  Brain,
+  Loader2,
+  Sparkles,
 } from "lucide-react";
 
 interface Connector {
@@ -124,7 +127,7 @@ function ConnectorCard({ connector, onConnect, onReconnect }: { connector: Conne
 export default function SettingsPage() {
   const { user } = useAuth();
   const { connectors, hasToken, refresh } = useConnectors();
-  const [activeTab, setActiveTab] = useState<"profile" | "connectors">("connectors");
+  const [activeTab, setActiveTab] = useState<"profile" | "connectors" | "voice">("connectors");
 
   async function handleConnect() {
     try {
@@ -143,6 +146,7 @@ export default function SettingsPage() {
   const tabs = [
     { id: "profile" as const, label: "Profile" },
     { id: "connectors" as const, label: "Connectors" },
+    { id: "voice" as const, label: "Voice Profile" },
   ];
 
   return (
@@ -256,6 +260,162 @@ export default function SettingsPage() {
           )}
         </div>
       )}
+
+      {/* Voice Profile Tab */}
+      {activeTab === "voice" && <VoiceProfileTab />}
+    </div>
+  );
+}
+
+// ---- Voice Profile Tab Component -------------------------------------------
+
+function VoiceProfileTab() {
+  const [analyzing, setAnalyzing] = useState(false);
+  const [hasProfile] = useState(false);
+
+  // Mock style dimensions (replace with Firestore data)
+  const dimensions = [
+    { label: "Vocabulary Complexity", value: 0.65 },
+    { label: "Formality Level", value: 0.55 },
+    { label: "Technical Depth", value: 0.78 },
+    { label: "Conciseness", value: 0.72 },
+    { label: "Emotional Expressiveness", value: 0.35 },
+  ];
+
+  const toneDescriptors = ["direct", "data-driven", "pragmatic"];
+  const communicationPatterns = [
+    "Leads with context before requests",
+    "Uses bullet points for complex ideas",
+    "Prefers active voice over passive",
+  ];
+  const avoidedPatterns = [
+    "Rarely uses exclamation marks",
+    "Avoids corporate jargon without context",
+    "Never starts with 'I hope this finds you well'",
+  ];
+
+  const handleAnalyze = async () => {
+    setAnalyzing(true);
+    // This would call POST /v1/voice-profile/extract in production
+    await new Promise((r) => setTimeout(r, 3000));
+    setAnalyzing(false);
+  };
+
+  return (
+    <div className="space-y-8">
+      {/* Header + Confidence */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-body-sm font-semibold text-ink-700 flex items-center gap-2">
+            <Brain className="w-4 h-4 text-ink-400" />
+            Digital Twin
+          </h2>
+          <p className="text-2xs text-ink-400 mt-0.5">
+            How Lurk understands your writing style, tone, and reasoning patterns.
+          </p>
+        </div>
+        <button
+          onClick={handleAnalyze}
+          disabled={analyzing}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-2xs font-medium text-white bg-clay-500 hover:bg-clay-600 disabled:opacity-50 rounded-lg transition-colors"
+        >
+          {analyzing ? (
+            <Loader2 className="w-3 h-3 animate-spin" />
+          ) : (
+            <Sparkles className="w-3 h-3" />
+          )}
+          {analyzing ? "Analyzing..." : "Analyze My Writing"}
+        </button>
+      </div>
+
+      {/* Confidence Score */}
+      <div className="p-5 bg-white border border-ink-100 rounded-editorial">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-2xs font-medium text-ink-500">Profile Confidence</span>
+          <span className="text-sm font-bold text-ink-800 font-serif">
+            {hasProfile ? "73%" : "—"}
+          </span>
+        </div>
+        <div className="w-full h-2 bg-ink-100 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-clay-500 rounded-full transition-all duration-1000"
+            style={{ width: hasProfile ? "73%" : "0%" }}
+          />
+        </div>
+        <p className="mt-2 text-2xs text-ink-400">
+          {hasProfile
+            ? "Lurk knows you at 73%. More email samples would improve tone accuracy."
+            : "Click \"Analyze My Writing\" to build your voice profile from connected artifacts."}
+        </p>
+      </div>
+
+      {/* Style Dimensions */}
+      <div className="p-5 bg-white border border-ink-100 rounded-editorial">
+        <h3 className="text-xs font-semibold text-ink-700 mb-4">Style Dimensions</h3>
+        <div className="space-y-3">
+          {dimensions.map((dim) => (
+            <div key={dim.label} className="flex items-center gap-3">
+              <span className="text-2xs text-ink-500 w-44 shrink-0">{dim.label}</span>
+              <div className="flex-1 h-1.5 bg-ink-100 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-clay-400 rounded-full transition-all duration-500"
+                  style={{ width: hasProfile ? `${dim.value * 100}%` : "0%" }}
+                />
+              </div>
+              <span className="text-2xs font-medium text-ink-600 w-8 text-right">
+                {hasProfile ? (dim.value * 100).toFixed(0) : "—"}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Qualitative Patterns */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="p-4 bg-white border border-ink-100 rounded-editorial">
+          <h4 className="text-2xs font-semibold text-ink-600 mb-2">Tone</h4>
+          <div className="flex flex-wrap gap-1.5">
+            {toneDescriptors.map((t) => (
+              <span key={t} className={`px-2 py-0.5 rounded-full text-2xs font-medium ${
+                hasProfile ? "bg-clay-50 text-clay-600 border border-clay-200" : "bg-ink-50 text-ink-300 border border-ink-100"
+              }`}>
+                {t}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="p-4 bg-white border border-ink-100 rounded-editorial">
+          <h4 className="text-2xs font-semibold text-ink-600 mb-2">Patterns</h4>
+          <ul className="space-y-1">
+            {communicationPatterns.map((p) => (
+              <li key={p} className={`text-2xs ${hasProfile ? "text-ink-500" : "text-ink-300"}`}>
+                {p}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="p-4 bg-white border border-ink-100 rounded-editorial">
+          <h4 className="text-2xs font-semibold text-ink-600 mb-2">Never Does</h4>
+          <ul className="space-y-1">
+            {avoidedPatterns.map((p) => (
+              <li key={p} className={`text-2xs ${hasProfile ? "text-ink-500" : "text-ink-300"}`}>
+                {p}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      {/* Training Sources */}
+      <div className="p-4 bg-ivory border border-ink-100 rounded-editorial">
+        <p className="text-2xs text-ink-400">
+          <span className="font-medium text-ink-500">Training sources:</span>{" "}
+          Voice profiles are built from your Google Docs, Gmail threads, and local files
+          tracked by the desktop daemon. Only your own writing is analyzed — never shared content.
+        </p>
+      </div>
     </div>
   );
 }

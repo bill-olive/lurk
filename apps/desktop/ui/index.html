@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lurk</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --ivory: #FEFBF6;
+      --ivory-300: #F5F0E8;
+      --ink-50: #F7F6F3;
+      --ink-100: #E8E6DF;
+      --ink-200: #D1CFC5;
+      --ink-300: #A8A599;
+      --ink-400: #7A7770;
+      --ink-500: #5C5A55;
+      --ink-600: #45433F;
+      --ink-700: #2E2D2A;
+      --ink-800: #1A1918;
+      --clay-50: #FDF2EE;
+      --clay-500: #C46849;
+      --clay-600: #A8573D;
+      --olive-500: #6B7C5E;
+      --heather-500: #8B7EC8;
+      --green-500: #22C55E;
+      --green-50: #F0FDF4;
+      --green-700: #15803D;
+      --red-400: #F87171;
+    }
+
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap');
+
+    body {
+      font-family: 'DM Sans', -apple-system, sans-serif;
+      background: var(--ivory);
+      color: var(--ink-800);
+      font-size: 13px;
+      -webkit-app-region: drag;
+      user-select: none;
+      overflow: hidden;
+    }
+
+    button, input, a { -webkit-app-region: no-drag; }
+
+    /* ---- Arrow pointer at top ---- */
+    .arrow {
+      position: absolute;
+      top: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 12px;
+      height: 6px;
+      overflow: hidden;
+    }
+    .arrow::before {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 0;
+      width: 12px;
+      height: 12px;
+      background: var(--ivory);
+      border: 1px solid var(--ink-200);
+      transform: rotate(45deg);
+      transform-origin: center;
+    }
+
+    /* ---- Layout ---- */
+    .container {
+      height: 580px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      border: 1px solid var(--ink-200);
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--ivory);
+    }
+
+    /* ---- Header ---- */
+    .header {
+      padding: 16px 20px 12px;
+      border-bottom: 0.5px solid var(--ink-200);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo {
+      width: 28px;
+      height: 28px;
+      background: var(--clay-500);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .logo svg { width: 14px; height: 14px; color: white; }
+    .header-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--ink-800);
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green-500);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    .status-dot.error { background: var(--red-400); animation: none; }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    .header-actions {
+      display: flex;
+      gap: 6px;
+    }
+    .icon-btn {
+      width: 28px;
+      height: 28px;
+      border: none;
+      background: transparent;
+      color: var(--ink-400);
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+    .icon-btn:hover { background: var(--ink-50); color: var(--ink-700); }
+
+    /* ---- Login Screen ---- */
+    .login-screen {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 32px;
+      text-align: center;
+    }
+    .login-screen .logo-big {
+      width: 48px;
+      height: 48px;
+      background: var(--clay-500);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+    .login-screen .logo-big svg { width: 24px; height: 24px; color: white; }
+    .login-screen h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .login-screen p {
+      color: var(--ink-400);
+      font-size: 12px;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+    .google-btn {
+      width: 100%;
+      max-width: 260px;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 8px;
+      background: var(--ink-800);
+      color: white;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: background 0.15s;
+    }
+    .google-btn:hover { background: var(--ink-700); }
+    .google-btn svg { width: 18px; height: 18px; }
+
+    /* ---- Stats Bar ---- */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1px;
+      background: var(--ink-200);
+      border-bottom: 0.5px solid var(--ink-200);
+    }
+    .stat {
+      background: var(--ivory);
+      padding: 12px 16px;
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--ink-800);
+      font-family: 'Playfair Display', serif;
+    }
+    .stat-label {
+      font-size: 10px;
+      color: var(--ink-400);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 2px;
+    }
+
+    /* ---- Tabs ---- */
+    .tabs {
+      display: flex;
+      border-bottom: 0.5px solid var(--ink-200);
+      padding: 0 16px;
+    }
+    .tab {
+      padding: 10px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--ink-400);
+      border: none;
+      background: none;
+      cursor: pointer;
+      position: relative;
+      font-family: inherit;
+      transition: color 0.15s;
+    }
+    .tab:hover { color: var(--ink-600); }
+    .tab.active {
+      color: var(--ink-800);
+      font-weight: 600;
+    }
+    .tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -0.5px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--ink-800);
+    }
+
+    /* ---- File List ---- */
+    .file-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 4px 0;
+    }
+    .file-list::-webkit-scrollbar { width: 6px; }
+    .file-list::-webkit-scrollbar-track { background: transparent; }
+    .file-list::-webkit-scrollbar-thumb { background: var(--ink-200); border-radius: 3px; }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 16px;
+      cursor: default;
+      transition: background 0.1s;
+    }
+    .file-item:hover { background: var(--ink-50); }
+    .file-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      background: var(--ink-50);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--ink-400);
+      font-size: 11px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .file-info { flex: 1; min-width: 0; }
+    .file-name {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--ink-700);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .file-meta {
+      font-size: 10px;
+      color: var(--ink-300);
+      margin-top: 1px;
+    }
+    .file-badge {
+      font-size: 9px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+    .badge-new { background: var(--green-50); color: var(--green-700); }
+    .badge-synced { background: var(--ink-50); color: var(--ink-400); }
+
+    /* ---- Footer ---- */
+    .footer {
+      padding: 10px 16px;
+      border-top: 0.5px solid var(--ink-200);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .footer-link {
+      font-size: 11px;
+      color: var(--clay-500);
+      text-decoration: none;
+      cursor: pointer;
+      font-weight: 500;
+      border: none;
+      background: none;
+      font-family: inherit;
+      transition: color 0.15s;
+    }
+    .footer-link:hover { color: var(--clay-600); }
+    .footer-version {
+      font-size: 10px;
+      color: var(--ink-300);
+    }
+
+    /* ---- Empty state ---- */
+    .empty {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--ink-300);
+      font-size: 12px;
+      gap: 8px;
+    }
+    .empty svg { color: var(--ink-200); }
+
+    /* ---- Loading spinner ---- */
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--ink-200);
+      border-top-color: var(--clay-500);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="arrow"></div>
+
+    <!-- Header -->
+    <div class="header">
+      <div class="header-left">
+        <div class="logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><line x1="16" y1="8" x2="2" y2="22"/><line x1="17.5" y1="15" x2="9" y2="15"/>
+          </svg>
+        </div>
+        <span class="header-title">Lurk</span>
+        <div class="status-dot" id="statusDot"></div>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" onclick="lurk.openSettings()" title="Settings">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+        <button class="icon-btn" onclick="lurk.quit()" title="Quit Lurk">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Dashboard (shown when running) -->
+    <div id="dashboard" style="display: flex; flex-direction: column; flex: 1;">
+      <!-- Stats -->
+      <div class="stats-bar">
+        <div class="stat">
+          <div class="stat-value" id="artifactCount">—</div>
+          <div class="stat-label">Artifacts</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="syncedCount">—</div>
+          <div class="stat-label">Synced</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="dirsCount">—</div>
+          <div class="stat-label">Folders</div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab active" data-tab="recent" onclick="switchTab('recent')">Recent</button>
+        <button class="tab" data-tab="watched" onclick="switchTab('watched')">Watched Dirs</button>
+        <button class="tab" data-tab="voice" onclick="switchTab('voice')">Voice</button>
+        <button class="tab" data-tab="guide" onclick="switchTab('guide')">Guide</button>
+      </div>
+
+      <!-- Tab: Recent Files -->
+      <div class="file-list" id="tab-recent">
+        <div class="empty" id="loading">
+          <div class="spinner"></div>
+          <span>Loading artifacts...</span>
+        </div>
+      </div>
+
+      <!-- Tab: Watched Directories -->
+      <div class="file-list" id="tab-watched" style="display: none; padding: 8px 0;">
+        <div id="watched-dirs-list"></div>
+        <div style="padding: 8px 16px;">
+          <button onclick="addDir()" style="
+            width: 100%;
+            padding: 10px;
+            border: 1.5px dashed var(--ink-200);
+            border-radius: 8px;
+            background: transparent;
+            color: var(--ink-400);
+            font-size: 12px;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.15s;
+          " onmouseover="this.style.borderColor='var(--clay-500)'; this.style.color='var(--clay-500)'"
+             onmouseout="this.style.borderColor='var(--ink-200)'; this.style.color='var(--ink-400)'">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Folder
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab: Voice Profile -->
+      <div class="file-list" id="tab-voice" style="display: none; padding: 16px;">
+        <div style="text-align: center; padding: 32px 16px; color: var(--ink-400);">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--ink-200); margin-bottom: 8px;">
+            <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/>
+          </svg>
+          <div style="font-size: 13px; font-weight: 600; color: var(--ink-700); margin-bottom: 4px;">Digital Twin</div>
+          <div style="font-size: 11px; line-height: 1.5;">
+            Voice profile analysis runs in the background.<br>
+            <button class="footer-link" onclick="lurk.openSettings()" style="margin-top: 8px; font-size: 12px;">
+              View profile in Settings →
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Guide -->
+      <div class="file-list" id="tab-guide" style="display: none; padding: 12px 16px; overflow-y: auto;">
+        <div style="margin-bottom: 14px;">
+          <div style="font-size: 14px; font-weight: 700; font-family: 'Playfair Display', serif; color: var(--ink-800); margin-bottom: 6px;">Quick Start</div>
+          <div style="font-size: 11px; line-height: 1.6; color: var(--ink-500);">
+            <strong style="color: var(--ink-700);">1.</strong> Switch to <strong>Watched Dirs</strong> and click <strong>+ Add Folder</strong> to choose directories to monitor.<br>
+            <strong style="color: var(--ink-700);">2.</strong> Edit any supported file (.md, .txt, .docx, .pdf, .csv, .json, .html, .rtf) in a watched folder.<br>
+            <strong style="color: var(--ink-700);">3.</strong> Watch it appear in the <strong>Recent</strong> tab within seconds — every change is versioned automatically.<br>
+            <strong style="color: var(--ink-700);">4.</strong> Open the <strong>Web App</strong> to see synced artifacts, collaborate with your team, and manage AI agents.
+          </div>
+        </div>
+
+        <div style="border-top: 0.5px solid var(--ink-200); padding-top: 12px; margin-bottom: 12px;">
+          <div style="font-size: 12px; font-weight: 600; color: var(--ink-700); margin-bottom: 8px;">How It Works</div>
+          <div style="font-size: 11px; line-height: 1.6; color: var(--ink-500);">
+            The daemon watches your folders using macOS FSEvents. When a file changes, it computes a SHA-256 hash, generates a diff against the previous version, and stores a versioned commit in a local SQLite database at <span style="font-family: monospace; font-size: 10px; background: var(--ink-50); padding: 1px 4px; border-radius: 3px;">~/.lurk/ledger.db</span>. Changes are synced to the cloud every 60 seconds.
+          </div>
+        </div>
+
+        <div style="border-top: 0.5px solid var(--ink-200); padding-top: 12px; margin-bottom: 12px;">
+          <div style="font-size: 12px; font-weight: 600; color: var(--ink-700); margin-bottom: 8px;">Key Concepts</div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <div style="font-size: 11px; color: var(--ink-500);"><strong style="color: var(--clay-500);">Artifact</strong> — A tracked file. Each file gets a unique ID and full version history.</div>
+            <div style="font-size: 11px; color: var(--ink-500);"><strong style="color: var(--clay-500);">Commit</strong> — A versioned snapshot. Every change creates a commit with content + diff.</div>
+            <div style="font-size: 11px; color: var(--ink-500);"><strong style="color: var(--clay-500);">Voice Profile</strong> — Your writing style model. The daemon extracts samples to train your Digital Twin.</div>
+            <div style="font-size: 11px; color: var(--ink-500);"><strong style="color: var(--clay-500);">YOLO Mode</strong> — Progressive autonomy where AI agents earn trust and act independently.</div>
+          </div>
+        </div>
+
+        <div style="border-top: 0.5px solid var(--ink-200); padding-top: 12px; margin-bottom: 8px;">
+          <div style="font-size: 12px; font-weight: 600; color: var(--ink-700); margin-bottom: 8px;">Full Tutorials</div>
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <button onclick="lurk.openTutorials()" style="
+              background: none; border: none; cursor: pointer; font-family: inherit;
+              text-align: left; padding: 6px 8px; border-radius: 6px; font-size: 11px;
+              color: var(--clay-500); font-weight: 500; transition: background 0.15s;
+            " onmouseover="this.style.background='var(--clay-50)'" onmouseout="this.style.background='none'">
+              Installing the Desktop App →
+            </button>
+            <button onclick="lurk.openTutorials()" style="
+              background: none; border: none; cursor: pointer; font-family: inherit;
+              text-align: left; padding: 6px 8px; border-radius: 6px; font-size: 11px;
+              color: var(--clay-500); font-weight: 500; transition: background 0.15s;
+            " onmouseover="this.style.background='var(--clay-50)'" onmouseout="this.style.background='none'">
+              Using the Desktop Daemon →
+            </button>
+            <button onclick="lurk.openTutorials()" style="
+              background: none; border: none; cursor: pointer; font-family: inherit;
+              text-align: left; padding: 6px 8px; border-radius: 6px; font-size: 11px;
+              color: var(--clay-500); font-weight: 500; transition: background 0.15s;
+            " onmouseover="this.style.background='var(--clay-50)'" onmouseout="this.style.background='none'">
+              How the Lurk System Works →
+            </button>
+            <button onclick="lurk.openTutorials()" style="
+              background: none; border: none; cursor: pointer; font-family: inherit;
+              text-align: left; padding: 6px 8px; border-radius: 6px; font-size: 11px;
+              color: var(--clay-500); font-weight: 500; transition: background 0.15s;
+            " onmouseover="this.style.background='var(--clay-50)'" onmouseout="this.style.background='none'">
+              Voice Profile &amp; Digital Twin →
+            </button>
+            <button onclick="lurk.openTutorials()" style="
+              background: none; border: none; cursor: pointer; font-family: inherit;
+              text-align: left; padding: 6px 8px; border-radius: 6px; font-size: 11px;
+              color: var(--clay-500); font-weight: 500; transition: background 0.15s;
+            " onmouseover="this.style.background='var(--clay-50)'" onmouseout="this.style.background='none'">
+              Autonomy &amp; YOLO Mode →
+            </button>
+            <button onclick="lurk.openTutorials()" style="
+              background: none; border: none; cursor: pointer; font-family: inherit;
+              text-align: left; padding: 6px 8px; border-radius: 6px; font-size: 11px;
+              color: var(--clay-500); font-weight: 500; transition: background 0.15s;
+            " onmouseover="this.style.background='var(--clay-50)'" onmouseout="this.style.background='none'">
+              Browse all 18 tutorials →
+            </button>
+          </div>
+        </div>
+
+        <div style="margin-top: 8px; padding: 8px; background: var(--ink-50); border-radius: 6px;">
+          <div style="font-size: 10px; color: var(--ink-400); font-family: monospace;">
+            API: http://localhost:3847/health<br>
+            DB: ~/.lurk/ledger.db<br>
+            Logs: check Terminal or Console.app
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        <button class="footer-link" onclick="lurk.openWeb()">Open Lurk Web →</button>
+        <span class="footer-version">v0.1.0</span>
+      </div>
+    </div>
+
+    <!-- Login Screen (shown when not logged in) -->
+    <div id="loginScreen" class="login-screen" style="display: none;">
+      <div class="logo-big">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><line x1="16" y1="8" x2="2" y2="22"/><line x1="17.5" y1="15" x2="9" y2="15"/>
+        </svg>
+      </div>
+      <h2>Welcome to Lurk</h2>
+      <p>Your team's knowledge, tracked and versioned.<br>Sign in to sync with your workspace.</p>
+      <button class="google-btn" onclick="lurk.openWeb()">
+        <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+        Continue with Google
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // ---- State ----
+    let currentTab = 'recent';
+    let stats = null;
+
+    // ---- Tab switching ----
+    function switchTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.tab').forEach(t => {
+        t.classList.toggle('active', t.dataset.tab === tab);
+      });
+      document.querySelectorAll('.file-list').forEach(el => {
+        el.style.display = 'none';
+      });
+      document.getElementById('tab-' + tab).style.display = '';
+    }
+
+    // ---- File extension to icon ----
+    function extIcon(ext) {
+      const map = {
+        '.md': 'MD', '.txt': 'TXT', '.json': 'JS',
+        '.csv': 'CSV', '.html': 'HTM', '.pdf': 'PDF',
+        '.docx': 'DOC', '.xlsx': 'XLS', '.rtf': 'RTF',
+      };
+      return map[ext] || ext.replace('.', '').toUpperCase().slice(0, 3);
+    }
+
+    function extColor(ext) {
+      const colors = {
+        '.md': '#6B7C5E', '.json': '#C46849', '.csv': '#8B7EC8',
+        '.html': '#C46849', '.pdf': '#C46849', '.txt': '#7A7770',
+      };
+      return colors[ext] || '#7A7770';
+    }
+
+    // ---- Relative time ----
+    function relTime(dateStr) {
+      const diff = Date.now() - new Date(dateStr).getTime();
+      const mins = Math.floor(diff / 60000);
+      if (mins < 1) return 'just now';
+      if (mins < 60) return mins + 'm ago';
+      const hours = Math.floor(mins / 60);
+      if (hours < 24) return hours + 'h ago';
+      return Math.floor(hours / 24) + 'd ago';
+    }
+
+    // ---- Render artifacts ----
+    function renderArtifacts(artifacts) {
+      const list = document.getElementById('tab-recent');
+      if (!artifacts || artifacts.length === 0) {
+        list.innerHTML = '<div class="empty"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span>No artifacts tracked yet</span></div>';
+        return;
+      }
+      list.innerHTML = artifacts.map(a => `
+        <div class="file-item">
+          <div class="file-icon" style="color: ${extColor(a.extension)}">${extIcon(a.extension)}</div>
+          <div class="file-info">
+            <div class="file-name">${a.file_name}</div>
+            <div class="file-meta">${relTime(a.updated_at)} · ${(a.size_bytes / 1024).toFixed(1)}KB</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // ---- Render watched dirs (with remove buttons) ----
+    function renderWatched(dirs) {
+      const el = document.getElementById('watched-dirs-list');
+      if (!dirs || dirs.length === 0) {
+        el.innerHTML = '<div style="padding: 24px 16px; text-align: center; color: var(--ink-300); font-size: 12px;">No folders being watched. Click "Add Folder" below.</div>';
+        return;
+      }
+      el.innerHTML = dirs.map(d => `
+        <div class="file-item" style="padding: 10px 16px;">
+          <div class="file-icon" style="color: var(--olive-500)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <div class="file-info">
+            <div class="file-name">${d.split('/').pop()}</div>
+            <div class="file-meta">${d}</div>
+          </div>
+          <button onclick="removeDir('${d.replace(/'/g, "\\'")}')" class="icon-btn" title="Stop watching" style="color: var(--red-400);">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      `).join('');
+    }
+
+    // ---- Add / Remove watched dirs ----
+    async function addDir() {
+      const dirs = await lurk.addWatchedDir();
+      if (dirs) {
+        renderWatched(dirs);
+        document.getElementById('dirsCount').textContent = dirs.length;
+        refresh(); // refresh stats
+      }
+    }
+
+    async function removeDir(dir) {
+      const dirs = await lurk.removeWatchedDir(dir);
+      if (dirs) {
+        renderWatched(dirs);
+        document.getElementById('dirsCount').textContent = dirs.length;
+      }
+    }
+
+    // ---- Refresh data ----
+    async function refresh() {
+      try {
+        stats = await lurk.getStats();
+        document.getElementById('artifactCount').textContent = stats.artifacts?.toLocaleString() || '0';
+        document.getElementById('syncedCount').textContent = stats.sync?.synced?.toLocaleString() || '0';
+        document.getElementById('dirsCount').textContent = stats.watchedDirs?.length || '0';
+
+        if (stats.watchedDirs) renderWatched(stats.watchedDirs);
+
+        const data = await lurk.getArtifacts(30);
+        renderArtifacts(data.artifacts);
+
+        const health = await lurk.getHealth();
+        document.getElementById('statusDot').className =
+          health.status === 'ok' ? 'status-dot' : 'status-dot error';
+      } catch (e) {
+        console.error('Refresh failed:', e);
+        document.getElementById('statusDot').className = 'status-dot error';
+      }
+    }
+
+    // ---- Init ----
+    document.addEventListener('DOMContentLoaded', () => {
+      // Show dashboard (login screen is available but we start with dashboard
+      // since the daemon runs locally without auth requirement)
+      document.getElementById('dashboard').style.display = 'flex';
+      document.getElementById('loginScreen').style.display = 'none';
+      refresh();
+      // Auto-refresh every 10s
+      setInterval(refresh, 10000);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+You are an expert writing analyst and linguistic profiler for the Lurk platform.
+
+Your task: Analyze the writing samples below and extract a structured voice profile that captures HOW this person writes, thinks, and communicates.
+
+## Instructions
+
+1. Read all samples carefully. These come from different contexts (emails, documents, meeting notes, code comments) — look for patterns that persist ACROSS contexts, not just within one.
+
+2. For each quantitative dimension, score on a 0.0–1.0 scale based on the evidence you see. Don't guess — if there's insufficient signal for a dimension, score it 0.5 (neutral) and note low confidence.
+
+3. For qualitative patterns, extract SPECIFIC, ACTIONABLE observations. Bad: "writes clearly." Good: "consistently opens emails with a one-sentence context-setter before making requests; uses em dashes for parenthetical asides; defaults to second person ('you') over passive voice."
+
+4. Signature phrases should be genuinely distinctive — things this person says that most people don't. Not generic phrases like "thanks for your help."
+
+5. Avoided patterns are just as important as used patterns. If someone NEVER uses exclamation marks, never starts with "I hope this email finds you well," or never uses jargon without defining it — capture that.
+
+6. For reasoning style, look at how they make arguments: Do they lead with data? Build consensus? State conclusions first? Walk through logic step-by-step?
+
+## Writing Samples
+
+{{SAMPLES}}
+
+## Output Format
+
+Return a JSON object matching this exact structure:
+
+```json
+{
+  "styleDimensions": {
+    "averageSentenceLength": <number>,
+    "vocabularyComplexity": <0.0-1.0>,
+    "formalityLevel": <0.0-1.0>,
+    "technicalDepth": <0.0-1.0>,
+    "concisenessScore": <0.0-1.0>,
+    "emotionalExpressiveness": <0.0-1.0>,
+    "toneDescriptors": ["<descriptor>", ...],
+    "communicationPatterns": ["<specific pattern>", ...],
+    "signaturePhrases": ["<phrase>", ...],
+    "avoidedPatterns": ["<pattern>", ...],
+    "openingPatterns": ["<how they start>", ...],
+    "closingPatterns": ["<how they end>", ...],
+    "domainVocabulary": {
+      "<domain>": ["<term>", ...]
+    },
+    "audienceAdaptation": {
+      "<audience>": "<how they adjust>"
+    },
+    "reasoningStyle": "<analytical|intuitive|collaborative|directive|systematic|creative>",
+    "prioritizationSignals": ["<what they optimize for>", ...]
+  },
+  "exemplars": [
+    {
+      "content": "<verbatim snippet that best represents their voice>",
+      "audience": "<who this was written for>",
+      "why": "<why this snippet is representative>"
+    }
+  ],
+  "confidence": <0.0-1.0>,
+  "confidenceNotes": "<what would improve confidence — more samples from X context, etc.>"
+}
+```
+
+Be precise. Be specific. An agent using this profile should be able to write a paragraph that the user's colleagues would believe came from the user.

@@ -22,7 +22,13 @@ import type {
   BoundarySource,
   HumanReviewRule,
   AgentCapability,
+  AutonomyTier,
+  AutonomyScore,
+  VoiceProfile,
+  TrustEvent,
 } from '@lurk/shared-types';
+
+import { computeAutonomyScore, TRUST_DELTAS } from '@lurk/shared-types';
 
 import { BudgetTracker } from './budget-tracker.js';
 
@@ -544,6 +550,109 @@ export class PolicyEngine {
 
   getSafetyConfig(): AgentSafetyConfig {
     return { ...this.safetyConfig };
+  }
+
+  // -------------------------------------------------------------------------
+  // evaluateAutonomyTier — Compute progressive trust tier from voice profile
+  //                        + trust history + artifact context
+  //
+  // The autonomy score drives the YOLO engine: agents start at 'supervised'
+  // and organically earn trust through accepted PRs until they can operate
+  // at 'yolo' tier. The voice profile confidence is the key differentiator —
+  // agents can't go YOLO if they don't know how you think.
+  // -------------------------------------------------------------------------
+
+  evaluateAutonomyTier(
+    voiceProfile: VoiceProfile | null,
+    trustHistory: TrustEvent[],
+    artifactContext?: { artifactId: string; previousInteractions: number },
+  ): AutonomyScore {
+    // 1. Voice profile confidence (0.0 if no profile exists)
+    const voiceConfidence = voiceProfile?.confidence ?? 0.0;
+
+    // 2. Historical acceptance rate (30-day exponential weighted average)
+    const acceptanceRate = this.computeAcceptanceRate(trustHistory);
+
+    // 3. Artifact familiarity (based on how many times agent has touched this artifact)
+    const familiarity = artifactContext
+      ? Math.min(1.0, artifactContext.previousInteractions / 20) // saturates at 20 interactions
+      : 0.0;
+
+    // 4. Domain expertise (derived from voice profile's technical depth + domain vocabulary breadth)
+    const domainExpertise = voiceProfile
+      ? (voiceProfile.styleDimensions.technicalDepth * 0.6 +
+         Math.min(1.0, Object.keys(voiceProfile.styleDimensions.domainVocabulary).length / 5) * 0.4)
+      : 0.0;
+
+    return computeAutonomyScore(
+      voiceConfidence,
+      acceptanceRate,
+      familiarity,
+      domainExpertise,
+    );
+  }
+
+  /**
+   * Compute the effective YOLO confidence threshold adjusted by autonomy tier.
+   * Higher autonomy tier = lower threshold needed for auto-merge.
+   */
+  getEffectiveYoloThreshold(
+    baseConfig: YoloConfig,
+    autonomyScore: AutonomyScore,
+  ): number {
+    const tierAdjustments: Record<AutonomyTier, number> = {
+      supervised: 0.15,   // +15% harder to auto-merge
+      assisted: 0.05,     // +5% harder
+      autonomous: 0.0,    // baseline
+      yolo: -0.10,        // -10% easier (earned through trust)
+    };
+
+    const adjustment = tierAdjustments[autonomyScore.tier];
+    return Math.max(0.5, Math.min(1.0, baseConfig.minConfidence + adjustment));
+  }
+
+  /**
+   * Compute trust delta for a new trust event and the resulting running score.
+   */
+  computeTrustDelta(
+    action: TrustEvent['action'],
+    currentRunningScore: number,
+  ): { delta: number; newScore: number } {
+    const delta = TRUST_DELTAS[action];
+    const newScore = Math.max(0.0, Math.min(1.0, currentRunningScore + delta));
+    return { delta, newScore };
+  }
+
+  // ---- Private: Acceptance rate computation --------------------------------
+
+  private computeAcceptanceRate(trustHistory: TrustEvent[]): number {
+    if (trustHistory.length === 0) return 0.0;
+
+    const now = Date.now();
+    const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+    const decayFactor = 0.95; // exponential decay per day
+
+    let weightedAccepts = 0;
+    let weightedTotal = 0;
+
+    for (const event of trustHistory) {
+      const age = now - new Date(event.timestamp).getTime();
+      if (age > thirtyDaysMs) continue; // only look at last 30 days
+
+      const daysAgo = age / (24 * 60 * 60 * 1000);
+      const weight = Math.pow(decayFactor, daysAgo);
+
+      weightedTotal += weight;
+
+      if (event.action === 'accepted' || event.action === 'auto_merged') {
+        weightedAccepts += weight;
+      } else if (event.action === 'accepted_edited') {
+        weightedAccepts += weight * 0.7; // partial credit
+      }
+      // rejected, corrected, rolled_back contribute 0 to accepts
+    }
+
+    return weightedTotal > 0 ? weightedAccepts / weightedTotal : 0.0;
   }
 
   // -------------------------------------------------------------------------

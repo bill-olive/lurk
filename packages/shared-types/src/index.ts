@@ -14,6 +14,7 @@ export * from './fork';
 export * from './pull-request';
 export * from './agent';
 export * from './yolo';
+export * from './voice-profile';
 
 // Privacy and access control (PRD Sections 8 & 9)
 export * from './privacy';

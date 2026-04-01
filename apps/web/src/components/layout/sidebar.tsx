@@ -17,6 +17,7 @@ import {
   Power,
   BookOpen,
   Feather,
+  Brain,
 } from "lucide-react";
 import { useSidebar } from "@/lib/hooks";
 
@@ -47,6 +48,7 @@ const navSections = [
   {
     title: "Intelligence",
     items: [
+      { label: "Autonomy", href: "/autonomy", icon: Brain },
       { label: "Customer Health", href: "/customer-health", icon: HeartPulse },
       { label: "Analytics", href: "/analytics", icon: BarChart3 },
     ],

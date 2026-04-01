@@ -1,0 +1,97 @@
+{
+  "name": "@lurk/desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Lurk Desktop — menu bar app for filesystem watching, artifact versioning, and local dashboard",
+  "main": "dist/electron/main.js",
+  "scripts": {
+    "dev": "tsc && electron .",
+    "build": "tsc",
+    "start": "electron .",
+    "clean": "rm -rf dist build",
+    "typecheck": "tsc --noEmit",
+    "pack": "tsc && electron-builder --mac --dir",
+    "dist": "tsc && electron-builder --mac",
+    "dist:dmg": "tsc && electron-builder --mac dmg"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.7.0",
+    "chokidar": "^4.0.3",
+    "electron-updater": "^6.8.3",
+    "express": "^4.21.0",
+    "mime-types": "^2.1.35",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/express": "^5.0.0",
+    "@types/mime-types": "^2.1.4",
+    "@types/ws": "^8.5.13",
+    "electron": "33.4.11",
+    "electron-builder": "^25.1.0",
+    "typescript": "^5.7.0"
+  },
+  "build": {
+    "appId": "com.lurk.desktop",
+    "productName": "Lurk",
+    "mac": {
+      "category": "public.app-category.productivity",
+      "icon": "resources/icon.icns",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        }
+      ],
+      "hardenedRuntime": true,
+      "extendInfo": {
+        "LSUIElement": true
+      }
+    },
+    "dmg": {
+      "title": "Lurk",
+      "iconSize": 80,
+      "contents": [
+        {
+          "x": 170,
+          "y": 200
+        },
+        {
+          "x": 430,
+          "y": 200,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "files": [
+      "dist/**/*",
+      "ui/**/*",
+      "resources/**/*",
+      "!resources/*.plist"
+    ],
+    "extraResources": [
+      {
+        "from": "resources/com.lurk.native_host.json",
+        "to": "."
+      },
+      {
+        "from": "resources/trayTemplate.png",
+        "to": "."
+      },
+      {
+        "from": "resources/trayTemplate@2x.png",
+        "to": "."
+      }
+    ],
+    "asarUnpack": [
+      "node_modules/better-sqlite3/**"
+    ]
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
