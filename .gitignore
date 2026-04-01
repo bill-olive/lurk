@@ -1,12 +1,42 @@
 node_modules/
 dist/
 build/
+out/
 .next/
 .turbo/
 *.tsbuildinfo
+
+# Secrets & credentials
 .env
 .env.local
 .env.*.local
+.env.production
+.env.development
+credentials.json
+client_secret*.json
+*service*account*.json
+
+# Private keys & certificates
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Database files
+*.sqlite
+*.db
+*.db-journal
+*.db-wal
+
+# Build artifacts
+*.dmg
+*.exe
+*.AppImage
+*.snap
+*.deb
+*.rpm
+
+# Python
 __pycache__/
 *.pyc
 .venv/
@@ -14,12 +44,24 @@ venv/
 *.egg-info/
 .pytest_cache/
 .mypy_cache/
+
+# OS & editor
 .DS_Store
+Thumbs.db
 *.log
+*.swp
+*.swo
+*~
+
+# Test & CI
 coverage/
+
+# Firebase & infra
 .firebase/
 *.tfstate
 *.tfstate.backup
 .terraform/
+
+# Evaluation reports
 evaluation/reports/*.json
 evaluation/reports/*.html
