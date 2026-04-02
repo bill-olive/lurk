@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   LayoutDashboard,
   FileText,
@@ -13,6 +13,7 @@ import {
   XCircle,
   Clock,
   AlertTriangle,
+  RefreshCw,
 } from "lucide-react";
 import {
   AreaChart,
@@ -24,8 +25,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  LineChart,
-  Line,
 } from "recharts";
 import { StatCard } from "@/components/ui/stat-card";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,29 +37,15 @@ import {
   TableHeaderCell,
   TableCell,
 } from "@/components/ui/table";
+import { useOrg, OrgContext } from "@/lib/hooks";
+import {
+  loadDashboardStats,
+  seedDashboardStats,
+  type DashboardStats,
+  type DashboardSnapshot,
+} from "@/lib/firestore";
 
-// ── Mock Data ────────────────────────────────
-
-const prAcceptanceData = [
-  { week: "W1", accepted: 85, rejected: 12, pending: 3 },
-  { week: "W2", accepted: 88, rejected: 9, pending: 3 },
-  { week: "W3", accepted: 82, rejected: 14, pending: 4 },
-  { week: "W4", accepted: 91, rejected: 7, pending: 2 },
-  { week: "W5", accepted: 87, rejected: 10, pending: 3 },
-  { week: "W6", accepted: 93, rejected: 5, pending: 2 },
-  { week: "W7", accepted: 90, rejected: 8, pending: 2 },
-  { week: "W8", accepted: 95, rejected: 4, pending: 1 },
-];
-
-const artifactVolumeData = [
-  { day: "Mon", docs: 42, snippets: 18, meetings: 7 },
-  { day: "Tue", docs: 38, snippets: 24, meetings: 12 },
-  { day: "Wed", docs: 55, snippets: 31, meetings: 9 },
-  { day: "Thu", docs: 47, snippets: 27, meetings: 15 },
-  { day: "Fri", docs: 62, snippets: 35, meetings: 11 },
-  { day: "Sat", docs: 12, snippets: 5, meetings: 2 },
-  { day: "Sun", docs: 8, snippets: 3, meetings: 1 },
-];
+// ── Static data (not affected by Firestore) ──
 
 const recentActivity = [
   {
@@ -169,16 +154,44 @@ const statusIcons = {
   danger: <XCircle className="w-4 h-4 text-red-400" />,
 };
 
+// ── Helpers ─────────────────────────────────
+
+function formatNumber(n: number): string {
+  return n.toLocaleString("en-US");
+}
+
+function formatDate(dateStr: string): string {
+  const d = new Date(dateStr + "T00:00:00");
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+function computeGrowth(history: DashboardSnapshot[]): string {
+  if (history.length < 2) return "+0%";
+  const first = history[0].totalArtifacts;
+  const last = history[history.length - 1].totalArtifacts;
+  if (first === 0) return "+∞";
+  const pct = ((last - first) / first) * 100;
+  return `+${Math.round(pct).toLocaleString()}%`;
+}
+
 // ── Custom Tooltip ──────────────────────────
 
-function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ name: string; value: number; color: string }>; label?: string }) {
+function ChartTooltip({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: Array<{ name: string; value: number; color: string }>;
+  label?: string;
+}) {
   if (!active || !payload) return null;
   return (
     <div className="bg-white border border-ink-200 rounded-lg px-3 py-2 shadow-warm-lg text-xs">
       <p className="text-ink-400 mb-1">{label}</p>
       {payload.map((entry, i) => (
         <p key={i} style={{ color: entry.color }} className="font-medium">
-          {entry.name}: {entry.value}
+          {entry.name}: {typeof entry.value === "number" ? formatNumber(entry.value) : entry.value}
         </p>
       ))}
     </div>
@@ -188,6 +201,73 @@ function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: 
 // ── Page ─────────────────────────────────────
 
 export default function DashboardPage() {
+  const { currentOrg } = useOrg();
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [seeding, setSeeding] = useState(false);
+
+  const orgId = currentOrg?.id ?? "org_1";
+
+  const loadStats = useCallback(async () => {
+    try {
+      const data = await loadDashboardStats(orgId);
+      setStats(data);
+    } catch (err) {
+      console.error("[Dashboard] Failed to load stats:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [orgId]);
+
+  useEffect(() => {
+    loadStats();
+  }, [loadStats]);
+
+  // Auto-seed if no data exists
+  useEffect(() => {
+    if (!loading && !stats && !seeding) {
+      setSeeding(true);
+      seedDashboardStats(orgId)
+        .then(() => loadStats())
+        .finally(() => setSeeding(false));
+    }
+  }, [loading, stats, seeding, orgId, loadStats]);
+
+  const current = stats?.current;
+  const history = stats?.history ?? [];
+
+  // Chart data from Firestore history
+  const artifactGrowthData = history.map((s) => ({
+    date: formatDate(s.date),
+    total: s.totalArtifacts,
+    docs: s.docs,
+    snippets: s.snippets,
+    meetings: s.meetings,
+  }));
+
+  const prAcceptanceData = history.map((s) => ({
+    date: formatDate(s.date),
+    accepted: s.prAccepted,
+    rejected: s.prRejected,
+    pending: s.prPending,
+  }));
+
+  const artifactVolumeData = history.map((s) => ({
+    date: formatDate(s.date),
+    docs: s.docs,
+    snippets: s.snippets,
+    meetings: s.meetings,
+  }));
+
+  if (loading || seeding) {
+    return (
+      <div className="flex items-center justify-center h-96 text-ink-400 text-sm gap-2">
+        <RefreshCw className="w-4 h-4 animate-spin" />
+        {seeding ? "Seeding dashboard data..." : "Loading dashboard..."}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Page Title */}
@@ -205,31 +285,31 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         <StatCard
           label="Total Artifacts"
-          value="12,847"
+          value={formatNumber(current?.totalArtifacts ?? 0)}
           trend="up"
-          trendValue="+8.3%"
+          trendValue={computeGrowth(history)}
           icon={<FileText className="w-4 h-4" />}
         />
         <StatCard
           label="Active Agents"
-          value="7"
+          value={String(current?.activeAgents ?? 0)}
           trend="up"
-          trendValue="+2"
+          trendValue={`+${Math.max((current?.activeAgents ?? 0) - (history[0]?.activeAgents ?? 0), 0)}`}
           icon={<Bot className="w-4 h-4" />}
           variant="success"
         />
         <StatCard
           label="Open PRs"
-          value="23"
+          value={String(current?.openPRs ?? 0)}
           trend="down"
           trendValue="-12%"
           icon={<GitPullRequest className="w-4 h-4" />}
         />
         <StatCard
           label="YOLO Merge Rate"
-          value="34%"
+          value={`${current?.yoloMergeRate ?? 0}%`}
           trend="up"
-          trendValue="+5%"
+          trendValue={`+${(current?.yoloMergeRate ?? 0) - (history[0]?.yoloMergeRate ?? 0)}%`}
           icon={<Zap className="w-4 h-4" />}
           variant="warning"
         />
@@ -252,55 +332,195 @@ export default function DashboardPage() {
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Artifact Growth (exponential curve) */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Artifact Growth</CardTitle>
+            <span className="text-xs text-ink-300">
+              {formatNumber(history[0]?.totalArtifacts ?? 0)} → {formatNumber(current?.totalArtifacts ?? 0)} this week
+            </span>
+          </CardHeader>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={artifactGrowthData}>
+                <defs>
+                  <linearGradient id="artifactGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#C46849" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#C46849" stopOpacity={0.02} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#E8E6DF" />
+                <XAxis
+                  dataKey="date"
+                  tick={{ fill: "#7A7770", fontSize: 12 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  tick={{ fill: "#7A7770", fontSize: 12 }}
+                  axisLine={false}
+                  tickLine={false}
+                  tickFormatter={(v: number) => v >= 1000 ? `${Math.round(v / 1000)}k` : String(v)}
+                />
+                <Tooltip content={<ChartTooltip />} />
+                <Area
+                  type="monotone"
+                  dataKey="total"
+                  stroke="#C46849"
+                  fill="url(#artifactGrad)"
+                  strokeWidth={2.5}
+                  name="Total Artifacts"
+                  dot={{ r: 4, fill: "#C46849", strokeWidth: 0 }}
+                  activeDot={{ r: 6, fill: "#C46849", strokeWidth: 2, stroke: "#fff" }}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+
         {/* PR Acceptance Rate */}
         <Card>
           <CardHeader>
             <CardTitle>PR Acceptance Rate</CardTitle>
-            <span className="text-xs text-ink-300">Last 8 weeks</span>
+            <span className="text-xs text-ink-300">Last 7 days</span>
           </CardHeader>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={prAcceptanceData}>
                 <defs>
                   <linearGradient id="acceptedGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                    <stop offset="5%" stopColor="#6B7C5E" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#6B7C5E" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e1e28" />
-                <XAxis dataKey="week" tick={{ fill: "#6b7280", fontSize: 12 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: "#6b7280", fontSize: 12 }} axisLine={false} tickLine={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#E8E6DF" />
+                <XAxis
+                  dataKey="date"
+                  tick={{ fill: "#7A7770", fontSize: 12 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  tick={{ fill: "#7A7770", fontSize: 12 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
                 <Tooltip content={<ChartTooltip />} />
-                <Area type="monotone" dataKey="accepted" stroke="#6366f1" fill="url(#acceptedGrad)" strokeWidth={2} name="Accepted" />
-                <Area type="monotone" dataKey="rejected" stroke="#ef4444" fill="transparent" strokeWidth={1.5} strokeDasharray="4 4" name="Rejected" />
+                <Area
+                  type="monotone"
+                  dataKey="accepted"
+                  stroke="#6B7C5E"
+                  fill="url(#acceptedGrad)"
+                  strokeWidth={2}
+                  name="Accepted"
+                />
+                <Area
+                  type="monotone"
+                  dataKey="rejected"
+                  stroke="#C75450"
+                  fill="transparent"
+                  strokeWidth={1.5}
+                  strokeDasharray="4 4"
+                  name="Rejected"
+                />
               </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </Card>
-
-        {/* Artifact Volume */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Artifact Volume</CardTitle>
-            <span className="text-xs text-ink-300">This week</span>
-          </CardHeader>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={artifactVolumeData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e1e28" />
-                <XAxis dataKey="day" tick={{ fill: "#6b7280", fontSize: 12 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: "#6b7280", fontSize: 12 }} axisLine={false} tickLine={false} />
-                <Tooltip content={<ChartTooltip />} />
-                <Bar dataKey="docs" fill="#6366f1" radius={[4, 4, 0, 0]} name="Documents" />
-                <Bar dataKey="snippets" fill="#a855f7" radius={[4, 4, 0, 0]} name="Snippets" />
-                <Bar dataKey="meetings" fill="#06b6d4" radius={[4, 4, 0, 0]} name="Meetings" />
-              </BarChart>
             </ResponsiveContainer>
           </div>
         </Card>
       </div>
 
-      {/* Activity + Health Row */}
+      {/* Artifact Volume Breakdown */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Artifact Volume by Type</CardTitle>
+            <span className="text-xs text-ink-300">This week</span>
+          </CardHeader>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={artifactVolumeData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#E8E6DF" />
+                <XAxis
+                  dataKey="date"
+                  tick={{ fill: "#7A7770", fontSize: 12 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  tick={{ fill: "#7A7770", fontSize: 12 }}
+                  axisLine={false}
+                  tickLine={false}
+                  tickFormatter={(v: number) => v >= 1000 ? `${Math.round(v / 1000)}k` : String(v)}
+                />
+                <Tooltip content={<ChartTooltip />} />
+                <Bar
+                  dataKey="docs"
+                  fill="#C46849"
+                  radius={[4, 4, 0, 0]}
+                  name="Documents"
+                />
+                <Bar
+                  dataKey="snippets"
+                  fill="#8B7EC8"
+                  radius={[4, 4, 0, 0]}
+                  name="Snippets"
+                />
+                <Bar
+                  dataKey="meetings"
+                  fill="#6B7C5E"
+                  radius={[4, 4, 0, 0]}
+                  name="Meetings"
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+
+        {/* Customer Health Summary */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Customer Health</CardTitle>
+          </CardHeader>
+          <div className="space-y-4">
+            {customerHealthSummary.map((item) => (
+              <div
+                key={item.label}
+                className="flex items-center justify-between"
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`w-2.5 h-2.5 rounded-full ${item.color}`}
+                  />
+                  <span className="text-sm text-ink-600">{item.label}</span>
+                </div>
+                <span className="text-heading-2 font-serif text-ink-800">
+                  {item.count}
+                </span>
+              </div>
+            ))}
+            <div className="pt-3 border-t border-ink-100">
+              <div className="flex items-center gap-1 h-3 rounded-full overflow-hidden bg-ink-100">
+                {customerHealthSummary.map((item) => {
+                  const total = customerHealthSummary.reduce(
+                    (a, b) => a + b.count,
+                    0
+                  );
+                  const pct = (item.count / total) * 100;
+                  return (
+                    <div
+                      key={item.label}
+                      className={`h-full ${item.color}`}
+                      style={{ width: `${pct}%` }}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      {/* Activity + Agent Table */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Agent Activity */}
         <Card className="lg:col-span-2" padding="none">
@@ -336,38 +556,23 @@ export default function DashboardPage() {
           </div>
         </Card>
 
-        {/* Customer Health Summary */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Customer Health</CardTitle>
-          </CardHeader>
-          <div className="space-y-4">
-            {customerHealthSummary.map((item) => (
-              <div key={item.label} className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className={`w-2.5 h-2.5 rounded-full ${item.color}`} />
-                  <span className="text-sm text-ink-600">{item.label}</span>
+        {/* Agent Performance Summary */}
+        <Card padding="none">
+          <div className="p-5 border-b border-ink-100">
+            <CardTitle>Top Agents</CardTitle>
+          </div>
+          <div className="divide-y divide-ink-100">
+            {agentPerformance.slice(0, 4).map((agent) => (
+              <div key={agent.name} className="px-5 py-3 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Bot className="w-3.5 h-3.5 text-clay-400" />
+                  <span className="text-sm font-medium text-ink-700">{agent.name}</span>
                 </div>
-                <span className="text-heading-2 font-serif text-ink-800">
-                  {item.count}
+                <span className={`text-sm font-medium ${agent.acceptRate >= 90 ? "text-olive-600" : "text-yellow-400"}`}>
+                  {agent.acceptRate}%
                 </span>
               </div>
             ))}
-            <div className="pt-3 border-t border-ink-100">
-              <div className="flex items-center gap-1 h-3 rounded-full overflow-hidden bg-ink-100">
-                {customerHealthSummary.map((item) => {
-                  const total = customerHealthSummary.reduce((a, b) => a + b.count, 0);
-                  const pct = (item.count / total) * 100;
-                  return (
-                    <div
-                      key={item.label}
-                      className={`h-full ${item.color}`}
-                      style={{ width: `${pct}%` }}
-                    />
-                  );
-                })}
-              </div>
-            </div>
           </div>
         </Card>
       </div>
@@ -400,7 +605,10 @@ export default function DashboardPage() {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Badge variant={agent.type === "Custom" ? "info" : "default"} size="sm">
+                  <Badge
+                    variant={agent.type === "Custom" ? "info" : "default"}
+                    size="sm"
+                  >
                     {agent.type}
                   </Badge>
                 </TableCell>
