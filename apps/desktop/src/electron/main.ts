@@ -259,6 +259,10 @@ function setupIPC(): void {
   ipcMain.handle('get-version', () => {
     return app.getVersion();
   });
+
+  ipcMain.handle('get-setup-status', () => {
+    return daemon?.getSetupStatus() ?? { phase: 'starting', message: 'Initializing...' };
+  });
 }
 
 // ---- Fallback tray icon (PNG buffer for a simple circle) -------------------
@@ -282,18 +286,22 @@ function createFallbackIcon(): Buffer {
 // ---- App Lifecycle ---------------------------------------------------------
 
 app.whenReady().then(async () => {
-  // 1. Start the daemon (runs Express server + watcher + ledger)
-  daemon = new LurkDaemon();
-  await daemon.start();
+  // 1. Wire up IPC early (before daemon start, so UI can poll setup status)
+  setupIPC();
 
-  // 2. Create tray icon
+  // 2. Create tray icon + window
   createTray();
-
-  // 3. Create (hidden) window
   createWindow();
 
-  // 4. Wire up IPC
-  setupIPC();
+  // 3. Start the daemon (runs Express server + watcher + ledger + Ollama)
+  daemon = new LurkDaemon();
+
+  // Push Ollama setup progress to the renderer
+  daemon.getOllamaManager()?.onStatus((status) => {
+    mainWindow?.webContents.send('setup-status', status);
+  });
+
+  await daemon.start();
 
   // 5. Auto-updater (silent check, notify user if update available)
   autoUpdater.logger = console;

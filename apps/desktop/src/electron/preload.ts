@@ -17,5 +17,8 @@ contextBridge.exposeInMainWorld('lurk', {
   openTutorials: () => ipcRenderer.invoke('open-tutorials'),
   checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
   getVersion: () => ipcRenderer.invoke('get-version'),
+  getSetupStatus: () => ipcRenderer.invoke('get-setup-status'),
+  onSetupStatus: (callback: (status: unknown) => void) =>
+    ipcRenderer.on('setup-status', (_event, status) => callback(status)),
   quit: () => ipcRenderer.invoke('quit-app'),
 });

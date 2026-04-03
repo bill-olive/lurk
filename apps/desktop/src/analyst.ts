@@ -8,14 +8,12 @@
 
 import { Ollama } from 'ollama';
 import { Ledger } from './ledger';
+import type { OllamaManager } from './ollama-manager';
 
 // ---- Configuration ---------------------------------------------------------
 
-const DEFAULT_MODEL = 'qwen3:14b';
-const OLLAMA_HOST = 'http://127.0.0.1:11434';
 const MAX_CONTENT_LENGTH = 12000;   // chars to send to LLM (fit in 8K tokens)
 const ANALYSIS_QUEUE_INTERVAL = 5000; // ms between queue drain attempts
-const MAX_CONCURRENT = 1;            // one analysis at a time (RAM)
 
 // ---- Types -----------------------------------------------------------------
 
@@ -46,21 +44,21 @@ export class Analyst {
 
   constructor(
     private ledger: Ledger,
-    model?: string,
+    private manager: OllamaManager,
   ) {
-    this.model = model ?? DEFAULT_MODEL;
-    this.ollama = new Ollama({ host: OLLAMA_HOST });
+    this.model = manager.getModel();
+    this.ollama = manager.getClient();
   }
 
-  /** Start the analyst — check if Ollama is reachable and begin queue drain. */
+  /** Start the analyst — uses the managed Ollama instance from OllamaManager. */
   async start(): Promise<void> {
-    this.available = await this.checkOllama();
-    if (!this.available) {
-      console.log('[Analyst] Ollama not available — local analysis disabled. Install: brew install ollama && ollama pull ' + this.model);
+    if (!this.manager.isRunning()) {
+      console.log('[Analyst] OllamaManager not running — local analysis disabled');
       return;
     }
-    console.log(`[Analyst] Connected to Ollama (${this.model})`);
 
+    this.available = true;
+    console.log(`[Analyst] Connected to managed Ollama (${this.model})`);
     this.timer = setInterval(() => this.drain(), ANALYSIS_QUEUE_INTERVAL);
   }
 
@@ -228,28 +226,4 @@ ${content}
 Respond with ONLY the JSON object.`;
   }
 
-  // ---- Private: Ollama Health Check ----------------------------------------
-
-  private async checkOllama(): Promise<boolean> {
-    try {
-      const models = await this.ollama.list();
-      const hasModel = models.models.some(m => m.name.startsWith(this.model.split(':')[0]));
-      if (!hasModel) {
-        console.log(`[Analyst] Model ${this.model} not found. Available: ${models.models.map(m => m.name).join(', ') || 'none'}`);
-        // Try to pull it
-        if (models.models.length >= 0) {
-          console.log(`[Analyst] Attempting to use first available model...`);
-          if (models.models.length > 0) {
-            this.model = models.models[0].name;
-            console.log(`[Analyst] Using model: ${this.model}`);
-            return true;
-          }
-        }
-        return false;
-      }
-      return true;
-    } catch {
-      return false;
-    }
-  }
 }

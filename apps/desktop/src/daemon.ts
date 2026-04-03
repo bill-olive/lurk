@@ -11,6 +11,8 @@ import { NativeHost } from './native-host';
 import { Syncer } from './syncer';
 import { Differ } from './differ';
 import { Analyst } from './analyst';
+import { OllamaManager } from './ollama-manager';
+import type { SetupStatus } from './ollama-manager';
 import { resolve } from 'path';
 import { homedir } from 'os';
 
@@ -62,9 +64,11 @@ export class LurkDaemon {
   private server!: Server;
   private nativeHost!: NativeHost;
   private analyst!: Analyst;
+  private ollamaManager!: OllamaManager;
 
   constructor(config?: Partial<DaemonConfig>) {
     this.config = { ...DEFAULT_CONFIG, ...config };
+    this.ollamaManager = new OllamaManager();
   }
 
   async start(): Promise<void> {
@@ -99,8 +103,13 @@ export class LurkDaemon {
     this.nativeHost = new NativeHost(this.ledger);
     this.nativeHost.start();
 
-    this.analyst = new Analyst(this.ledger);
-    await this.analyst.start();
+    // Start managed Ollama instance (bundled binary, auto-pulls model)
+    const ollamaReady = await this.ollamaManager.start();
+
+    this.analyst = new Analyst(this.ledger, this.ollamaManager);
+    if (ollamaReady) {
+      await this.analyst.start();
+    }
 
     // Provide analyst to watcher so it can enqueue analysis after commits
     this.watcher.setAnalyst(this.analyst);
@@ -112,6 +121,7 @@ export class LurkDaemon {
   async shutdown(): Promise<void> {
     console.log('[Lurk Daemon] Shutting down...');
     this.analyst?.stop();
+    await this.ollamaManager?.stop();
     this.syncer?.stop();
     this.nativeHost?.stop();
     if (this.server) await this.server.stop();
@@ -140,5 +150,13 @@ export class LurkDaemon {
 
   getWatchedDirs(): string[] {
     return this.watcher.getWatchedDirs();
+  }
+
+  getOllamaManager(): OllamaManager {
+    return this.ollamaManager;
+  }
+
+  getSetupStatus(): SetupStatus {
+    return this.ollamaManager?.getStatus() ?? { phase: 'starting', message: 'Initializing...' };
   }
 }

@@ -86,6 +86,10 @@
       {
         "from": "resources/trayTemplate@2x.png",
         "to": "."
+      },
+      {
+        "from": "resources/bin/ollama",
+        "to": "bin/ollama"
       }
     ],
     "asarUnpack": [

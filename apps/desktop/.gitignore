@@ -1,0 +1,23 @@
+# Build output
+dist/
+build/
+out/
+
+# Bundled binaries (downloaded at build time)
+resources/bin/
+
+# Native modules
+node_modules/
+
+# SQLite databases
+*.sqlite
+*.db
+*.db-journal
+*.db-wal
+
+# DMG artifacts
+*.dmg
+*.blockmap
+
+# Electron output
+*.app/

@@ -357,6 +357,108 @@
       animation: spin 0.8s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ---- Setup Screen (first launch / model download) ---- */
+    .setup-screen {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 32px;
+      text-align: center;
+    }
+    .setup-screen .setup-icon {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, var(--clay-500), var(--heather-500));
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .setup-screen .setup-icon svg { width: 28px; height: 28px; color: white; }
+    .setup-screen h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--ink-800);
+    }
+    .setup-screen .setup-subtitle {
+      color: var(--ink-400);
+      font-size: 12px;
+      margin-bottom: 28px;
+      line-height: 1.5;
+    }
+    .setup-screen .setup-phase {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--ink-600);
+      margin-bottom: 12px;
+    }
+    .progress-container {
+      width: 100%;
+      max-width: 280px;
+      height: 6px;
+      background: var(--ink-100);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--clay-500), var(--heather-500));
+      border-radius: 3px;
+      transition: width 0.3s ease;
+      width: 0%;
+    }
+    .progress-bar.indeterminate {
+      width: 30%;
+      animation: indeterminate 1.5s ease-in-out infinite;
+    }
+    @keyframes indeterminate {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(400%); }
+    }
+    .setup-detail {
+      font-size: 10px;
+      color: var(--ink-300);
+      font-family: monospace;
+    }
+    .setup-features {
+      margin-top: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+      max-width: 260px;
+    }
+    .setup-feature {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-align: left;
+      font-size: 11px;
+      color: var(--ink-500);
+    }
+    .setup-feature .check {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--ink-50);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--ink-300);
+      font-size: 10px;
+    }
+    .setup-feature .check.done {
+      background: var(--green-50);
+      color: var(--green-700);
+    }
   </style>
 </head>
 <body>
@@ -385,6 +487,37 @@
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
           </svg>
         </button>
+      </div>
+    </div>
+
+    <!-- Setup Screen (first launch / model download) -->
+    <div id="setupScreen" class="setup-screen" style="display: none;">
+      <div class="setup-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2a4 4 0 0 0-4 4v2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2h-2V6a4 4 0 0 0-4-4z"/>
+          <circle cx="12" cy="15" r="2"/>
+        </svg>
+      </div>
+      <h2 id="setupTitle">Setting Up AI</h2>
+      <p class="setup-subtitle">Lurk includes a bundled AI engine that runs<br>entirely on your Mac. No cloud required.</p>
+      <div class="setup-phase" id="setupPhase">Starting AI engine...</div>
+      <div class="progress-container">
+        <div class="progress-bar indeterminate" id="setupProgress"></div>
+      </div>
+      <div class="setup-detail" id="setupDetail"></div>
+      <div class="setup-features">
+        <div class="setup-feature" id="feat-engine">
+          <div class="check" id="check-engine">1</div>
+          <span>Start bundled AI engine</span>
+        </div>
+        <div class="setup-feature" id="feat-model">
+          <div class="check" id="check-model">2</div>
+          <span>Download AI model (9 GB, one-time)</span>
+        </div>
+        <div class="setup-feature" id="feat-ready">
+          <div class="check" id="check-ready">3</div>
+          <span>Ready for on-device analysis</span>
+        </div>
       </div>
     </div>
 
@@ -458,7 +591,7 @@
               <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
             </svg>
             <div style="font-size: 12px;">Waiting for local LLM analysis...</div>
-            <div style="font-size: 10px; color: var(--ink-300); margin-top: 4px;">Requires Ollama + Qwen3 14B</div>
+            <div style="font-size: 10px; color: var(--ink-300); margin-top: 4px;">Edit a file in a watched folder to trigger analysis</div>
           </div>
         </div>
       </div>
@@ -739,15 +872,127 @@
       }
     }
 
+    // ---- Setup Status Handling ----
+    let setupComplete = false;
+
+    function formatBytes(bytes) {
+      if (!bytes) return '';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(0) + ' KB';
+      if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(0) + ' MB';
+      return (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
+    }
+
+    function handleSetupStatus(status) {
+      const setupScreen = document.getElementById('setupScreen');
+      const dashboard = document.getElementById('dashboard');
+      const phaseEl = document.getElementById('setupPhase');
+      const progressEl = document.getElementById('setupProgress');
+      const detailEl = document.getElementById('setupDetail');
+
+      if (status.phase === 'ready') {
+        // Transition to dashboard
+        if (!setupComplete) {
+          setupComplete = true;
+          document.getElementById('check-engine').textContent = '\u2713';
+          document.getElementById('check-engine').classList.add('done');
+          document.getElementById('check-model').textContent = '\u2713';
+          document.getElementById('check-model').classList.add('done');
+          document.getElementById('check-ready').textContent = '\u2713';
+          document.getElementById('check-ready').classList.add('done');
+          phaseEl.textContent = 'AI engine ready!';
+          progressEl.style.width = '100%';
+          progressEl.classList.remove('indeterminate');
+
+          setTimeout(() => {
+            setupScreen.style.display = 'none';
+            dashboard.style.display = 'flex';
+            refresh();
+          }, 1200);
+        }
+        return;
+      }
+
+      if (status.phase === 'error') {
+        // Show dashboard anyway (AI is optional, filesystem watching still works)
+        phaseEl.textContent = 'AI setup skipped';
+        detailEl.textContent = status.error || 'AI will be available after manual setup';
+        progressEl.style.width = '100%';
+        progressEl.classList.remove('indeterminate');
+        progressEl.style.background = 'var(--ink-300)';
+
+        setTimeout(() => {
+          setupScreen.style.display = 'none';
+          dashboard.style.display = 'flex';
+          refresh();
+        }, 2000);
+        return;
+      }
+
+      // Show setup screen
+      setupScreen.style.display = 'flex';
+      dashboard.style.display = 'none';
+      phaseEl.textContent = status.message || 'Setting up...';
+
+      if (status.phase === 'starting') {
+        progressEl.classList.add('indeterminate');
+        progressEl.style.width = '30%';
+      } else if (status.phase === 'checking') {
+        document.getElementById('check-engine').textContent = '\u2713';
+        document.getElementById('check-engine').classList.add('done');
+        progressEl.classList.add('indeterminate');
+      } else if (status.phase === 'downloading') {
+        document.getElementById('check-engine').textContent = '\u2713';
+        document.getElementById('check-engine').classList.add('done');
+        progressEl.classList.remove('indeterminate');
+
+        if (status.progress != null) {
+          progressEl.style.width = status.progress + '%';
+        }
+        if (status.downloadedBytes && status.totalBytes) {
+          detailEl.textContent = formatBytes(status.downloadedBytes) + ' / ' + formatBytes(status.totalBytes);
+        } else {
+          detailEl.textContent = status.message || '';
+        }
+      }
+    }
+
     // ---- Init ----
-    document.addEventListener('DOMContentLoaded', () => {
-      // Show dashboard (login screen is available but we start with dashboard
-      // since the daemon runs locally without auth requirement)
-      document.getElementById('dashboard').style.display = 'flex';
-      document.getElementById('loginScreen').style.display = 'none';
-      refresh();
-      // Auto-refresh every 10s
-      setInterval(refresh, 10000);
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Listen for setup status pushes from main process
+      if (lurk.onSetupStatus) {
+        lurk.onSetupStatus(handleSetupStatus);
+      }
+
+      // Check initial setup status
+      try {
+        const status = await lurk.getSetupStatus();
+        if (status.phase === 'ready' || status.phase === 'error') {
+          // Already ready, show dashboard directly
+          document.getElementById('dashboard').style.display = 'flex';
+          document.getElementById('setupScreen').style.display = 'none';
+          document.getElementById('loginScreen').style.display = 'none';
+          refresh();
+        } else {
+          // Show setup screen
+          document.getElementById('dashboard').style.display = 'none';
+          document.getElementById('setupScreen').style.display = 'flex';
+          document.getElementById('loginScreen').style.display = 'none';
+          handleSetupStatus(status);
+        }
+      } catch {
+        // Fallback: show dashboard
+        document.getElementById('dashboard').style.display = 'flex';
+        document.getElementById('setupScreen').style.display = 'none';
+        document.getElementById('loginScreen').style.display = 'none';
+        refresh();
+      }
+
+      // Auto-refresh every 10s (only when dashboard is visible)
+      setInterval(() => {
+        if (document.getElementById('dashboard').style.display !== 'none') {
+          refresh();
+        }
+      }, 10000);
     });
   </script>
 </body>
