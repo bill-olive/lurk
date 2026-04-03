@@ -54,6 +54,17 @@ export interface VoiceSample {
   sent_for_training: boolean;
 }
 
+export interface InsightRecord {
+  id: number;
+  artifact_id: string;
+  commit_id: string;
+  insight_type: 'summary' | 'style' | 'classification' | 'suggestion';
+  content: string;
+  metadata: string | null;       // JSON: model, tokens, latency, etc.
+  cloud_synced: boolean;
+  created_at: string;
+}
+
 // ---- Ledger Class ----------------------------------------------------------
 
 export class Ledger {
@@ -125,10 +136,23 @@ export class Ledger {
         value TEXT NOT NULL
       );
 
+      CREATE TABLE IF NOT EXISTS insights (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        artifact_id TEXT NOT NULL REFERENCES artifacts(id),
+        commit_id TEXT NOT NULL,
+        insight_type TEXT NOT NULL CHECK(insight_type IN ('summary', 'style', 'classification', 'suggestion')),
+        content TEXT NOT NULL,
+        metadata TEXT,
+        cloud_synced INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+
       CREATE INDEX IF NOT EXISTS idx_artifacts_path ON artifacts(file_path);
       CREATE INDEX IF NOT EXISTS idx_commits_artifact ON commits(artifact_id);
       CREATE INDEX IF NOT EXISTS idx_sync_status ON sync_queue(status);
       CREATE INDEX IF NOT EXISTS idx_voice_unsent ON voice_samples(sent_for_training) WHERE sent_for_training = 0;
+      CREATE INDEX IF NOT EXISTS idx_insights_artifact ON insights(artifact_id);
+      CREATE INDEX IF NOT EXISTS idx_insights_unsynced ON insights(cloud_synced) WHERE cloud_synced = 0;
     `);
   }
 
@@ -238,6 +262,49 @@ export class Ledger {
     this.db.prepare(
       `UPDATE voice_samples SET sent_for_training = 1 WHERE id IN (${placeholders})`
     ).run(...ids);
+  }
+
+  // ---- Insights (local LLM analysis) ---------------------------------------
+
+  insertInsight(insight: Omit<InsightRecord, 'id' | 'cloud_synced' | 'created_at'>): void {
+    this.db.prepare(`
+      INSERT INTO insights (artifact_id, commit_id, insight_type, content, metadata)
+      VALUES (@artifact_id, @commit_id, @insight_type, @content, @metadata)
+    `).run(insight);
+  }
+
+  getInsightsForArtifact(artifactId: string, limit = 20): InsightRecord[] {
+    return this.db.prepare(
+      'SELECT * FROM insights WHERE artifact_id = ? ORDER BY created_at DESC LIMIT ?'
+    ).all(artifactId, limit) as InsightRecord[];
+  }
+
+  getRecentInsights(limit = 50): (InsightRecord & { file_name: string; extension: string })[] {
+    return this.db.prepare(`
+      SELECT i.*, a.file_name, a.extension
+      FROM insights i
+      JOIN artifacts a ON a.id = i.artifact_id
+      ORDER BY i.created_at DESC LIMIT ?
+    `).all(limit) as (InsightRecord & { file_name: string; extension: string })[];
+  }
+
+  getUnsyncedInsights(limit = 50): InsightRecord[] {
+    return this.db.prepare(
+      'SELECT * FROM insights WHERE cloud_synced = 0 ORDER BY created_at ASC LIMIT ?'
+    ).all(limit) as InsightRecord[];
+  }
+
+  markInsightsSynced(ids: number[]): void {
+    if (ids.length === 0) return;
+    const placeholders = ids.map(() => '?').join(',');
+    this.db.prepare(
+      `UPDATE insights SET cloud_synced = 1 WHERE id IN (${placeholders})`
+    ).run(...ids);
+  }
+
+  getInsightCount(): number {
+    const row = this.db.prepare('SELECT COUNT(*) as count FROM insights').get() as { count: number };
+    return row.count;
   }
 
   // ---- Config (key-value store) --------------------------------------------

@@ -243,6 +243,15 @@ function setupIPC(): void {
     app.quit();
   });
 
+  ipcMain.handle('get-insights', async (_event, limit = 30) => {
+    try {
+      const res = await fetch(`http://localhost:${PORT}/api/insights?limit=${limit}`);
+      return await res.json();
+    } catch {
+      return { insights: [], total: 0 };
+    }
+  });
+
   ipcMain.handle('check-for-updates', () => {
     autoUpdater.checkForUpdatesAndNotify();
   });

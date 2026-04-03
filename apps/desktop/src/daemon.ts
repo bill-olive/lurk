@@ -10,6 +10,7 @@ import { Server } from './server';
 import { NativeHost } from './native-host';
 import { Syncer } from './syncer';
 import { Differ } from './differ';
+import { Analyst } from './analyst';
 import { resolve } from 'path';
 import { homedir } from 'os';
 
@@ -60,6 +61,7 @@ export class LurkDaemon {
   private syncer!: Syncer;
   private server!: Server;
   private nativeHost!: NativeHost;
+  private analyst!: Analyst;
 
   constructor(config?: Partial<DaemonConfig>) {
     this.config = { ...DEFAULT_CONFIG, ...config };
@@ -97,12 +99,19 @@ export class LurkDaemon {
     this.nativeHost = new NativeHost(this.ledger);
     this.nativeHost.start();
 
+    this.analyst = new Analyst(this.ledger);
+    await this.analyst.start();
+
+    // Provide analyst to watcher so it can enqueue analysis after commits
+    this.watcher.setAnalyst(this.analyst);
+
     this.syncer.startPeriodicSync(60_000);
     console.log('[Lurk Daemon] All systems running');
   }
 
   async shutdown(): Promise<void> {
     console.log('[Lurk Daemon] Shutting down...');
+    this.analyst?.stop();
     this.syncer?.stop();
     this.nativeHost?.stop();
     if (this.server) await this.server.stop();

@@ -13,6 +13,7 @@ contextBridge.exposeInMainWorld('lurk', {
   getWatchedDirs: () => ipcRenderer.invoke('get-watched-dirs'),
   addWatchedDir: () => ipcRenderer.invoke('add-watched-dir'),
   removeWatchedDir: (dir: string) => ipcRenderer.invoke('remove-watched-dir', dir),
+  getInsights: (limit?: number) => ipcRenderer.invoke('get-insights', limit),
   openTutorials: () => ipcRenderer.invoke('open-tutorials'),
   checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
   getVersion: () => ipcRenderer.invoke('get-version'),

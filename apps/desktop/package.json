@@ -20,6 +20,7 @@
     "electron-updater": "^6.8.3",
     "express": "^4.21.0",
     "mime-types": "^2.1.35",
+    "ollama": "^0.6.3",
     "ws": "^8.18.0"
   },
   "devDependencies": {

@@ -168,6 +168,20 @@ export class Server {
       this.ledger.setWatchedDirs(this.watcher.getWatchedDirs());
       res.json({ dirs: this.watcher.getWatchedDirs() });
     });
+
+    // ---- Insights (local LLM analysis) --------------------------------------
+
+    this.app.get('/api/insights', (req: Request, res: Response) => {
+      const limit = parseInt(String(req.query['limit'] ?? '30')) || 30;
+      const insights = this.ledger.getRecentInsights(limit);
+      res.json({ insights, total: this.ledger.getInsightCount() });
+    });
+
+    this.app.get('/api/insights/:artifactId', (req: Request, res: Response) => {
+      const artifactId = String(req.params['artifactId']);
+      const insights = this.ledger.getInsightsForArtifact(artifactId);
+      res.json({ insights });
+    });
   }
 
   // ---- WebSocket -----------------------------------------------------------

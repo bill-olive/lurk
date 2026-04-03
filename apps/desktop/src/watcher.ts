@@ -13,6 +13,7 @@ import { basename, extname, resolve } from 'path';
 import { randomUUID } from 'crypto';
 import { Ledger } from './ledger';
 import { Differ } from './differ';
+import type { Analyst } from './analyst';
 
 // ---- Types -----------------------------------------------------------------
 
@@ -32,6 +33,7 @@ export class Watcher {
   private readonly MAX_CONCURRENT = 10; // Limit concurrent file reads to avoid EMFILE
   private processingQueue: string[] = [];
   private lastEmfileWarning = 0;
+  private analyst: Analyst | null = null;
 
   constructor(
     private watchDirs: string[],
@@ -123,6 +125,11 @@ export class Watcher {
 
   getWatchedDirs(): string[] {
     return [...this.watchDirs];
+  }
+
+  /** Attach the Analyst for post-commit local LLM analysis. */
+  setAnalyst(analyst: Analyst): void {
+    this.analyst = analyst;
   }
 
   // ---- Private: Change Handling --------------------------------------------
@@ -253,6 +260,17 @@ export class Watcher {
       // Extract voice sample from text content
       if (this.isTextContent(ext) && content.length >= 100) {
         this.extractVoiceSample(artifactId, content, ext);
+      }
+
+      // Enqueue for local LLM analysis (if Ollama is available)
+      if (this.analyst && this.isTextContent(ext) && content.length >= 50) {
+        this.analyst.enqueue({
+          artifactId,
+          commitId,
+          fileName,
+          extension: ext,
+          content,
+        });
       }
 
       // Update stats

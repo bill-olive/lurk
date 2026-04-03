@@ -409,8 +409,8 @@
       <!-- Tabs -->
       <div class="tabs">
         <button class="tab active" data-tab="recent" onclick="switchTab('recent')">Recent</button>
+        <button class="tab" data-tab="insights" onclick="switchTab('insights')">Insights</button>
         <button class="tab" data-tab="watched" onclick="switchTab('watched')">Watched Dirs</button>
-        <button class="tab" data-tab="voice" onclick="switchTab('voice')">Voice</button>
         <button class="tab" data-tab="guide" onclick="switchTab('guide')">Guide</button>
       </div>
 
@@ -450,18 +450,15 @@
         </div>
       </div>
 
-      <!-- Tab: Voice Profile -->
-      <div class="file-list" id="tab-voice" style="display: none; padding: 16px;">
-        <div style="text-align: center; padding: 32px 16px; color: var(--ink-400);">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--ink-200); margin-bottom: 8px;">
-            <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/>
-          </svg>
-          <div style="font-size: 13px; font-weight: 600; color: var(--ink-700); margin-bottom: 4px;">Digital Twin</div>
-          <div style="font-size: 11px; line-height: 1.5;">
-            Voice profile analysis runs in the background.<br>
-            <button class="footer-link" onclick="lurk.openSettings()" style="margin-top: 8px; font-size: 12px;">
-              View profile in Settings →
-            </button>
+      <!-- Tab: Insights (Local LLM) -->
+      <div class="file-list" id="tab-insights" style="display: none; padding: 0;">
+        <div id="insights-list">
+          <div class="empty" style="padding: 32px 16px; text-align: center; color: var(--ink-400);">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--ink-200); margin-bottom: 6px;">
+              <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+            </svg>
+            <div style="font-size: 12px;">Waiting for local LLM analysis...</div>
+            <div style="font-size: 10px; color: var(--ink-300); margin-top: 4px;">Requires Ollama + Qwen3 14B</div>
           </div>
         </div>
       </div>
@@ -680,6 +677,42 @@
       }
     }
 
+    // ---- Render insights ----
+    function insightIcon(type) {
+      const icons = {
+        summary: '📝', classification: '🏷️', style: '✍️', suggestion: '💡'
+      };
+      return icons[type] || '🔍';
+    }
+
+    function renderInsights(insights) {
+      const el = document.getElementById('insights-list');
+      if (!insights || insights.length === 0) {
+        el.innerHTML = `
+          <div class="empty" style="padding: 32px 16px; text-align: center; color: var(--ink-400);">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--ink-200); margin-bottom: 6px;">
+              <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+            </svg>
+            <div style="font-size: 12px;">No insights yet</div>
+            <div style="font-size: 10px; color: var(--ink-300); margin-top: 4px;">Edit a file in a watched folder to trigger analysis</div>
+          </div>`;
+        return;
+      }
+      el.innerHTML = insights.map(i => {
+        const meta = i.metadata ? JSON.parse(i.metadata) : {};
+        const latency = meta.latency_ms ? `${(meta.latency_ms / 1000).toFixed(1)}s` : '';
+        return `<div style="padding: 8px 16px; border-bottom: 0.5px solid var(--ink-100);">
+          <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 3px;">
+            <span style="font-size: 12px;">${insightIcon(i.insight_type)}</span>
+            <span style="font-size: 11px; font-weight: 600; color: var(--ink-700);">${i.file_name || 'Unknown'}</span>
+            <span style="font-size: 9px; color: var(--ink-300); margin-left: auto; font-family: monospace;">${i.insight_type}${latency ? ' · ' + latency : ''}</span>
+          </div>
+          <div style="font-size: 11px; color: var(--ink-500); line-height: 1.5; padding-left: 22px;">${i.content.length > 200 ? i.content.slice(0, 200) + '…' : i.content}</div>
+          <div style="font-size: 9px; color: var(--ink-300); padding-left: 22px; margin-top: 2px;">${relTime(i.created_at)}${meta.local ? ' · on-device' : ''}</div>
+        </div>`;
+      }).join('');
+    }
+
     // ---- Refresh data ----
     async function refresh() {
       try {
@@ -692,6 +725,10 @@
 
         const data = await lurk.getArtifacts(30);
         renderArtifacts(data.artifacts);
+
+        // Load insights from local LLM
+        const insightsData = await lurk.getInsights(20);
+        renderInsights(insightsData.insights);
 
         const health = await lurk.getHealth();
         document.getElementById('statusDot').className =
